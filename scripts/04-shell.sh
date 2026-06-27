@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, ghostty font
+# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, cmux font
 
 OMZ_DIR="$HOME/.oh-my-zsh"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
@@ -70,13 +70,27 @@ EOF
     ok "installed ~/.config/starship.toml"
   fi
 
-  # --- ghostty font (only if ghostty is around) --------------------------
-  if have ghostty || [[ -d "$HOME/.config/ghostty" ]] || [[ -d /Applications/Ghostty.app ]]; then
-    inject_block "$HOME/.config/ghostty/config" "macos-starter-kit:ghostty" <<'EOF'
-font-family = "JetBrainsMono Nerd Font Mono"
-font-size = 14
+  # --- cmux terminal font (Ghostty-based terminal for AI coding agents) ---
+  # cmux config is JSONC (allows // comments), so we never edit an existing
+  # file (jq would choke on comments). We only seed a minimal config when
+  # none exists; otherwise just point the user at the font.
+  local cmux_cfg="$HOME/.config/cmux/cmux.json"
+  if have cmux || [[ -e "$cmux_cfg" ]] || [[ -d /Applications/cmux.app ]]; then
+    if [[ "$DRY_RUN" == "1" ]]; then
+      info "[dry-run] ensure cmux uses 'JetBrainsMono Nerd Font Mono' (seed $cmux_cfg if absent)"
+    elif [[ -e "$cmux_cfg" ]]; then
+      info "cmux config exists — set \"fontFamily\": \"JetBrainsMono Nerd Font Mono\" in ~/.config/cmux/cmux.json (or via cmux settings)"
+    else
+      mkdir -p "$(dirname "$cmux_cfg")"
+      cat > "$cmux_cfg" <<'EOF'
+{
+  "fontFamily": "JetBrainsMono Nerd Font Mono",
+  "fontSize": 14
+}
 EOF
+      ok "seeded ~/.config/cmux/cmux.json with the Nerd Font"
+    fi
   else
-    info "ghostty not detected — skipping ghostty font config"
+    info "cmux not detected — Nerd Font is installed; set it in your terminal's settings"
   fi
 }

@@ -58,7 +58,7 @@ prereqs  brew  runtimes  shell  docker  git  agents
 ```
 
 모든 단계는 **멱등(idempotent)** — 몇 번을 돌려도 안전합니다. `~/.zshrc`, `~/.zprofile`,
-ghostty 설정, `~/.docker/config.json`은 명확히 표시된 **마커 블록**으로만 편집되어
+`~/.docker/config.json`은 명확히 표시된 **마커 블록**으로만 편집되어
 재실행 시 교체됩니다(중복 안 됨). 사용자가 소유한 기존 파일은 보존됩니다.
 
 ## 이미 도구가 깔린 맥에서 돌릴 때
@@ -90,7 +90,7 @@ ghostty 설정, `~/.docker/config.json`은 명확히 표시된 **마커 블록**
 
 그 외 전부 **user 공간에서, sudo 없이** 실행됩니다: mise → `~/.local`, rustup →
 `~/.rustup`, bun → `~/.bun`, Homebrew 패키지(설치 후), 그리고 dotfiles는 전부 `~`.
-ghostty 같은 cask를 `/Applications`에 설치할 때 비밀번호를 물을 수 있고, 앱을 처음
+cmux 같은 cask를 `/Applications`에 설치할 때 비밀번호를 물을 수 있고, 앱을 처음
 실행할 때 뜨는 Gatekeeper/권한 팝업은 정상입니다(설치가 아니라 사용 시점).
 `gh auth login`은 본인 GitHub 계정 로그인이지 시스템 권한이 아닙니다. uninstall도
 전부 user 공간입니다(Homebrew 자체는 절대 제거 안 함).

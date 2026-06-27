@@ -57,8 +57,8 @@ prereqs  brew  runtimes  shell  docker  git  agents
 ./install.sh --list             # print step ids
 ```
 
-Every step is **idempotent** — safe to re-run. `~/.zshrc`, `~/.zprofile`, the ghostty
-config, and `~/.docker/config.json` are edited via clearly marked managed blocks that
+Every step is **idempotent** — safe to re-run. `~/.zshrc`, `~/.zprofile`, and
+`~/.docker/config.json` are edited via clearly marked managed blocks that
 get replaced (never duplicated) on re-runs. Existing files you own are preserved.
 
 ## Running on a Mac that already has tools
@@ -93,7 +93,7 @@ two places, and only on a truly fresh machine:
 
 Everything else runs in **user space, no sudo**: mise → `~/.local`, rustup →
 `~/.rustup`, bun → `~/.bun`, Homebrew packages (after setup), and all dotfiles in
-`~`. Installing a cask like ghostty into `/Applications` may prompt for your password,
+`~`. Installing a cask like cmux into `/Applications` may prompt for your password,
 and first-launch Gatekeeper/permission prompts are normal (on use, not install).
 `gh auth login` is your GitHub account sign-in, not a system permission. Uninstall is
 also fully user-space (Homebrew itself is never removed).

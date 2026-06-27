@@ -33,4 +33,6 @@ brew "docker-buildx"  # buildx plugin
 cask "font-jetbrains-mono-nerd-font"
 
 # --- terminal (optional; comment out if you use another) ----------------
-cask "ghostty"
+# cmux: Ghostty-based terminal purpose-built for AI coding agents
+# (vertical tabs + notifications). Swap for `cask "ghostty"` if preferred.
+cask "cmux"
