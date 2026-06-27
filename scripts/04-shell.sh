@@ -47,7 +47,7 @@ step_shell() {
     inject_block "$HOME/.zshrc" "macos-starter-kit:ohmyzsh" <<'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""            # prompt handled by starship below
-plugins=(git)
+plugins=(git npm node macos)
 source "$ZSH/oh-my-zsh.sh"
 EOF
   fi

@@ -34,7 +34,8 @@ cd macos-starter-kit
 |---|---|
 | **기반** | Xcode Command Line Tools, Homebrew |
 | **CLI** | git, gh, jq, ripgrep, fd, fzf, bat, tree, wget, ast-grep |
-| **셸** | zsh + oh-my-zsh (+ autosuggestions, syntax-highlighting), **starship** 프롬프트, JetBrainsMono Nerd Font |
+| **유지보수** | **Mole**(`mo`) — Mac 정리/삭제/분석/최적화/모니터링 |
+| **셸** | zsh + oh-my-zsh (플러그인: git, npm, node, macos, autosuggestions, syntax-highlighting), **starship** 프롬프트, JetBrainsMono Nerd Font |
 | **런타임** | **mise** → node(LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
 | **컨테이너** | **Colima** + docker / compose / buildx (Docker Desktop 불필요) |
 | **Git/GitHub** | 신원(GitHub noreply 이메일), HTTPS 자격증명 도우미, 합리적 기본값 |

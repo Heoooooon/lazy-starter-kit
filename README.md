@@ -34,7 +34,8 @@ cd macos-starter-kit
 |---|---|
 | **Base** | Xcode Command Line Tools, Homebrew |
 | **CLI** | git, gh, jq, ripgrep, fd, fzf, bat, tree, wget, ast-grep |
-| **Shell** | zsh + oh-my-zsh (+ autosuggestions, syntax-highlighting), **starship** prompt, JetBrainsMono Nerd Font |
+| **Maintenance** | **Mole** (`mo`) — clean / uninstall / analyze / optimize / monitor your Mac |
+| **Shell** | zsh + oh-my-zsh (plugins: git, npm, node, macos, autosuggestions, syntax-highlighting), **starship** prompt, JetBrainsMono Nerd Font |
 | **Runtimes** | **mise** → node (LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
 | **Containers** | **Colima** + docker / compose / buildx (Docker Desktop not required) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |

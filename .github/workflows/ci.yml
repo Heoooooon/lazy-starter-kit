@@ -58,7 +58,7 @@ jobs:
           export PATH="$HOME/.local/share/mise/shims:$HOME/.bun/bin:/opt/homebrew/opt/rustup/bin:$PATH"
           fail=0
           need() { command -v "$1" >/dev/null 2>&1 && echo "ok   $1" || { echo "MISS $1"; fail=1; }; }
-          for t in mise starship rg fd fzf bat gh colima node python go rustc gjc codex; do need "$t"; done
+          for t in mise starship rg fd fzf bat gh colima mo node python go rustc gjc codex; do need "$t"; done
           echo "node:   $(node -v)"
           echo "python: $(python --version)"
           echo "go:     $(go version)"
