@@ -29,6 +29,8 @@ step_agents() {
   else
     info "Installing @openai/codex (npm -g)…"
     run npm install -g @openai/codex
+    # mise-managed node needs a reshim so the `codex` shim appears on PATH
+    have mise && run mise reshim
   fi
 
   # --- lazycodex (OmO agent harness for codex) --------------------------
