@@ -1,0 +1,83 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly (Mon 06:00 UTC) — catch upstream drift (Homebrew/tool changes)
+    # even without a commit, so the kit doesn't silently bit-rot.
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: shellcheck + syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: bash syntax (3.2-safe parse)
+        run: |
+          for f in install.sh uninstall.sh scripts/*.sh config/zshrc.block.sh; do
+            bash -n "$f"
+          done
+      - name: shellcheck
+        run: shellcheck -x -S warning -e SC2154 install.sh uninstall.sh scripts/*.sh
+
+  dryrun:
+    name: macOS dry-run
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./install.sh --dry-run
+      - run: ./uninstall.sh --dry-run --yes
+
+  integration:
+    name: macOS install -> uninstall
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install (non-interactive)
+        # plain run: non-tty so Colima start is auto-declined; everything else runs.
+        run: ./install.sh
+
+      - name: verify installed
+        run: |
+          set -euo pipefail
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+          export PATH="$HOME/.local/share/mise/shims:$HOME/.bun/bin:/opt/homebrew/opt/rustup/bin:$PATH"
+          fail=0
+          need() { command -v "$1" >/dev/null 2>&1 && echo "ok   $1" || { echo "MISS $1"; fail=1; }; }
+          for t in mise starship rg fd fzf bat gh colima node python go rustc gjc codex; do need "$t"; done
+          echo "node:   $(node -v)"
+          echo "python: $(python --version)"
+          echo "go:     $(go version)"
+          echo "codex:  $(codex --version 2>/dev/null | head -1 || echo '?')"
+          test -d "$HOME/.oh-my-zsh"            || { echo "MISS oh-my-zsh"; fail=1; }
+          grep -q 'macos-starter-kit:main' "$HOME/.zshrc" || { echo "MISS zshrc block"; fail=1; }
+          test -d "$HOME/.codex/plugins/cache/sisyphuslabs/omo" && echo "ok   lazycodex/omo" || echo "warn lazycodex/omo not found"
+          exit $fail
+
+      - name: uninstall (full teardown)
+        run: ./uninstall.sh --yes --with-gajae
+
+      - name: verify removed
+        run: |
+          set -euo pipefail
+          eval "$(/opt/homebrew/bin/brew shellenv)" || true
+          export PATH="$HOME/.local/share/mise/shims:$HOME/.bun/bin:$PATH"
+          fail=0
+          gone() { command -v "$1" >/dev/null 2>&1 && { echo "STILL $1"; fail=1; } || echo "gone $1"; }
+          for t in gjc codex starship mise; do gone "$t"; done
+          test -d "$HOME/.oh-my-zsh" && { echo "STILL oh-my-zsh"; fail=1; } || echo "gone oh-my-zsh"
+          if grep -q 'macos-starter-kit' "$HOME/.zshrc" 2>/dev/null; then echo "STILL zshrc block"; fail=1; else echo "gone zshrc block"; fi
+          test -x /opt/homebrew/bin/brew && echo "ok   Homebrew preserved" || { echo "Homebrew missing!"; fail=1; }
+          exit $fail

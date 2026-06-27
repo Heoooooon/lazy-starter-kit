@@ -1,5 +1,7 @@
 # macos-starter-kit
 
+[![ci](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
+
 One command to take a **fresh MacBook** from nothing to a complete dev environment —
 runtimes, shell, containers, and AI coding agents (**gajae-code** + **lazycodex**).
 
