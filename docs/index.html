@@ -101,6 +101,7 @@
   .prop { flex: 1 1 200px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
   .prop b { color: var(--ok); font-size: 14px; }
   .prop p { color: var(--dim); font-size: 13px; margin-top: 3px; }
+  .prop p code { font-family: var(--mono); font-size: 12px; color: var(--accent); }
 
   footer { text-align: center; margin-top: 70px; color: var(--dim); font-size: 13px; }
   footer a { color: var(--accent); text-decoration: none; }
@@ -220,6 +221,20 @@
     <div class="prop"><b>멱등성</b><p>몇 번을 돌려도 안전. 설정 파일은 마커 블록으로 교체되어 중복·손상이 없습니다.</p></div>
     <div class="prop"><b>bash 3.2 호환</b><p>맥 기본 셸로 동작. 갓 산 맥에서 추가 설치 없이 바로 실행됩니다.</p></div>
     <div class="prop"><b>비파괴적</b><p>기존 파일·설정은 보존. 빈 값만 채우고, 사용자 것은 덮어쓰지 않습니다.</p></div>
+  </div>
+
+  <div class="sec-title">권한 (sudo)</div>
+  <div class="props">
+    <div class="prop"><b>Homebrew 설치</b><p>맥 비밀번호 1회 — 공식 installer가 물음 (brew 없을 때만).</p></div>
+    <div class="prop"><b>Xcode CLT</b><p>GUI "설치" 클릭 (CLT 없을 때만).</p></div>
+    <div class="prop"><b>그 외 전부</b><p>user 공간, sudo 없음 — mise·rustup·bun·dotfiles 모두 홈 디렉터리. 스크립트는 sudo를 직접 부르지 않음.</p></div>
+  </div>
+
+  <div class="sec-title">이미 도구가 깔린 맥에서</div>
+  <div class="props">
+    <div class="prop"><b>비파괴적</b><p>brew·oh-my-zsh·gjc·codex는 있으면 스킵. git 신원은 비었을 때만 설정 (덮어쓰지 않음).</p></div>
+    <div class="prop"><b>node 가림 주의</b><p>기존 node(.pkg/nvm/brew)는 안 지워지고 mise node가 PATH로 가립니다. 감지 시 경고 출력 — <code>which -a node</code>로 확인.</p></div>
+    <div class="prop"><b>.zshrc 중복</b><p>손으로 편집한 줄이 있으면 키트 블록이 추가돼 중복 실행(무해). 한 곳으로 정리 권장.</p></div>
   </div>
 
   <footer>
