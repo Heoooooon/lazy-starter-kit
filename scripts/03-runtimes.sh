@@ -7,8 +7,16 @@ MISE_TOOLS=("node@lts" "python@latest" "go@latest")
 step_runtimes() {
   step "Runtimes: mise (node/python/go) + rustup (rust)"
   load_brew
-  have mise   || die "mise not found — run the 'brew' step first."
-  have rustup || die "rustup not found — run the 'brew' step first."
+  # In a full dry-run on a bare machine, mise/rustup aren't installed yet (the
+  # brew step only previewed them). Preview gracefully instead of dying.
+  if ! have mise || ! have rustup; then
+    if [[ "$DRY_RUN" == "1" ]]; then
+      info "[dry-run] would install via mise: ${MISE_TOOLS[*]}, and Rust stable via rustup (after the brew step provides them)"
+      return 0
+    fi
+    have mise   || die "mise not found — run the 'brew' step first."
+    have rustup || die "rustup not found — run the 'brew' step first."
+  fi
 
   # Heads-up: a runtime already installed by another method (system .pkg, nvm,
   # brew, …) is NOT removed — mise installs its own and shadows it via PATH.

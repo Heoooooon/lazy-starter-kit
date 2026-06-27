@@ -4,10 +4,18 @@
 step_brew() {
   step "Homebrew packages (Brewfile)"
   load_brew
-  have brew || die "Homebrew not found — run the 'prereqs' step first."
-
   local brewfile="$ROOT/Brewfile"
   [[ -f "$brewfile" ]] || die "missing Brewfile at $brewfile"
+
+  # In a full dry-run on a bare machine, Homebrew isn't installed yet (the
+  # prereqs step only previewed it). Preview gracefully instead of dying.
+  if ! have brew; then
+    if [[ "$DRY_RUN" == "1" ]]; then
+      info "[dry-run] Homebrew not present yet (prereqs would install it) — would then: brew bundle install --file=$brewfile"
+      return 0
+    fi
+    die "Homebrew not found — run the 'prereqs' step first."
+  fi
 
   export HOMEBREW_NO_ENV_HINTS=1
   if [[ "$DRY_RUN" == "1" ]]; then
