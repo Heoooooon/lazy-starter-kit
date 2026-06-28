@@ -1,14 +1,22 @@
-# macos-starter-kit
+<div align="center">
 
-[![ci](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
+<img src="./docs/banner.png" alt="macos-starter-kit" width="760" />
 
-One command to take a **fresh MacBook** from nothing to a complete dev environment —
-runtimes, shell, containers, and AI coding agents (**gajae-code** + **lazycodex**).
+### One command turns a fresh MacBook into a complete dev environment.
 
-Built and tested on Apple Silicon (M-series), macOS.
+_Runtimes · shell · containers · and AI coding agents — installed and verified._
 
-🌐 **Language:** English · [한국어](./README.ko.md)
-📊 **[Visual install flow →](https://heoooooon.github.io/macos-starter-kit/)** (the 7 steps, in order)
+[![CI](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/tag/Heoooooon/macos-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/macos-starter-kit/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple&logoColor=white)](#)
+[![Stars](https://img.shields.io/github/stars/Heoooooon/macos-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/macos-starter-kit/stargazers)
+
+**English** · [한국어](./README.ko.md) · [Install flow ↗](https://heoooooon.github.io/macos-starter-kit/) · [Changelog](./CHANGELOG.md)
+
+</div>
+
+---
 
 ## Quick start
 

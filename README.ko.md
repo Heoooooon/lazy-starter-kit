@@ -1,14 +1,22 @@
-# macos-starter-kit
+<div align="center">
 
-[![ci](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
+<img src="./docs/banner.png" alt="macos-starter-kit" width="760" />
 
-명령어 한 줄로 **갓 산 맥북**을 아무것도 없는 상태에서 완전한 개발 환경까지 —
-런타임, 셸, 컨테이너, 그리고 AI 코딩 에이전트(**gajae-code** + **lazycodex**)까지.
+### 새 맥북을 명령어 한 줄로 완전한 개발 환경까지.
 
-Apple Silicon(M 시리즈) macOS에서 제작·검증.
+_런타임 · 셸 · 컨테이너 · AI 코딩 에이전트까지 — 설치부터 검증까지._
 
-🌐 **언어:** [English](./README.md) · 한국어
-📊 **[설치 흐름 시각화 →](https://heoooooon.github.io/macos-starter-kit/)** (7단계, 순서대로)
+[![CI](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/tag/Heoooooon/macos-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/macos-starter-kit/releases)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Platform](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple&logoColor=white)](#)
+[![Stars](https://img.shields.io/github/stars/Heoooooon/macos-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/macos-starter-kit/stargazers)
+
+[English](./README.md) · **한국어** · [설치 흐름 ↗](https://heoooooon.github.io/macos-starter-kit/) · [Changelog](./CHANGELOG.md)
+
+</div>
+
+---
 
 ## 빠른 시작
 
