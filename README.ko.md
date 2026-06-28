@@ -111,6 +111,21 @@ cmux 같은 cask를 `/Applications`에 설치할 때 비밀번호를 물을 수 
 - **프롬프트** — [`config/starship.toml`](./config/starship.toml) (없을 때만 `~/.config/`로 복사).
 - **셸 블록** — [`config/zshrc.block.sh`](./config/zshrc.block.sh).
 
+## 선택 설치: 생산성 앱
+
+기본 키트는 **개발 도구 중심**으로 유지합니다. 다만 새 맥을 일상 작업용으로도 바로
+쓰고 싶다면, 아래의 작고 엄선된 무료/오픈소스 앱을 추가로 설치하세요 — 의도적으로
+최소한만 담았고, "추천 앱 모음"이 아닙니다:
+
+```sh
+brew bundle --file Brewfile.optional
+# 또는 직접:
+brew install --cask rectangle maccy
+```
+
+- **[Rectangle](https://github.com/rxhanson/Rectangle)** — 창 정리(스냅), Magnet 대체용 무료/오픈소스.
+- **[Maccy](https://github.com/p0deje/Maccy)** — 클립보드 히스토리 관리, 무료/오픈소스.
+
 ## 설치 후 할 일
 
 1. **새 터미널 열기** (또는 `source ~/.zshrc`) → PATH/프롬프트 로드.

@@ -114,6 +114,21 @@ also fully user-space (Homebrew itself is never removed).
 - **Prompt** — [`config/starship.toml`](./config/starship.toml) (copied to `~/.config/` only if absent).
 - **Shell block** — [`config/zshrc.block.sh`](./config/zshrc.block.sh).
 
+## Optional productivity apps
+
+The default kit stays focused on **developer tools**. If you also want a more
+comfortable daily macOS setup, install this small, curated set of free/open-source
+apps — it's intentionally minimal, not a "recommended apps" dump:
+
+```sh
+brew bundle --file Brewfile.optional
+# or directly:
+brew install --cask rectangle maccy
+```
+
+- **[Rectangle](https://github.com/rxhanson/Rectangle)** — window snapping, a free/open-source Magnet alternative.
+- **[Maccy](https://github.com/p0deje/Maccy)** — clipboard history manager, free/open-source.
+
 ## After install
 
 1. **Open a new terminal** (or `source ~/.zshrc`) so PATH/prompt load.
