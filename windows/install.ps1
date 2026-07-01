@@ -34,8 +34,8 @@
 param(
   [switch]$DryRun,
   [switch]$Yes,
-  [string]$Only = '',
-  [string]$Skip = '',
+  [string[]]$Only = @(),
+  [string[]]$Skip = @(),
   [switch]$NoAgents,
   [switch]$List,
   [switch]$Version,
@@ -133,11 +133,11 @@ if ($Help)    { Get-Help $target -Detailed; exit 0 }
 if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; exit 0 }
 if ($Version) { Write-Output "lazy-starter-kit $KitVersion"; exit 0 }
 
-if ($NoAgents) { $Skip = if ($Skip) { "$Skip,agents" } else { 'agents' } }
+if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 
 function Get-SelectedSteps {
-  $onlyList = @($Only -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-  $skipList = @($Skip -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  $onlyList = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  $skipList = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
   foreach ($id in $StepIds) {
     if ($onlyList.Count -gt 0) {
       if ($onlyList -contains $id) { $id }

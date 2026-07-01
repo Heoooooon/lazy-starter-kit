@@ -21,8 +21,8 @@
 param(
   [switch]$DryRun,
   [switch]$Yes,
-  [string]$Only = '',
-  [string]$Skip = '',
+  [string[]]$Only = @(),
+  [string[]]$Skip = @(),
   [switch]$WithGajae,
   [switch]$KeepCodexHome,
   [switch]$List
@@ -187,8 +187,8 @@ $GroupFunc = @{
 if ($List) { $GroupIds | ForEach-Object { Write-Output $_ }; exit 0 }
 
 function Get-SelectedGroups {
-  $onlyList = @($Only -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-  $skipList = @($Skip -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  $onlyList = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  $skipList = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
   foreach ($id in $GroupIds) {
     if ($onlyList.Count -gt 0) { if ($onlyList -contains $id) { $id } }
     elseif ($skipList -notcontains $id) { $id }
