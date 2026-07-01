@@ -59,8 +59,21 @@ function Resolve-Root {
 
   Write-Host "==> Bootstrapping lazy-starter-kit into $CloneDir" -ForegroundColor Blue
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Host "==> git not found. Install Git first (winget install --id Git.Git), then re-run." -ForegroundColor Red
-    exit 1
+    # A piped one-liner (irm | iex) needs git to clone the kit. On a fresh
+    # machine, install it via winget, then refresh PATH for this session.
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+      Write-Host "==> git not found - installing via winget..." -ForegroundColor Blue
+      winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements --silent --disable-interactivity
+      $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' +
+                  [Environment]::GetEnvironmentVariable('Path','User') + ';C:\Program Files\Git\cmd'
+    }
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+      Write-Host "==> git still not found. Either:" -ForegroundColor Red
+      Write-Host "    1) install git:  winget install --id Git.Git   (then re-run), or" -ForegroundColor Red
+      Write-Host "    2) download the ZIP: https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip" -ForegroundColor Red
+      Write-Host "       extract it, then run  windows\install.ps1" -ForegroundColor Red
+      exit 1
+    }
   }
   if (Test-Path (Join-Path $CloneDir '.git')) {
     git -C $CloneDir pull --ff-only origin $RepoBranch | Out-Null
