@@ -9,8 +9,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Added
 - **Linux kit** (`linux/`): the same 7-step, idempotent, dry-run-first installer
-  for Linux. Auto-detects the package manager (apt · dnf/yum · pacman · zypper ·
-  apk) for base/CLI tools and installs the developer toolchain (mise, starship,
+  for Linux. Auto-detects the package manager (apt · dnf/yum · pacman · zypper)
+  for base/CLI tools and installs the developer toolchain (mise, starship,
   uv, bun, rustup) from official user-space installers — no Homebrew, no root for
   the per-user tools. Steps: `prereqs packages runtimes shell docker git agents`.
   Includes `uninstall.sh` and a dedicated README.
@@ -23,6 +23,29 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   (PowerShell parse + PSScriptAnalyzer) jobs.
 - **Docs**: root README now links all three platform kits (macOS at root,
   `linux/`, `windows/`).
+- **Real end-to-end CI on all three OSes**: `windows-latest` (Server 2025) and
+  `ubuntu-latest` install→verify→uninstall jobs, alongside the existing macOS one.
+  Agents (gajae-code + codex) are covered on Linux and Windows.
+- **Verified end-to-end on Ubuntu, Fedora, openSUSE and Arch** (glibc). Alpine/
+  musl is explicitly **unsupported** (upstream node/ast-grep/bun have no musl builds).
+
+### Changed
+- **Windows**: winget installs prefer per-user (`--scope user`) and fall back to
+  the default scope, so standard (non-admin) accounts install more; a summary
+  lists any packages that still need admin. `-Only`/`-Skip` now accept comma
+  lists (`-Only packages,shell`). PSReadLine is upgraded to 2.2+ for inline
+  autosuggestions, plus CompletionPredictor + Tab menu + history search.
+- **Linux**: Python uses mise's **precompiled** builds (`MISE_PYTHON_COMPILE=0`);
+  `fd`/`bat` get real command symlinks on Debian/Ubuntu; oh-my-zsh plugin clones
+  retry and are non-fatal; pacman refresh uses `-Syu` (avoids partial-upgrade
+  breakage on Arch).
+
+### Fixed
+- **Rename** `macos-starter-kit` → `lazy-starter-kit` across code, URLs, managed-
+  block tags, and clone dir; installs/uninstalls migrate legacy `macos-starter-kit:*`
+  blocks so re-runs stay duplicate-free.
+- `set -e` bug: `load_local_bins` aborted the Linux install when the mise shims
+  dir did not exist yet.
 
 ## [0.1.0] - 2026-06-27
 
