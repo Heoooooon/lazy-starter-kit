@@ -3,9 +3,9 @@
 # lazy-starter-kit — uninstaller. Reverses what install.sh set up, in reverse
 # dependency order, idempotently. Destructive groups are confirm-gated.
 #
-# What it NEVER removes automatically (too system-wide / your data):
-#   - Homebrew itself, Xcode Command Line Tools
+# What it NEVER removes automatically:
 #   - your git identity / config
+#   - system compiler/build tools installed by 'prereqs'
 #   - gajae-code (gjc) unless you pass --with-gajae
 #
 # Usage:
@@ -21,7 +21,7 @@
 #   --list             List group ids and exit.
 #   --help, -h         Show this help.
 #
-# Groups (reverse order): agents shell docker runtimes brew
+# Groups (reverse order): agents shell docker runtimes packages
 #
 set -euo pipefail
 
@@ -30,22 +30,21 @@ ROOT="$SELF_DIR"
 # shellcheck source=scripts/lib.sh
 source "$ROOT/scripts/lib.sh"
 
-KIT_VERSION="$(cat "$ROOT/VERSION" 2>/dev/null || echo dev)"
+KIT_VERSION="$(cat "$ROOT/../VERSION" 2>/dev/null || echo dev)"
 : "${WITH_GAJAE:=0}"
 : "${KEEP_CODEX_HOME:=0}"
 
-GROUP_IDS=(agents shell docker runtimes brew)
-usage() { sed -n '2,30p' "$ROOT/uninstall.sh" | sed 's/^# \{0,1\}//'; }
+GROUP_IDS=(agents shell docker runtimes packages)
+usage() { sed -n '2,26p' "$ROOT/uninstall.sh" | sed 's/^# \{0,1\}//'; }
 
 # ---------------------------------------------------------------------------
-# agents — codex + lazycodex (+ optionally gajae-code)
+# agents — codex + lazycodex + Hermes (+ optionally gajae-code)
 # ---------------------------------------------------------------------------
 undo_agents() {
-  step "Remove AI agents (codex + lazycodex)"
-  load_brew; load_mise
+  step "Remove AI agents (codex + lazycodex + Hermes)"
+  load_local_bins; load_mise
   export PATH="$HOME/.bun/bin:$PATH"
 
-  # codex (npm global under mise node)
   if have npm && mise exec -- npm ls -g --depth=0 2>/dev/null | grep -q '@openai/codex'; then
     info "Uninstalling @openai/codex…"
     run mise exec -- npm uninstall -g @openai/codex
@@ -54,7 +53,6 @@ undo_agents() {
     info "codex npm package not installed"
   fi
 
-  # lazycodex npx cache
   local d found=0
   for d in "$HOME"/.npm/_npx/*/node_modules/lazycodex-ai; do
     [[ -e "$d" ]] || continue
@@ -63,7 +61,6 @@ undo_agents() {
   done
   [[ "$found" == 1 ]] && ok "cleared lazycodex npx cache" || info "no lazycodex npx cache"
 
-  # ~/.codex home (config, auth, sessions, omo plugin)
   if [[ -d "$HOME/.codex" && "$KEEP_CODEX_HOME" != "1" ]]; then
     if confirm "Remove ~/.codex (codex home: config, auth, sessions, omo plugin)?"; then
       if [[ -f "$HOME/.codex/auth.json" ]]; then
@@ -75,18 +72,10 @@ undo_agents() {
       info "kept ~/.codex"
     fi
   fi
-  if [[ -d "$HOME/.cache/codex-runtimes" ]]; then
-    if confirm "Remove ~/.cache/codex-runtimes (downloaded codex runtime, large)?"; then
-      run rm -rf "$HOME/.cache/codex-runtimes"
-    else
-      info "kept ~/.cache/codex-runtimes"
-    fi
-  fi
 
   # Hermes Agent — remove command shim + (confirm) data dir
   if have hermes || [[ -d "$HOME/.hermes" ]]; then
     run rm -f "$HOME/.local/bin/hermes"
-    # node/npm/npx in ~/.local/bin only if they symlink into ~/.hermes
     local b tgt
     for b in node npm npx; do
       tgt="$HOME/.local/bin/$b"
@@ -126,15 +115,8 @@ undo_agents() {
 # ---------------------------------------------------------------------------
 undo_shell() {
   step "Revert shell configuration"
-  remove_block "$HOME/.zshrc"            "lazy-starter-kit:main"
-  remove_block "$HOME/.zshrc"            "lazy-starter-kit:ohmyzsh"
-  remove_block "$HOME/.zprofile"         "lazy-starter-kit:brew"
-  remove_block "$HOME/.config/ghostty/config" "lazy-starter-kit:ghostty"
-  # also strip legacy 'macos-starter-kit:*' blocks (installs from before the rename)
-  remove_block "$HOME/.zshrc"            "macos-starter-kit:main"
-  remove_block "$HOME/.zshrc"            "macos-starter-kit:ohmyzsh"
-  remove_block "$HOME/.zprofile"         "macos-starter-kit:brew"
-  remove_block "$HOME/.config/ghostty/config" "macos-starter-kit:ghostty"
+  remove_block "$HOME/.zshrc"    "lazy-starter-kit:main"
+  remove_block "$HOME/.zshrc"    "lazy-starter-kit:ohmyzsh"
 
   if [[ -f "$HOME/.config/starship.toml" ]]; then
     if confirm "Remove ~/.config/starship.toml?"; then run rm -f "$HOME/.config/starship.toml"
@@ -147,31 +129,23 @@ undo_shell() {
 }
 
 # ---------------------------------------------------------------------------
-# docker — Colima VM + docker plugin config entry
+# docker — remove Docker Engine (native packages)
 # ---------------------------------------------------------------------------
 undo_docker() {
-  step "Remove containers (Colima VM + docker config entry)"
-  load_brew
-  if have colima && colima list 2>/dev/null | grep -q colima; then
-    if confirm "Stop and delete the Colima VM (containers & images lost)?"; then
-      run colima stop || true
-      run colima delete --force || true
-    else
-      info "kept Colima VM"
-    fi
+  step "Remove containers (Docker Engine)"
+  if ! have docker; then info "docker not installed"; return 0; fi
+  if confirm "Uninstall Docker Engine (docker-ce + compose/buildx; containers & images lost)?"; then
+    if have systemctl; then run $SUDO systemctl disable --now docker 2>/dev/null || true; fi
+    case "$PM" in
+      apt)    pm_remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker.io ;;
+      dnf|yum) pm_remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin ;;
+      pacman) pm_remove docker docker-compose docker-buildx ;;
+      zypper) pm_remove docker docker-compose ;;
+      apk)    pm_remove docker docker-cli-compose ;;
+    esac
+    ok "Docker removed (your user's docker group membership is left as-is)"
   else
-    info "no Colima VM"
-  fi
-
-  local cfg="$HOME/.docker/config.json" pdir; pdir="$(brew_prefix)/lib/docker/cli-plugins"
-  if [[ -f "$cfg" ]] && have jq && grep -q cliPluginsExtraDirs "$cfg" 2>/dev/null; then
-    if [[ "$DRY_RUN" == "1" ]]; then
-      info "[dry-run] would remove $pdir from $cfg"
-    else
-      local tmp; tmp="$(mktemp)"
-      jq --arg d "$pdir" '(.cliPluginsExtraDirs) |= (map(select(. != $d)))' "$cfg" > "$tmp" && mv "$tmp" "$cfg"
-      ok "removed plugin dir from docker config"
-    fi
+    info "kept Docker"
   fi
 }
 
@@ -180,14 +154,14 @@ undo_docker() {
 # ---------------------------------------------------------------------------
 undo_runtimes() {
   step "Remove language runtimes (mise node/python/go + rustup)"
-  load_brew
+  load_local_bins
   if have mise; then
-    if confirm "Remove mise-managed node/python/go (versions + global config entries)?"; then
+    if confirm "Remove mise-managed node/python/go/ast-grep (versions + global config)?"; then
       if [[ "$DRY_RUN" == "1" ]]; then
-        info "[dry-run] mise uninstall node python go ; mise rm -g node python go"
+        info "[dry-run] mise uninstall node python go ; mise rm -g node python go ast-grep"
       else
         mise uninstall node python go 2>/dev/null || true
-        local t; for t in node python go; do mise rm -g "$t" 2>/dev/null || true; done
+        local t; for t in node python go "ubi:ast-grep/ast-grep"; do mise rm -g "$t" 2>/dev/null || true; done
         ok "removed mise runtimes"
       fi
     else
@@ -205,28 +179,36 @@ undo_runtimes() {
 }
 
 # ---------------------------------------------------------------------------
-# brew — uninstall everything listed in the Brewfile
+# packages — user-space dev tools + (optional) native CLI utilities
 # ---------------------------------------------------------------------------
-undo_brew() {
-  step "Uninstall Homebrew packages listed in the Brewfile"
-  load_brew
-  have brew || { warn "brew not found"; return 0; }
-  local bf="$ROOT/Brewfile"
-  [[ -f "$bf" ]] || { warn "no Brewfile at $bf"; return 0; }
+undo_packages() {
+  step "Remove developer tools (mise/starship/uv/bun) + CLI utilities"
 
-  if ! confirm "Uninstall all formulae/casks in the Brewfile? (Homebrew itself stays)"; then
-    info "kept brew packages"; return 0
+  # user-space tool installs (all under $HOME)
+  if confirm "Remove user-space tools mise/starship/uv/bun and their homes?"; then
+    run rm -f  "$HOME/.local/bin/mise" "$HOME/.local/bin/starship" \
+               "$HOME/.local/bin/uv" "$HOME/.local/bin/uvx"
+    run rm -rf "$HOME/.local/share/mise" "$HOME/.config/mise" "$HOME/.cache/mise"
+    run rm -rf "$HOME/.bun"
+    ok "removed mise/starship/uv/bun"
+  else
+    info "kept user-space tools"
   fi
-  local f
-  for f in $(grep -E '^brew "' "$bf" | sed -E 's/^brew "([^"]+)".*/\1/'); do
-    run brew uninstall "$f" 2>/dev/null || warn "skip $f (missing, in use, or has dependents)"
-  done
-  for f in $(grep -E '^cask "' "$bf" | sed -E 's/^cask "([^"]+)".*/\1/'); do
-    run brew uninstall --cask "$f" 2>/dev/null || warn "skip cask $f"
-  done
-  # sweep orphaned dependencies the Brewfile packages pulled in (e.g. node@24)
-  run brew autoremove
-  ok "Brewfile packages processed"
+
+  # native CLI utilities via package manager
+  if confirm "Uninstall CLI utilities (ripgrep, fd, bat, fzf, jq, tree, gh) via $PM?"; then
+    case "$PM" in
+      apt)     pm_remove ripgrep fd-find bat fzf jq tree gh ;;
+      dnf|yum) pm_remove ripgrep fd-find bat fzf jq tree gh ;;
+      pacman)  pm_remove ripgrep fd bat fzf jq tree github-cli ;;
+      zypper)  pm_remove ripgrep fd bat fzf jq tree gh ;;
+      apk)     pm_remove ripgrep fd bat fzf jq tree github-cli ;;
+    esac
+    ok "CLI utilities processed"
+  else
+    info "kept CLI utilities"
+  fi
+  info "Build tools (gcc/make) from 'prereqs' are left installed — remove manually if desired."
 }
 
 # ---------------------------------------------------------------------------
@@ -267,18 +249,18 @@ selected() {
 # ---------------------------------------------------------------------------
 # Run
 # ---------------------------------------------------------------------------
-is_macos || die "macOS only."
+is_linux || die "Linux only."
 [[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION · uninstall ==$_C_RESET"
 info "groups: $(selected | tr '\n' ' ')"
-warn "Homebrew, Xcode CLT, and your git identity are left untouched (remove manually if desired)."
+warn "Your git identity and system build tools are left untouched (remove manually if desired)."
 
 for id in $(selected); do
   "undo_$id"
 done
 
 step "Uninstall complete."
-ok "Restart your terminal. To fully reset prereqs, remove Homebrew/Xcode CLT manually."
+ok "Restart your terminal to load a clean environment."
 [[ "$DRY_RUN" == "1" ]] && info "That was a dry run — re-run without --dry-run to apply."
 exit 0

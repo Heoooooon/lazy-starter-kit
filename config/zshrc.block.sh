@@ -1,4 +1,4 @@
-# managed by macos-starter-kit — edits between the markers are overwritten on re-run.
+# managed by lazy-starter-kit — edits between the markers are overwritten on re-run.
 
 # mise: node / python / go version manager
 command -v mise >/dev/null && eval "$(mise activate zsh)"

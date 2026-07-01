@@ -1,18 +1,20 @@
 <div align="center">
 
-<img src="./docs/banner.png" alt="macos-starter-kit" width="760" />
+<img src="./docs/banner.png" alt="lazy-starter-kit" width="760" />
 
 ### One command turns a fresh MacBook into a complete dev environment.
 
 _Runtimes · shell · containers · and AI coding agents — installed and verified._
 
-[![CI](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/macos-starter-kit/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/tag/Heoooooon/macos-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/macos-starter-kit/releases)
+[![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple&logoColor=white)](#)
-[![Stars](https://img.shields.io/github/stars/Heoooooon/macos-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/macos-starter-kit/stargazers)
+[![Stars](https://img.shields.io/github/stars/Heoooooon/lazy-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/lazy-starter-kit/stargazers)
 
-**English** · [한국어](./README.ko.md) · [Install flow ↗](https://heoooooon.github.io/macos-starter-kit/) · [Changelog](./CHANGELOG.md)
+**English** · [한국어](./README.ko.md) · [Install flow ↗](https://heoooooon.github.io/lazy-starter-kit/) · [Changelog](./CHANGELOG.md)
+
+**Platforms:** **macOS** (this page) · [Linux](./linux/README.md) · [Windows](./windows/README.md)
 
 </div>
 
@@ -21,7 +23,7 @@ _Runtimes · shell · containers · and AI coding agents — installed and verif
 ## Quick start
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/macos-starter-kit/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
 ```
 
 On a brand-new Mac with no `git`, this triggers the Xcode Command Line Tools install
@@ -30,11 +32,25 @@ first — re-run the same command once they finish.
 Prefer to read before you run (recommended):
 
 ```sh
-git clone https://github.com/Heoooooon/macos-starter-kit.git
-cd macos-starter-kit
+git clone https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit
 ./install.sh --dry-run     # see exactly what it would do
 ./install.sh               # apply
 ```
+
+## Linux & Windows
+
+This repo ships parallel kits for the other two platforms — same 7-step,
+idempotent, `--dry-run`-first philosophy, adapted to each OS's native tooling:
+
+| Platform | Package base | One-liner |
+|---|---|---|
+| **Linux** ([`linux/`](./linux/README.md)) | apt · dnf/yum · pacman · zypper · apk + official tool installers | `curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh \| bash` |
+| **Windows** ([`windows/`](./windows/README.md)) | winget + mise/rustup | `irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 \| iex` |
+
+Each is self-contained under its directory (`install`, `uninstall`, `scripts/`,
+`config/`) so you can clone and run just the one you need. The macOS kit below
+stays at the repo root.
 
 ## What you get
 
@@ -164,7 +180,7 @@ Safe by design:
 - **gajae-code (`gjc`) is kept** unless you pass `--with-gajae` (refused while `gjc` is running).
 - Removing codex backs up `~/.codex/auth.json` to `~/` first; pass `--keep-codex-home` to leave `~/.codex` intact.
 - Removing Hermes deletes its `~/.local/bin/hermes` shim and (after confirming) `~/.hermes`.
-- Only the kit's own managed blocks (`# >>> macos-starter-kit:* >>>`) are stripped from your dotfiles — hand-written lines are untouched.
+- Only the kit's own managed blocks (`# >>> lazy-starter-kit:* >>>`) are stripped from your dotfiles — hand-written lines are untouched.
 
 ## Versioning
 
@@ -175,7 +191,7 @@ Pin the installer to a release instead of `main`:
 
 ```sh
 STARTER_KIT_BRANCH=v0.1.0 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/macos-starter-kit/v0.1.0/install.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.1.0/install.sh)"
 ```
 
 ## Credits

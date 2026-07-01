@@ -30,6 +30,48 @@ jobs:
       - name: shellcheck
         run: shellcheck -x -S warning -e SC2154 install.sh uninstall.sh scripts/*.sh
 
+  lint-linux:
+    name: linux shellcheck + syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: bash syntax
+        run: |
+          for f in linux/install.sh linux/uninstall.sh linux/scripts/*.sh linux/config/zshrc.block.sh; do
+            bash -n "$f"
+          done
+      - name: shellcheck
+        run: shellcheck -x -S warning -e SC2154 linux/install.sh linux/uninstall.sh linux/scripts/*.sh
+
+  lint-windows:
+    name: windows powershell parse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: parse all .ps1 (PowerShell is preinstalled on the runner)
+        shell: pwsh
+        run: |
+          $fail = 0
+          Get-ChildItem -Path windows -Recurse -Include *.ps1 | ForEach-Object {
+            $tokens = $null; $errors = $null
+            $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
+            if ($errors.Count -gt 0) {
+              $fail = 1
+              Write-Host "FAIL $($_.FullName)"
+              $errors | ForEach-Object { Write-Host "  $($_.Message) (line $($_.Extent.StartLineNumber))" }
+            } else { Write-Host "ok   $($_.Name)" }
+          }
+          exit $fail
+      - name: PSScriptAnalyzer (warnings+errors)
+        shell: pwsh
+        run: |
+          Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+          $res = Invoke-ScriptAnalyzer -Path windows -Recurse -Severity Warning,Error
+          $res | Format-Table -AutoSize
+          if ($res | Where-Object { $_.Severity -eq 'Error' }) { exit 1 }
+
   dryrun:
     name: macOS dry-run
     runs-on: macos-14
@@ -64,7 +106,7 @@ jobs:
           echo "go:     $(go version)"
           echo "codex:  $(codex --version 2>/dev/null | head -1 || echo '?')"
           test -d "$HOME/.oh-my-zsh"            || { echo "MISS oh-my-zsh"; fail=1; }
-          grep -q 'macos-starter-kit:main' "$HOME/.zshrc" || { echo "MISS zshrc block"; fail=1; }
+          grep -q 'lazy-starter-kit:main' "$HOME/.zshrc" || { echo "MISS zshrc block"; fail=1; }
           test -d "$HOME/.codex/plugins/cache/sisyphuslabs/omo" && echo "ok   lazycodex/omo" || echo "warn lazycodex/omo not found"
           exit $fail
 
@@ -80,6 +122,6 @@ jobs:
           gone() { command -v "$1" >/dev/null 2>&1 && { echo "STILL $1"; fail=1; } || echo "gone $1"; }
           for t in gjc codex starship mise; do gone "$t"; done
           test -d "$HOME/.oh-my-zsh" && { echo "STILL oh-my-zsh"; fail=1; } || echo "gone oh-my-zsh"
-          if grep -q 'macos-starter-kit' "$HOME/.zshrc" 2>/dev/null; then echo "STILL zshrc block"; fail=1; else echo "gone zshrc block"; fi
+          if grep -q 'lazy-starter-kit' "$HOME/.zshrc" 2>/dev/null; then echo "STILL zshrc block"; fail=1; else echo "gone zshrc block"; fi
           test -x /opt/homebrew/bin/brew && echo "ok   Homebrew preserved" || { echo "Homebrew missing!"; fail=1; }
           exit $fail

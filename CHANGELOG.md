@@ -1,11 +1,28 @@
 # Changelog
 
-All notable changes to **macos-starter-kit** are documented here.
+All notable changes to **lazy-starter-kit** are documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+### Added
+- **Linux kit** (`linux/`): the same 7-step, idempotent, dry-run-first installer
+  for Linux. Auto-detects the package manager (apt · dnf/yum · pacman · zypper ·
+  apk) for base/CLI tools and installs the developer toolchain (mise, starship,
+  uv, bun, rustup) from official user-space installers — no Homebrew, no root for
+  the per-user tools. Steps: `prereqs packages runtimes shell docker git agents`.
+  Includes `uninstall.sh` and a dedicated README.
+- **Windows kit** (`windows/`): a PowerShell installer (`install.ps1`, 5.1+/7+)
+  using **winget** for packages plus **mise**/**rustup** for runtimes. Wires up a
+  managed PowerShell profile block (starship, PSReadLine, PSFzf, bun/cargo PATH),
+  Docker Desktop (opt-in), git identity, and the AI agents (gajae-code, codex,
+  lazycodex; Hermes via WSL2). Includes `uninstall.ps1` and a README.
+- **CI**: added `lint-linux` (shellcheck + `bash -n`) and `lint-windows`
+  (PowerShell parse + PSScriptAnalyzer) jobs.
+- **Docs**: root README now links all three platform kits (macOS at root,
+  `linux/`, `windows/`).
 
 ## [0.1.0] - 2026-06-27
 
@@ -47,5 +64,5 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/macos-starter-kit/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Heoooooon/macos-starter-kit/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.1.0

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, cmux font
+# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, default shell
 
 OMZ_DIR="$HOME/.oh-my-zsh"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
@@ -16,9 +16,9 @@ _clone_plugin() {
 
 step_shell() {
   step "Shell: oh-my-zsh + plugins + zsh config + prompt"
-  load_brew
+  load_local_bins
 
-  [[ "$SHELL" == */zsh ]] || warn "default shell is $SHELL (macOS default is zsh; run: chsh -s /bin/zsh)"
+  have zsh || { warn "zsh not installed — run the 'prereqs' step first"; return 0; }
 
   # --- oh-my-zsh ---------------------------------------------------------
   if [[ -d "$OMZ_DIR" ]]; then
@@ -42,22 +42,17 @@ step_shell() {
     _clone_plugin zsh-syntax-highlighting https://github.com/zsh-users/zsh-syntax-highlighting
   fi
 
-  # --- migrate: strip legacy 'macos-starter-kit:*' blocks (pre-rename installs)
-  # so a re-run replaces cleanly instead of leaving a duplicate block behind.
-  remove_block "$HOME/.zshrc" "macos-starter-kit:main"
-  remove_block "$HOME/.zshrc" "macos-starter-kit:ohmyzsh"
-
   # --- ensure oh-my-zsh is sourced (only if user isn't already doing it) -
   if [[ "$DRY_RUN" != "1" ]] && ! grep -qs 'oh-my-zsh.sh' "$HOME/.zshrc" 2>/dev/null; then
     inject_block "$HOME/.zshrc" "lazy-starter-kit:ohmyzsh" <<'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""            # prompt handled by starship below
-plugins=(git npm node macos)
+plugins=(git npm node)
 source "$ZSH/oh-my-zsh.sh"
 EOF
   fi
 
-  # --- our zsh config block (mise, fzf, bat, rustup, bun, starship) ------
+  # --- our zsh config block (mise, fzf, bat, cargo, bun, starship) -------
   if [[ "$DRY_RUN" == "1" ]]; then
     info "[dry-run] inject 'lazy-starter-kit:main' block into ~/.zshrc"
   else
@@ -75,27 +70,19 @@ EOF
     ok "installed ~/.config/starship.toml"
   fi
 
-  # --- cmux terminal font (Ghostty-based terminal for AI coding agents) ---
-  # cmux config is JSONC (allows // comments), so we never edit an existing
-  # file (jq would choke on comments). We only seed a minimal config when
-  # none exists; otherwise just point the user at the font.
-  local cmux_cfg="$HOME/.config/cmux/cmux.json"
-  if have cmux || [[ -e "$cmux_cfg" ]] || [[ -d /Applications/cmux.app ]]; then
+  # --- make zsh the default login shell (opt-in) -------------------------
+  local zsh_path; zsh_path="$(command -v zsh || true)"
+  if [[ -n "$zsh_path" && "$SHELL" != *zsh ]]; then
     if [[ "$DRY_RUN" == "1" ]]; then
-      info "[dry-run] ensure cmux uses 'JetBrainsMono Nerd Font Mono' (seed $cmux_cfg if absent)"
-    elif [[ -e "$cmux_cfg" ]]; then
-      info "cmux config exists — set \"fontFamily\": \"JetBrainsMono Nerd Font Mono\" in ~/.config/cmux/cmux.json (or via cmux settings)"
+      info "[dry-run] chsh -s $zsh_path (make zsh the default shell)"
+    elif confirm "Make zsh your default login shell?"; then
+      # ensure the shell is registered in /etc/shells
+      if ! grep -qxF "$zsh_path" /etc/shells 2>/dev/null; then
+        run bash -c "echo '$zsh_path' | $SUDO tee -a /etc/shells >/dev/null" || true
+      fi
+      run chsh -s "$zsh_path" || warn "chsh failed — set your shell manually: chsh -s $zsh_path"
     else
-      mkdir -p "$(dirname "$cmux_cfg")"
-      cat > "$cmux_cfg" <<'EOF'
-{
-  "fontFamily": "JetBrainsMono Nerd Font Mono",
-  "fontSize": 14
-}
-EOF
-      ok "seeded ~/.config/cmux/cmux.json with the Nerd Font"
+      info "Left default shell as $SHELL. Switch later: chsh -s $zsh_path"
     fi
-  else
-    info "cmux not detected — Nerd Font is installed; set it in your terminal's settings"
   fi
 }

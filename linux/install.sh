@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# lazy-starter-kit — install a complete macOS dev environment from scratch.
-# From nothing → Xcode CLT, Homebrew, runtimes, shell, Docker, AI agents
-# (gajae-code + lazycodex).
+# lazy-starter-kit — install a complete Linux dev environment from scratch.
+# From a fresh box → build tools, CLI, runtimes, shell, Docker, AI agents
+# (gajae-code + codex + lazycodex + Hermes).
 #
 # Usage:
 #   ./install.sh [options]
-#   curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
 #
 # Options:
 #   --dry-run        Show what would happen, change nothing.
@@ -18,7 +18,9 @@
 #   --version, -V    Print the kit version and exit.
 #   --help, -h       Show this help.
 #
-# Steps (in order): prereqs brew runtimes shell docker git agents
+# Steps (in order): prereqs packages runtimes shell docker git agents
+#
+# Supported package managers: apt · dnf/yum · pacman · zypper · apk
 #
 set -euo pipefail
 
@@ -27,7 +29,7 @@ REPO_BRANCH="${STARTER_KIT_BRANCH:-main}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 
 # ---------------------------------------------------------------------------
-# Resolve the repo root, or bootstrap by cloning (supports curl | bash).
+# Resolve the repo root (the linux/ dir), or bootstrap by cloning (curl | bash).
 # ---------------------------------------------------------------------------
 resolve_root() {
   local src="${BASH_SOURCE[0]:-}"
@@ -37,12 +39,10 @@ resolve_root() {
       echo "$dir"; return 0
     fi
   fi
-  # Running piped from curl: clone (or update) and hand off.
+  # Running piped from curl: clone (or update) and hand off to linux/install.sh.
   echo "==> Bootstrapping lazy-starter-kit into $CLONE_DIR" >&2
   if ! command -v git >/dev/null 2>&1; then
-    echo "==> git not found; triggering Xcode Command Line Tools install…" >&2
-    xcode-select --install 2>/dev/null || true
-    echo "Re-run this command after the Command Line Tools finish installing." >&2
+    echo "==> git not found. Install git first (e.g. sudo apt-get install -y git), then re-run." >&2
     exit 1
   fi
   if [[ -d "$CLONE_DIR/.git" ]]; then
@@ -50,7 +50,7 @@ resolve_root() {
   else
     git clone --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$CLONE_DIR" >&2
   fi
-  echo "$CLONE_DIR"
+  echo "$CLONE_DIR/linux"
 }
 
 ROOT="$(resolve_root)"
@@ -67,19 +67,18 @@ fi
 # shellcheck source=scripts/lib.sh
 source "$ROOT/scripts/lib.sh"
 
-KIT_VERSION="$(cat "$ROOT/VERSION" 2>/dev/null || echo dev)"
+KIT_VERSION="$(cat "$ROOT/../VERSION" 2>/dev/null || echo dev)"
 
 # ---------------------------------------------------------------------------
 # Step registry
 # ---------------------------------------------------------------------------
-# Note: kept bash-3.2 compatible (macOS ships bash 3.2) — no associative arrays.
-STEP_IDS=(prereqs brew runtimes shell docker git agents)
+STEP_IDS=(prereqs packages runtimes shell docker git agents)
 
 # step_file <id> -> the scripts/NN-*.sh filename for that step
 step_file() {
   case "$1" in
     prereqs)  echo 01-prereqs.sh ;;
-    brew)     echo 02-brew.sh ;;
+    packages) echo 02-packages.sh ;;
     runtimes) echo 03-runtimes.sh ;;
     shell)    echo 04-shell.sh ;;
     docker)   echo 05-docker.sh ;;
@@ -88,7 +87,6 @@ step_file() {
     *) return 1 ;;
   esac
 }
-# function name for each step is always step_<id>
 
 usage() { sed -n '2,21p' "$ROOT/install.sh" | sed 's/^# \{0,1\}//'; }
 
@@ -130,8 +128,7 @@ selected() {
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
-is_macos || die "This kit targets macOS only."
-is_arm   || warn "Not Apple Silicon (arm64) — proceeding, but only tested on M-series."
+is_linux || die "This kit targets Linux only (macOS users: use the repo root install.sh)."
 [[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION ==$_C_RESET"
@@ -157,6 +154,9 @@ else
   info "1) Open a NEW terminal (or: source ~/.zshrc) so PATH + prompt load."
   if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
     info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)"
+  fi
+  if command -v docker >/dev/null 2>&1 && ! id -nG 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
+    info "3) Docker: log out/in (or run 'newgrp docker') so group access applies."
   fi
   info "Set your terminal font to 'JetBrainsMono Nerd Font' for prompt icons."
 fi

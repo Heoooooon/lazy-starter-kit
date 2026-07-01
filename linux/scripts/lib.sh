@@ -22,7 +22,7 @@ die()   { err "$*"; exit 1; }
 # ---------------------------------------------------------------------------
 # Environment flags (exported by install.sh)
 # ---------------------------------------------------------------------------
-: "${DRY_RUN:=0}"   # 1 = print actions, do not execute
+: "${DRY_RUN:=0}"    # 1 = print actions, do not execute
 : "${ASSUME_YES:=0}" # 1 = never prompt, take defaults
 
 # run CMD...  — execute, or just print under DRY_RUN
@@ -39,20 +39,97 @@ run() {
 # ---------------------------------------------------------------------------
 have()        { command -v "$1" >/dev/null 2>&1; }
 is_tty()      { [[ -t 0 ]]; }
-is_macos()    { [[ "$(uname -s)" == "Darwin" ]]; }
-is_arm()      { [[ "$(uname -m)" == "arm64" ]]; }
+is_linux()    { [[ "$(uname -s)" == "Linux" ]]; }
 
-# brew_prefix — echo the Homebrew prefix for the current arch
-brew_prefix() {
-  if [[ -x /opt/homebrew/bin/brew ]]; then echo /opt/homebrew
-  elif [[ -x /usr/local/bin/brew ]]; then echo /usr/local
-  else echo /opt/homebrew; fi
+# ---------------------------------------------------------------------------
+# Privilege escalation — pick sudo only when needed & available
+# ---------------------------------------------------------------------------
+# SUDO is "" when we are root or when sudo is missing; system package installs
+# use "$SUDO" so a rootless/CI environment degrades gracefully.
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  SUDO=""
+elif have sudo; then
+  SUDO="sudo"
+else
+  SUDO=""
+fi
+
+# ---------------------------------------------------------------------------
+# Distro / package-manager detection
+# ---------------------------------------------------------------------------
+# PM is one of: apt dnf yum pacman zypper apk  (empty if unknown)
+detect_pm() {
+  if have apt-get;  then echo apt
+  elif have dnf;    then echo dnf
+  elif have yum;    then echo yum
+  elif have pacman; then echo pacman
+  elif have zypper; then echo zypper
+  elif have apk;    then echo apk
+  else echo ""; fi
+}
+PM="$(detect_pm)"
+
+# distro_id — the ID= field from /etc/os-release (ubuntu, debian, fedora, arch…)
+distro_id() {
+  [[ -r /etc/os-release ]] || { echo unknown; return; }
+  # shellcheck disable=SC1091
+  ( . /etc/os-release; echo "${ID:-unknown}" )
 }
 
-# load brew into the current shell env (so steps see freshly-installed brew)
-load_brew() {
-  local p; p="$(brew_prefix)"
-  [[ -x "$p/bin/brew" ]] && eval "$("$p/bin/brew" shellenv)"
+# pm_refresh — update the package index once (best effort)
+_PM_REFRESHED=0
+pm_refresh() {
+  [[ "$_PM_REFRESHED" == "1" ]] && return 0
+  _PM_REFRESHED=1
+  case "$PM" in
+    apt)    run $SUDO apt-get update -y ;;
+    dnf)    run $SUDO dnf -y makecache || true ;;
+    yum)    run $SUDO yum -y makecache || true ;;
+    pacman) run $SUDO pacman -Sy --noconfirm ;;
+    zypper) run $SUDO zypper --non-interactive refresh || true ;;
+    apk)    run $SUDO apk update ;;
+    *)      warn "no supported package manager detected" ;;
+  esac
+}
+
+# pm_install PKG...  — install one or more system packages (non-interactive)
+pm_install() {
+  [[ $# -gt 0 ]] || return 0
+  case "$PM" in
+    apt)    run $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$@" ;;
+    dnf)    run $SUDO dnf install -y "$@" ;;
+    yum)    run $SUDO yum install -y "$@" ;;
+    pacman) run $SUDO pacman -S --needed --noconfirm "$@" ;;
+    zypper) run $SUDO zypper --non-interactive install --no-recommends "$@" ;;
+    apk)    run $SUDO apk add "$@" ;;
+    *)      warn "cannot install ($*): unknown package manager"; return 1 ;;
+  esac
+}
+
+# pm_try PKG...  — best-effort install; a failure only warns (used for optional
+# CLI tools whose package name may not exist on every distro).
+pm_try() {
+  pm_install "$@" || warn "could not install via $PM: $* (skipping)"
+}
+
+# pm_remove PKG...  — remove system packages (used by the uninstaller)
+pm_remove() {
+  [[ $# -gt 0 ]] || return 0
+  case "$PM" in
+    apt)    run $SUDO env DEBIAN_FRONTEND=noninteractive apt-get remove -y "$@" || true ;;
+    dnf)    run $SUDO dnf remove -y "$@" || true ;;
+    yum)    run $SUDO yum remove -y "$@" || true ;;
+    pacman) run $SUDO pacman -Rns --noconfirm "$@" || true ;;
+    zypper) run $SUDO zypper --non-interactive remove "$@" || true ;;
+    apk)    run $SUDO apk del "$@" || true ;;
+  esac
+}
+
+# load user-local bins for the current process, so freshly-installed tools
+# (mise, starship, uv, bun, cargo) are visible to later steps immediately.
+load_local_bins() {
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$PATH"
+  [[ -d "$HOME/.local/share/mise/shims" ]] && export PATH="$HOME/.local/share/mise/shims:$PATH"
 }
 
 # load mise shims into PATH for the current process
@@ -61,6 +138,9 @@ load_mise() {
   export PATH="$HOME/.local/share/mise/shims:$PATH"
 }
 
+# ---------------------------------------------------------------------------
+# Prompts
+# ---------------------------------------------------------------------------
 # ask "Question?" "default"  -> echoes the answer (default under ASSUME_YES / no tty)
 ask() {
   local q="$1" def="${2:-}"
@@ -70,7 +150,7 @@ ask() {
 }
 
 # confirm "Question?"  -> yes(0)/no(1).
-#   --yes (ASSUME_YES): always yes.  non-interactive without --yes: decline (skip optional/heavy action).
+#   --yes (ASSUME_YES): always yes.  non-interactive without --yes: decline.
 confirm() {
   local q="$1"
   [[ "$ASSUME_YES" == "1" ]] && return 0
@@ -108,7 +188,6 @@ inject_block() {
     $0==b {skip=1} skip && $0==e {skip=0; next} !skip {print}
   ' "$file" > "$tmp"
 
-  # trim a single trailing blank line for tidiness, then append the block
   {
     cat "$tmp"
     printf '%s\n%s\n%s\n' "$begin" "$content" "$end"

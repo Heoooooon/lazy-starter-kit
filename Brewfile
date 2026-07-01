@@ -1,4 +1,4 @@
-# Brewfile — declarative Homebrew manifest for macos-starter-kit.
+# Brewfile — declarative Homebrew manifest for lazy-starter-kit.
 # Applied with: brew bundle --file Brewfile
 # Safe to edit: add/remove lines, then re-run ./install.sh --only brew
 
