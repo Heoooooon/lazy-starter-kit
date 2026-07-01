@@ -10,6 +10,12 @@ _winget packages · runtimes · PowerShell profile · containers · and AI codin
 
 ---
 
+> **🇰🇷 한국어 빠른 시작** — 시작 버튼에서 `PowerShell`을 찾아 열고, 아래 한 줄을 붙여넣고 Enter:
+> ```powershell
+> irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
+> ```
+> 끝나면 PowerShell을 새로 여세요. 막히면 앞에 `powershell -ExecutionPolicy Bypass -Command "..."`로 감싸 실행. (한국어 전체 안내: [README.ko](../README.ko.md#-windows--linux-도-됩니다))
+
 ## Quick start
 
 Open **PowerShell** (Windows PowerShell 5.1 or PowerShell 7) and run:
