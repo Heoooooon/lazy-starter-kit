@@ -96,8 +96,14 @@ step_packages() {
     zypper) pm_try ripgrep fd bat fzf jq tree ;;
     apk)    pm_try ripgrep fd bat fzf jq tree ;;
   esac
-  # Debian/Ubuntu ship fd as `fdfind` and bat as `batcat`; the shell block
-  # aliases them back to fd/bat, so no action needed here.
+  # Debian/Ubuntu ship fd as `fdfind` and bat as `batcat`. Expose real
+  # `fd`/`bat` commands via symlinks so they work in ANY shell/script — not
+  # just the zsh aliases in the shell block.
+  if [[ "$DRY_RUN" != "1" ]]; then
+    mkdir -p "$HOME/.local/bin"
+    if have fdfind && ! have fd;  then ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd";  fi
+    if have batcat && ! have bat; then ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"; fi
+  fi
 
   # --- distro-agnostic developer tools ----------------------------------
   _install_mise

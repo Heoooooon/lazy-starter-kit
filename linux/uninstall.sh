@@ -204,6 +204,8 @@ undo_packages() {
       zypper)  pm_remove ripgrep fd bat fzf jq tree gh ;;
       apk)     pm_remove ripgrep fd bat fzf jq tree github-cli ;;
     esac
+    # drop the fd/bat compatibility symlinks we created on Debian/Ubuntu
+    for l in fd bat; do [[ -L "$HOME/.local/bin/$l" ]] && run rm -f "$HOME/.local/bin/$l" || true; done
     ok "CLI utilities processed"
   else
     info "kept CLI utilities"

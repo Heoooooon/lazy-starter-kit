@@ -5,13 +5,18 @@ OMZ_DIR="$HOME/.oh-my-zsh"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
 
 _clone_plugin() {
-  local name="$1" url="$2" dest="$ZSH_CUSTOM_DIR/plugins/$1"
-  if [[ -d "$dest" ]]; then
-    ok "plugin present: $name"
-  else
-    info "cloning plugin: $name"
-    run git clone --depth 1 "$url" "$dest"
-  fi
+  local name="$1" url="$2" dest="$ZSH_CUSTOM_DIR/plugins/$1" i
+  if [[ -d "$dest" ]]; then ok "plugin present: $name"; return 0; fi
+  info "cloning plugin: $name"
+  # Retry a few times: shallow clones over TLS occasionally flake mid-transfer.
+  # A persistent failure only warns (non-fatal) so the whole install survives.
+  for i in 1 2 3; do
+    rm -rf "$dest"
+    if run git clone --depth 1 "$url" "$dest"; then return 0; fi
+    warn "clone $name attempt $i failed; retrying…"; sleep 2
+  done
+  warn "could not clone $name (skip; re-run the 'shell' step later)"
+  return 0
 }
 
 step_shell() {

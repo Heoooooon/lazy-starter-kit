@@ -130,6 +130,7 @@ pm_remove() {
 load_local_bins() {
   export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$PATH"
   [[ -d "$HOME/.local/share/mise/shims" ]] && export PATH="$HOME/.local/share/mise/shims:$PATH"
+  return 0   # never fail under `set -e` (trailing test may be false)
 }
 
 # load mise shims into PATH for the current process
