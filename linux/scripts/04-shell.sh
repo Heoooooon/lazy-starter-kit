@@ -4,6 +4,14 @@
 OMZ_DIR="$HOME/.oh-my-zsh"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
 
+# Pin ohmyzsh's tools/install.sh (the bootstrap script we execute) to an
+# immutable, reviewable commit instead of the moving 'master' branch, so the
+# code we pipe into sh can't change under us. To bump: set this to a newer
+# ohmyzsh/ohmyzsh commit SHA and confirm the raw URL below serves 200 for it.
+# NOTE: this pins only the bootstrap script — oh-my-zsh itself still clones its
+# own current master when it installs.
+OMZ_INSTALLER_REF="ff2f16e8df7386d7198009566aef09cbbc0c8212"  # 2026-07-01
+
 _clone_plugin() {
   local name="$1" url="$2" dest="$ZSH_CUSTOM_DIR/plugins/$1" i
   if [[ -d "$dest" ]]; then ok "plugin present: $name"; return 0; fi
@@ -37,7 +45,7 @@ step_shell() {
       # script (exit 0) if curl fails, which would then break the shell via the
       # injected 'source oh-my-zsh.sh' block. Verify the download AND the result.
       local omz_tmp; omz_tmp="$(mktemp)"
-      if curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$omz_tmp" \
+      if curl -fsSL "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/${OMZ_INSTALLER_REF}/tools/install.sh" -o "$omz_tmp" \
          && [[ -s "$omz_tmp" ]]; then
         RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh "$omz_tmp" || warn "oh-my-zsh installer did not complete"
       else

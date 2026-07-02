@@ -15,13 +15,32 @@ step_docker() {
   # Docker's official convenience script supports all major distros and pulls
   # compose + buildx plugins. Heavy + needs root, so it's confirm-gated.
   if [[ "$DRY_RUN" == "1" ]]; then
-    info "[dry-run] (optional) curl -fsSL https://get.docker.com | sh   (installs docker-ce + compose + buildx)"
+    info "[dry-run] (optional) download https://get.docker.com to a temp file, verify it, then $SUDO sh <file>   (installs docker-ce + compose + buildx)"
     info "[dry-run] $SUDO usermod -aG docker \$USER"
     return 0
   fi
 
   if confirm "Install Docker Engine now? (official get.docker.com script, needs root)"; then
-    curl -fsSL https://get.docker.com | run $SUDO sh || { warn "docker install failed"; return 0; }
+    # Download the convenience script to a file and sanity-check it before we
+    # run it as root, rather than piping curl straight into a root shell — a
+    # truncated or hijacked download would otherwise execute unreviewed. We log
+    # the path so the user can inspect it. Stays non-fatal: any failure warns
+    # and returns 0 so the rest of the install still runs.
+    # (get.docker.com honors VERSION=<x.y.z> for users who want to pin a Docker
+    #  version; we don't pin here — staleness risk outweighs it.)
+    docker_tmp="$(mktemp)"
+    info "downloading get.docker.com installer to $docker_tmp (inspect it there if you like)"
+    if curl -fsSL https://get.docker.com -o "$docker_tmp" \
+       && [[ -s "$docker_tmp" ]] \
+       && head -n1 "$docker_tmp" | grep -q '^#!' \
+       && grep -q 'do_install' "$docker_tmp"; then
+      run $SUDO sh "$docker_tmp" || { warn "docker install failed"; rm -f "$docker_tmp"; return 0; }
+    else
+      warn "could not download/verify the get.docker.com installer — skipping Docker"
+      rm -f "$docker_tmp"
+      return 0
+    fi
+    rm -f "$docker_tmp"
     # let the current user run docker without sudo (takes effect on next login).
     # bash doesn't set $USER; fall back to `id -un` so `set -u` can't abort here.
     _u="${USER:-$(id -un)}"
