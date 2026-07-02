@@ -4,7 +4,7 @@ function Step-Docker {
   Write-Step "Containers: Docker Desktop (optional)"
 
   if (Test-HasCommand docker) {
-    Write-Ok "docker present ($(docker --version 2>$null))"
+    Write-Ok "docker present ($(Invoke-NativeSilently 'docker' @('--version')))"
     return
   }
 
@@ -20,8 +20,16 @@ function Step-Docker {
     return
   }
 
-  # Declined by default / when non-interactive, because of the licensing caveat.
-  if (Confirm-Action "Install Docker Desktop anyway? (confirm your org's license first)") {
+  # Declined by default because of the licensing caveat. We NEVER install Docker
+  # Desktop non-interactively: under -Yes (AssumeYes) or when input is redirected
+  # this gate is skipped outright. Interactively it's a default-No prompt ([y/N]),
+  # so a bare Enter also declines -- you must type 'y' to install.
+  if ($script:AssumeYes -or [Console]::IsInputRedirected) {
+    Write-Info "Skipped Docker Desktop (paid license for orgs >250 employees / >`$10M revenue -- not installed non-interactively)."
+    Write-Info "To install it explicitly: rerun interactively and answer y, or  .\install.ps1 -Only docker"
+    return
+  }
+  if (Confirm-Action "Install Docker Desktop anyway? (confirm your org's license first)" -DefaultNo) {
     Install-WingetPackage -Id 'Docker.DockerDesktop' -Name 'Docker Desktop'
     Write-Info "After install: launch Docker Desktop once to finish setup, then reboot if prompted."
   } else {

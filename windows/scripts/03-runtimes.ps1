@@ -27,26 +27,26 @@ function Step-Runtimes {
   # --- mise-managed runtimes --------------------------------------------
   Write-Info "mise: $($script:MiseTools -join ', ')"
   Invoke-Run -Exe 'mise' -Arguments (@('use', '-g') + $script:MiseTools) | Out-Null
-  if (-not $script:DryRun) { & mise reshim 2>$null }
+  if (-not $script:DryRun) { Invoke-NativeSilently 'mise' @('reshim') }
   Update-SessionPath
 
   # --- rust via rustup ---------------------------------------------------
   if ($script:DryRun) {
     Write-Info "[dry-run] rustup default stable; rustup component add rust-analyzer"
   } else {
-    $active = (& rustup show active-toolchain 2>$null)
+    $active = (Invoke-NativeSilently 'rustup' @('show', 'active-toolchain'))
     if ($active) {
       Write-Ok "rust toolchain: $active"
     } else {
       Write-Info "Installing Rust stable toolchain..."
       & rustup default stable
     }
-    & rustup component add rust-analyzer 2>$null
+    Invoke-NativeSilently 'rustup' @('component', 'add', 'rust-analyzer')
     if ($LASTEXITCODE -ne 0) { Write-Warn "rust-analyzer component add skipped" }
   }
 
   if (-not $script:DryRun) {
-    $nodev = (& node -v 2>$null); $rustv = (& rustc --version 2>$null)
+    $nodev = (Invoke-NativeSilently 'node' @('-v')); $rustv = (Invoke-NativeSilently 'rustc' @('--version'))
     Write-Ok "node $nodev  $rustv"
   }
 }

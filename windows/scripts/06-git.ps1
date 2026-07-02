@@ -12,37 +12,37 @@ function Step-Git {
   # --- gh login (derive identity + wire HTTPS credentials) ---------------
   $ghAuthed = $false
   if (Test-HasCommand gh) {
-    & gh auth status 2>$null | Out-Null
+    Invoke-NativeSilently 'gh' @('auth', 'status') | Out-Null
     if ($LASTEXITCODE -eq 0) {
       $ghAuthed = $true
-      Write-Ok "gh authenticated ($(& gh api user --jq .login 2>$null))"
+      Write-Ok "gh authenticated ($(Invoke-NativeSilently 'gh' @('api', 'user', '--jq', '.login')))"
     } elseif ($script:DryRun) {
       Write-Info "[dry-run] gh auth login"
     } elseif (-not [Console]::IsInputRedirected) {
       Write-Info "Launching 'gh auth login' (choose GitHub.com -> HTTPS)..."
       & gh auth login
-      & gh auth status 2>$null | Out-Null
+      Invoke-NativeSilently 'gh' @('auth', 'status') | Out-Null
       if ($LASTEXITCODE -eq 0) { $ghAuthed = $true }
     } else {
       Write-Warn "gh not authenticated and input is redirected -- run 'gh auth login' later"
     }
-    if (-not $script:DryRun -and $ghAuthed) { & gh auth setup-git 2>$null | Out-Null }
+    if (-not $script:DryRun -and $ghAuthed) { Invoke-NativeSilently 'gh' @('auth', 'setup-git') | Out-Null }
   } else {
     Write-Warn "gh CLI not installed -- skipping GitHub auth"
   }
 
   # --- identity ----------------------------------------------------------
-  $curName  = (& git config --global user.name 2>$null)
-  $curEmail = (& git config --global user.email 2>$null)
+  $curName  = (Invoke-NativeSilently 'git' @('config', '--global', 'user.name'))
+  $curEmail = (Invoke-NativeSilently 'git' @('config', '--global', 'user.email'))
 
   if ($curName -and $curEmail) {
     Write-Ok "git identity already set: $curName <$curEmail>"
   } else {
     $name = $null; $email = $null
     if ($ghAuthed) {
-      $login = (& gh api user --jq .login 2>$null)
-      $id    = (& gh api user --jq .id 2>$null)
-      $name  = (& gh api user --jq '.name // .login' 2>$null)
+      $login = (Invoke-NativeSilently 'gh' @('api', 'user', '--jq', '.login'))
+      $id    = (Invoke-NativeSilently 'gh' @('api', 'user', '--jq', '.id'))
+      $name  = (Invoke-NativeSilently 'gh' @('api', 'user', '--jq', '.name // .login'))
       if ($login -and $id) { $email = "$id+$login@users.noreply.github.com" }
     }
     if (-not $name)  { $name  = Read-Default 'git author name:'  $curName }
@@ -65,13 +65,13 @@ function Step-Git {
     'push.autoSetupRemote'  = 'true'
   }
   foreach ($key in $defaults.Keys) {
-    $existing = (& git config --global $key 2>$null)
+    $existing = (Invoke-NativeSilently 'git' @('config', '--global', $key))
     if (-not $existing) {
       Invoke-Run -Exe 'git' -Arguments @('config', '--global', $key, $defaults[$key]) | Out-Null
     }
   }
   # On Windows, keep line-endings sane for cross-platform repos
-  $autocrlf = (& git config --global core.autocrlf 2>$null)
+  $autocrlf = (Invoke-NativeSilently 'git' @('config', '--global', 'core.autocrlf'))
   if (-not $autocrlf) { Invoke-Run -Exe 'git' -Arguments @('config', '--global', 'core.autocrlf', 'true') | Out-Null }
   Write-Ok "git defaults ensured (main branch, autoSetupRemote, autocrlf, ...)"
 }

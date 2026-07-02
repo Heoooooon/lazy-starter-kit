@@ -44,6 +44,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Are we running from a real .ps1 file, or piped through `iex` (irm | iex)? When
+# iex'd the script shares the caller's session scope, so `exit` closes the user's
+# terminal -- wiping the "Next steps" output on success and the error on failure.
+# We `return`/`throw` instead in that mode, and keep exit codes for real file runs
+# (CI relies on them). $PSCommandPath is the running file's path, empty under iex.
+$script:RunFromFile = [bool]$PSCommandPath
+
 $HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'https://github.com/Heoooooon/lazy-starter-kit.git' }
 $RepoBranch = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { 'main' }
@@ -72,7 +79,7 @@ function Resolve-Root {
       Write-Host "    1) install git:  winget install --id Git.Git   (then re-run), or" -ForegroundColor Red
       Write-Host "    2) download the ZIP: https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip" -ForegroundColor Red
       Write-Host "       extract it, then run  windows\install.ps1" -ForegroundColor Red
-      exit 1
+      if ($script:RunFromFile) { exit 1 } else { throw "git is required -- install it and re-run (see options above)." }
     }
   }
   if (Test-Path (Join-Path $CloneDir '.git')) {
@@ -92,7 +99,9 @@ $target = Join-Path $Root 'install.ps1'
 if ((-not $self) -or ($self -ne $target)) {
   if (Test-Path $target) {
     & $target @PSBoundParameters
-    exit $LASTEXITCODE
+    # Propagate the cloned copy's exit code when we're a file; under iex, `return`
+    # so we don't close the caller's terminal.
+    if ($script:RunFromFile) { exit $LASTEXITCODE } else { return }
   }
 }
 
@@ -129,9 +138,9 @@ $StepFunc = @{
   agents   = 'Step-Agents'
 }
 
-if ($Help)    { Get-Help $target -Detailed; exit 0 }
-if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; exit 0 }
-if ($Version) { Write-Output "lazy-starter-kit $KitVersion"; exit 0 }
+if ($Help)    { Get-Help $target -Detailed;                    if ($script:RunFromFile) { exit 0 } else { return } }
+if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; if ($script:RunFromFile) { exit 0 } else { return } }
+if ($Version) { Write-Output "lazy-starter-kit $KitVersion";    if ($script:RunFromFile) { exit 0 } else { return } }
 
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 
@@ -174,10 +183,10 @@ if ($script:DryRun) {
   Write-Step "Next steps"
   Write-Info "1) Open a NEW PowerShell window so the profile loads (autosuggestions, prompt)."
   if ((Test-HasCommand gh)) {
-    & gh auth status 2>$null | Out-Null
+    Invoke-NativeSilently 'gh' @('auth', 'status') | Out-Null
     if ($LASTEXITCODE -ne 0) { Write-Info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)" }
   }
   Write-Info "3) Set your terminal font to 'JetBrainsMono Nerd Font' (Windows Terminal > Settings > Appearance)."
   Write-Info "Note: on Windows PowerShell 5.1, restart it once if PSReadLine was upgraded. PowerShell 7 is smoother."
 }
-exit 0
+if ($script:RunFromFile) { exit 0 } else { return }

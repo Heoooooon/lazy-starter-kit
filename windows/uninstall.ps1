@@ -48,10 +48,10 @@ function Undo-Agents {
   Update-SessionPath
 
   if (Test-HasCommand mise) {
-    $installed = (& mise exec -- npm ls -g --depth=0 2>$null | Out-String)
+    $installed = (Invoke-NativeSilently 'mise' @('exec', '--', 'npm', 'ls', '-g', '--depth=0') | Out-String)
     if ($installed -match '@openai/codex') {
       Write-Info "Uninstalling @openai/codex..."
-      if (-not $script:DryRun) { & mise exec -- npm uninstall -g '@openai/codex'; & mise reshim 2>$null }
+      if (-not $script:DryRun) { & mise exec -- npm uninstall -g '@openai/codex'; Invoke-NativeSilently 'mise' @('reshim') }
       else { Write-Info "[dry-run] mise exec -- npm uninstall -g @openai/codex" }
     } else { Write-Info "codex npm package not installed" }
   }
@@ -137,8 +137,8 @@ function Undo-Runtimes {
       if ($script:DryRun) {
         Write-Info "[dry-run] mise uninstall node python go; mise rm -g node python go ast-grep"
       } else {
-        & mise uninstall node python go 2>$null
-        foreach ($t in @('node','python','go','ubi:ast-grep/ast-grep')) { & mise rm -g $t 2>$null }
+        Invoke-NativeSilently 'mise' @('uninstall', 'node', 'python', 'go')
+        foreach ($t in @('node','python','go','ubi:ast-grep/ast-grep')) { Invoke-NativeSilently 'mise' @('rm', '-g', $t) }
         Write-Ok "removed mise runtimes"
       }
     } else { Write-Info "kept mise runtimes" }

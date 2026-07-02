@@ -7,7 +7,7 @@ function Step-Agents {
   # --- gajae-code (gjc) via bun -----------------------------------------
   if (Test-HasCommand bun) {
     if (Test-HasCommand gjc) {
-      Write-Ok "gajae-code present (gjc $(& gjc --version 2>$null | Select-Object -First 1))"
+      Write-Ok "gajae-code present (gjc $(Invoke-NativeSilently 'gjc' @('--version') | Select-Object -First 1))"
     } else {
       Write-Info "Installing gajae-code (bun add -g gajae-code)..."
       Invoke-Run -Exe 'bun' -Arguments @('add', '-g', 'gajae-code') | Out-Null
@@ -29,7 +29,7 @@ function Step-Agents {
   }
 
   if (Test-HasCommand codex) {
-    Write-Ok "codex present ($(& codex --version 2>$null | Select-Object -First 1))"
+    Write-Ok "codex present ($(Invoke-NativeSilently 'codex' @('--version') | Select-Object -First 1))"
   } else {
     Write-Info "Installing @openai/codex (npm -g)..."
     if ($script:DryRun) {
@@ -37,7 +37,7 @@ function Step-Agents {
     } else {
       if (Test-HasCommand mise) {
         & mise exec -- npm install -g '@openai/codex'
-        & mise reshim 2>$null
+        Invoke-NativeSilently 'mise' @('reshim')
       } else {
         & npm install -g '@openai/codex'
       }

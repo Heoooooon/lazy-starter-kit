@@ -9,6 +9,11 @@ Set-StrictMode -Version Latest
 # ---------------------------------------------------------------------------
 if (-not (Test-Path variable:script:DryRun))    { $script:DryRun = $false }
 if (-not (Test-Path variable:script:AssumeYes)) { $script:AssumeYes = $false }
+# $true when the top-level script runs from a real .ps1 file; $false when it was
+# piped through `iex` (irm | iex), where `exit` would close the user's terminal.
+# install.ps1 sets this before dot-sourcing us; default $true is right for a file
+# run and for the uninstaller.
+if (-not (Test-Path variable:script:RunFromFile)) { $script:RunFromFile = $true }
 
 # ---------------------------------------------------------------------------
 # Output helpers
@@ -18,7 +23,14 @@ function Write-Info { param([string]$Message) Write-Host "  - $Message" -Foregro
 function Write-Ok   { param([string]$Message) Write-Host "  ok  $Message" -ForegroundColor Green }
 function Write-Warn { param([string]$Message) Write-Warning $Message }
 function Write-Err  { param([string]$Message) Write-Host "  x   $Message" -ForegroundColor Red }
-function Stop-Kit   { param([string]$Message) Write-Err $Message; exit 1 }
+function Stop-Kit {
+  # Fail the run. Under `irm | iex` (not a file) `exit 1` would close the user's
+  # terminal and take the error text with it, so throw a terminating error whose
+  # message survives instead; keep the exit code intact for real file runs (CI).
+  param([string]$Message)
+  Write-Err $Message
+  if ($script:RunFromFile) { exit 1 } else { throw $Message }
+}
 
 # Tracks winget packages that failed to install, for an end-of-step summary.
 if (-not (Test-Path variable:script:WingetFailures)) { $script:WingetFailures = @() }
@@ -62,6 +74,30 @@ function Invoke-Run {
 }
 
 # ---------------------------------------------------------------------------
+# Native-command invocation with stderr discarded.
+# On Windows PowerShell 5.1 a native command's stderr lines become ErrorRecords,
+# and $ErrorActionPreference='Stop' (which install.ps1 sets) promotes the first
+# one into a TERMINATING error -- so a plain `git config ... 2>$null` kills the
+# script the moment the tool writes to stderr (e.g. gh when unauthenticated).
+# Fixed only in PS 7.2+. We flip EAP to 'Continue' for the call so stderr is
+# harmless, discard it with 2>$null, and return stdout. $LASTEXITCODE is left
+# set by the native command for the caller to inspect.
+# ---------------------------------------------------------------------------
+function Invoke-NativeSilently {
+  param(
+    [Parameter(Mandatory)][string]$Exe,
+    [string[]]$Arguments = @()
+  )
+  $prev = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & $Exe @Arguments 2>$null
+  } finally {
+    $ErrorActionPreference = $prev
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Prompts
 # ---------------------------------------------------------------------------
 function Read-Default {
@@ -73,9 +109,16 @@ function Read-Default {
 }
 
 function Confirm-Action {
-  param([string]$Question)
-  if ($script:AssumeYes) { return $true }
+  # -DefaultNo flips the gate to default-No: bare Enter declines, the prompt reads
+  # [y/N], and -Yes / non-interactive returns $false (used for the licensing-gated
+  # Docker Desktop install). Without it, behaviour is unchanged (default-Yes).
+  param([string]$Question, [switch]$DefaultNo)
+  if ($script:AssumeYes) { return (-not $DefaultNo) }
   if ([Console]::IsInputRedirected) { return $false }
+  if ($DefaultNo) {
+    $ans = Read-Host ("{0} [y/N]" -f $Question)
+    return ($ans -match '^[Yy]')
+  }
   $ans = Read-Host ("{0} [Y/n]" -f $Question)
   return ([string]::IsNullOrWhiteSpace($ans) -or $ans -match '^[Yy]')
 }
@@ -104,7 +147,7 @@ function Update-SessionPath {
 # ---------------------------------------------------------------------------
 function Test-WingetPackage {
   param([Parameter(Mandatory)][string]$Id)
-  $null = winget list --id $Id -e --accept-source-agreements 2>$null | Out-String -Stream | Select-String -SimpleMatch $Id
+  $null = Invoke-NativeSilently 'winget' @('list', '--id', $Id, '-e', '--accept-source-agreements') | Out-String -Stream | Select-String -SimpleMatch $Id
   return ($LASTEXITCODE -eq 0)
 }
 
@@ -156,6 +199,40 @@ function Uninstall-WingetPackage {
 }
 
 # ---------------------------------------------------------------------------
+# File-encoding detection for in-place profile edits.
+# WinPS 5.1 parses a BOM-less profile.ps1 as the system ANSI codepage, so writing
+# it back UTF-8-without-BOM (the .NET default) corrupts Korean comments into
+# mojibake / syntax errors. We preserve the file's existing encoding: honour a
+# UTF-8/UTF-16 BOM; for a BOM-less file assume ANSI on 5.1 and UTF-8 on PS7. A
+# brand-new (or empty) file gets UTF-8 WITH BOM, which is safe on both.
+# ---------------------------------------------------------------------------
+function Get-ProfileEncoding {
+  param([Parameter(Mandatory)][string]$Path)
+
+  # New or empty file -> UTF-8 with BOM (unambiguous for 5.1 and 7).
+  if (-not (Test-Path $Path) -or ((Get-Item $Path).Length -eq 0)) {
+    return (New-Object System.Text.UTF8Encoding($true))
+  }
+
+  # Fallback used only when the file has no BOM.
+  if ($PSVersionTable.PSVersion.Major -ge 6) {
+    $fallback = New-Object System.Text.UTF8Encoding($false)  # PS7 default: UTF-8, no BOM
+  } else {
+    $fallback = [System.Text.Encoding]::Default              # WinPS 5.1: system ANSI codepage
+  }
+
+  # StreamReader detects a BOM and reports it via CurrentEncoding; with no BOM it
+  # keeps our fallback. Read once so detection actually runs.
+  $reader = New-Object System.IO.StreamReader($Path, $fallback, $true)
+  try {
+    $null = $reader.ReadToEnd()
+    return $reader.CurrentEncoding
+  } finally {
+    $reader.Dispose()
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Managed-block injection -- idempotent insert/replace between markers
 # Update-ManagedBlock -Path <file> -Tag <tag> -Content <string>
 # Re-running replaces the block; never duplicates.
@@ -170,6 +247,23 @@ function Update-ManagedBlock {
   $end   = "# <<< $Tag <<<"
   $short = $Path.Replace($env:USERPROFILE, '~')
 
+  # Preserve the existing file's encoding (or UTF-8 BOM for a new file) so we
+  # don't corrupt a profile with Korean comments on WinPS 5.1.
+  $enc = Get-ProfileEncoding $Path
+
+  # Refuse to touch a file whose markers are unbalanced (crashed run / hand-edit):
+  # rewriting would drop everything between the lone marker and EOF -- the user's
+  # own config. Mirrors inject_block in the bash kits.
+  if (Test-Path $Path) {
+    $existing = [System.IO.File]::ReadAllLines($Path, $enc)
+    $hasBegin = $existing -contains $begin
+    $hasEnd   = $existing -contains $end
+    if ($hasBegin -ne $hasEnd) {
+      Write-Warn "$short has an unmatched lazy-starter-kit '$Tag' marker; refusing to modify it. Fix or delete the stray marker line by hand."
+      return
+    }
+  }
+
   if ($script:DryRun) {
     if ((Test-Path $Path) -and (Select-String -Path $Path -SimpleMatch $begin -Quiet)) {
       Write-Info "[dry-run] would update '$Tag' block in $short"
@@ -182,10 +276,17 @@ function Update-ManagedBlock {
   $dir = Split-Path -Parent $Path
   if ($dir -and -not (Test-Path $dir)) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
 
+  # one-time safety backup before the first rewrite of a non-empty user file
+  $bak = "$Path.lazy-starter-kit.bak"
+  if ((Test-Path $Path) -and ((Get-Item $Path).Length -gt 0) -and -not (Test-Path $bak)) {
+    Copy-Item $Path $bak
+    Write-Info "backed up $short -> $($bak.Replace($env:USERPROFILE, '~')) (first change)"
+  }
+
   $lines = @()
   if (Test-Path $Path) {
     $skip = $false
-    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+    foreach ($line in [System.IO.File]::ReadAllLines($Path, $enc)) {
       if ($line -eq $begin) { $skip = $true; continue }
       if ($skip -and $line -eq $end) { $skip = $false; continue }
       if (-not $skip) { $lines += $line }
@@ -195,7 +296,7 @@ function Update-ManagedBlock {
   foreach ($l in ($Content -split "`r?`n")) { $lines += $l }
   $lines += $end
 
-  [System.IO.File]::WriteAllLines($Path, $lines)
+  [System.IO.File]::WriteAllLines($Path, $lines, $enc)
   Write-Ok "wrote '$Tag' block -> $short"
 }
 
@@ -206,18 +307,37 @@ function Remove-ManagedBlock {
   $end   = "# <<< $Tag <<<"
   $short = $Path.Replace($env:USERPROFILE, '~')
   if (-not (Test-Path $Path)) { Write-Info "no $short (skip '$Tag')"; return }
-  if (-not (Select-String -Path $Path -SimpleMatch $begin -Quiet)) {
-    Write-Info "no '$Tag' block in $short"; return
+
+  # Preserve the file's existing encoding on read and write-back (see Get-ProfileEncoding).
+  $enc = Get-ProfileEncoding $Path
+
+  # Refuse on unbalanced markers (see Update-ManagedBlock): a lone begin marker
+  # would make the skip loop drop the user's own config below it.
+  $existing = [System.IO.File]::ReadAllLines($Path, $enc)
+  $hasBegin = $existing -contains $begin
+  $hasEnd   = $existing -contains $end
+  if ($hasBegin -ne $hasEnd) {
+    Write-Warn "$short has an unmatched lazy-starter-kit '$Tag' marker; refusing to modify it. Fix or delete the stray marker line by hand."
+    return
   }
+  if (-not $hasBegin) { Write-Info "no '$Tag' block in $short"; return }
+
   if ($script:DryRun) { Write-Info "[dry-run] would remove '$Tag' block from $short"; return }
+
+  # one-time safety backup before the first rewrite of a non-empty user file
+  $bak = "$Path.lazy-starter-kit.bak"
+  if (((Get-Item $Path).Length -gt 0) -and -not (Test-Path $bak)) {
+    Copy-Item $Path $bak
+    Write-Info "backed up $short -> $($bak.Replace($env:USERPROFILE, '~')) (first change)"
+  }
 
   $lines = @()
   $skip = $false
-  foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+  foreach ($line in $existing) {
     if ($line -eq $begin) { $skip = $true; continue }
     if ($skip -and $line -eq $end) { $skip = $false; continue }
     if (-not $skip) { $lines += $line }
   }
-  [System.IO.File]::WriteAllLines($Path, $lines)
+  [System.IO.File]::WriteAllLines($Path, $lines, $enc)
   Write-Ok "removed '$Tag' block from $short"
 }

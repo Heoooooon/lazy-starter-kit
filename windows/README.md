@@ -83,7 +83,9 @@ re-runs. Existing files you own are preserved.
   macOS/Linux kits.
 - **No admin required** for the default flow — everything installs per-user.
   Docker Desktop is the exception (needs virtualization + a reboot) and is
-  strictly opt-in.
+  strictly opt-in: it defaults to **No**, is **never** installed under `-Yes` or
+  non-interactively (licensing), and must be confirmed with an explicit `y` in an
+  interactive run (e.g. `.\install.ps1 -Only docker`).
 - **PATH refresh.** winget puts new tools on the persistent PATH; the installer
   re-reads the environment mid-run so later steps see them without a restart.
   Still, **open a new PowerShell window** afterwards to load the profile.

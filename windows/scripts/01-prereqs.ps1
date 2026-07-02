@@ -14,7 +14,7 @@ function Step-Prereqs {
 
   # --- winget (Windows Package Manager, ships in App Installer) -----------
   if (Test-HasCommand winget) {
-    $ver = (winget --version 2>$null)
+    $ver = (Invoke-NativeSilently 'winget' @('--version'))
     Write-Ok "winget present ($ver)"
   } else {
     Write-Warn "winget not found."
