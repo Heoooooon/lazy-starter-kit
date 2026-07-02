@@ -12,11 +12,11 @@ step_git() {
       ok "gh authenticated ($(gh api user --jq .login 2>/dev/null))"
     elif [[ "$DRY_RUN" == "1" ]]; then
       info "[dry-run] gh auth login"
-    elif is_tty; then
+    elif is_tty && [[ "$ASSUME_YES" != "1" ]]; then
       info "Launching 'gh auth login' (choose GitHub.com → HTTPS)…"
       gh auth login || warn "gh auth login did not complete"
     else
-      warn "gh not authenticated and shell is non-interactive — run 'gh auth login' later"
+      warn "gh not authenticated — run 'gh auth login' later"
     fi
     [[ "$DRY_RUN" == "1" ]] || gh auth setup-git >/dev/null 2>&1 || true
   else

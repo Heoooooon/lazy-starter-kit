@@ -21,7 +21,12 @@ step_agents() {
 
   # --- codex (base harness that lazycodex extends) ----------------------
   if ! have npm; then
-    warn "npm not found — skipping codex + lazycodex (run the 'runtimes' step first)"
+    if [[ "$DRY_RUN" == "1" ]]; then
+      info "[dry-run] npm install -g @openai/codex"
+      info "[dry-run] npx --yes lazycodex-ai install"
+    else
+      warn "npm not found — skipping codex + lazycodex (run the 'runtimes' step first)"
+    fi
     return 0
   fi
   if have codex; then
@@ -37,7 +42,7 @@ step_agents() {
   # No global install by design — always run via npx.
   if [[ "$DRY_RUN" == "1" ]]; then
     info "[dry-run] npx --yes lazycodex-ai install"
-  elif is_tty; then
+  elif is_tty && [[ "$ASSUME_YES" != "1" ]]; then
     info "Installing lazycodex (npx lazycodex-ai install)…"
     npx --yes lazycodex-ai install || warn "lazycodex installer did not complete"
   else

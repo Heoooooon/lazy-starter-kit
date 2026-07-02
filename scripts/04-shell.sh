@@ -13,7 +13,7 @@ _clone_plugin() {
   for i in 1 2 3; do
     rm -rf "$dest"
     if run git clone --depth 1 "$url" "$dest"; then return 0; fi
-    warn "clone $name attempt $i failed; retrying…"; sleep 2
+    [[ "$i" -lt 3 ]] && { warn "clone $name attempt $i failed; retrying…"; sleep 2; }
   done
   warn "could not clone $name (skip; re-run the 'shell' step later)"
   return 0
@@ -33,8 +33,18 @@ step_shell() {
     if [[ "$DRY_RUN" == "1" ]]; then
       info "[dry-run] install oh-my-zsh (RUNZSH=no CHSH=no KEEP_ZSHRC=yes)"
     else
-      RUNZSH=no CHSH=no KEEP_ZSHRC=yes \
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+      # Download to a file first: `sh -c "$(curl …)"` silently runs an empty
+      # script (exit 0) if curl fails, which would then break the shell via the
+      # injected 'source oh-my-zsh.sh' block. Verify the download AND the result.
+      local omz_tmp; omz_tmp="$(mktemp)"
+      if curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -o "$omz_tmp" \
+         && [[ -s "$omz_tmp" ]]; then
+        RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh "$omz_tmp" || warn "oh-my-zsh installer did not complete"
+      else
+        warn "could not download the oh-my-zsh installer (network?) — skipping oh-my-zsh"
+      fi
+      rm -f "$omz_tmp"
+      [[ -d "$OMZ_DIR" ]] || warn "oh-my-zsh not installed — the shell config will skip its oh-my-zsh block"
     fi
   fi
 
@@ -53,7 +63,11 @@ step_shell() {
   remove_block "$HOME/.zshrc" "macos-starter-kit:ohmyzsh"
 
   # --- ensure oh-my-zsh is sourced (only if user isn't already doing it) -
-  if [[ "$DRY_RUN" != "1" ]] && ! grep -qs 'oh-my-zsh.sh' "$HOME/.zshrc" 2>/dev/null; then
+  # Guard on the framework actually being present: injecting the source line
+  # when the install failed would error on every new shell startup.
+  if [[ "$DRY_RUN" == "1" ]]; then
+    info "[dry-run] would ensure oh-my-zsh is sourced in ~/.zshrc (lazy-starter-kit:ohmyzsh block)"
+  elif [[ -d "$OMZ_DIR" ]] && ! grep -qs 'oh-my-zsh.sh' "$HOME/.zshrc" 2>/dev/null; then
     inject_block "$HOME/.zshrc" "lazy-starter-kit:ohmyzsh" <<'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""            # prompt handled by starship below

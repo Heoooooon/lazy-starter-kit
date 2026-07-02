@@ -119,6 +119,7 @@ pm_refresh() {
 # pm_install PKG...  — install one or more system packages (non-interactive)
 pm_install() {
   [[ $# -gt 0 ]] || return 0
+  pm_refresh   # refresh the package index once (no-op after the first call)
   case "$PM" in
     apt)    run $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$@" ;;
     dnf)    run $SUDO dnf install -y "$@" ;;

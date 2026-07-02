@@ -90,7 +90,9 @@ step_file() {
 }
 # function name for each step is always step_<id>
 
-usage() { sed -n '2,21p' "$ROOT/install.sh" | sed 's/^# \{0,1\}//'; }
+# usage — print the leading comment block (skip the shebang, stop at the first
+# non-comment line) so --help never leaks code that follows the header.
+usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/install.sh"; }
 
 # ---------------------------------------------------------------------------
 # Arg parsing
@@ -112,6 +114,23 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Normalize --only/--skip (strip spaces so `--only "brew, shell"` works), then
+# reject any unknown token up front instead of silently selecting nothing.
+ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
+_validate_ids() {
+  local list="$1" tok id found valid="${STEP_IDS[*]}"
+  while [[ -n "$list" ]]; do
+    tok="${list%%,*}"
+    if [[ "$list" == *,* ]]; then list="${list#*,}"; else list=""; fi
+    [[ -z "$tok" ]] && continue
+    found=0
+    for id in "${STEP_IDS[@]}"; do [[ "$id" == "$tok" ]] && found=1; done
+    [[ "$found" == 1 ]] || die "unknown step id: '$tok' (valid: $valid)"
+  done
+}
+[[ -n "$ONLY" ]] && _validate_ids "$ONLY"
+[[ -n "$SKIP" ]] && _validate_ids "$SKIP"
 
 # Build the active step list honouring --only / --skip
 selected() {

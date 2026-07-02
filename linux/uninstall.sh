@@ -19,6 +19,7 @@
 #   --with-gajae       Also remove gajae-code (gjc). Refused if gjc is running.
 #   --keep-codex-home  Keep ~/.codex (config/auth/sessions) when removing codex.
 #   --list             List group ids and exit.
+#   --version, -V      Print the kit version and exit.
 #   --help, -h         Show this help.
 #
 # Groups (reverse order): agents shell docker runtimes packages
@@ -35,7 +36,10 @@ KIT_VERSION="$(cat "$ROOT/../VERSION" 2>/dev/null || echo dev)"
 : "${KEEP_CODEX_HOME:=0}"
 
 GROUP_IDS=(agents shell docker runtimes packages)
-usage() { sed -n '2,26p' "$ROOT/uninstall.sh" | sed 's/^# \{0,1\}//'; }
+
+# usage — print the leading comment block (skip the shebang, stop at the first
+# non-comment line) so --help never leaks code that follows the header.
+usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/uninstall.sh"; }
 
 # ---------------------------------------------------------------------------
 # agents — codex + lazycodex + Hermes (+ optionally gajae-code)
@@ -45,9 +49,10 @@ undo_agents() {
   load_local_bins; load_mise
   export PATH="$HOME/.bun/bin:$PATH"
 
-  if have npm && mise exec -- npm ls -g --depth=0 2>/dev/null | grep -q '@openai/codex'; then
+  # codex (npm global — plain npm IS the mise npm once load_mise ran)
+  if have npm && npm ls -g --depth=0 2>/dev/null | grep -q '@openai/codex'; then
     info "Uninstalling @openai/codex…"
-    run mise exec -- npm uninstall -g @openai/codex
+    run npm uninstall -g @openai/codex
     have mise && run mise reshim
   else
     info "codex npm package not installed"
@@ -65,7 +70,11 @@ undo_agents() {
     if confirm "Remove ~/.codex (codex home: config, auth, sessions, omo plugin)?"; then
       if [[ -f "$HOME/.codex/auth.json" ]]; then
         local bak; bak="$HOME/codex-auth-backup-$(date +%Y%m%d-%H%M%S).json"
-        run cp -p "$HOME/.codex/auth.json" "$bak" && ok "backed up auth.json -> ${bak/#$HOME/~}"
+        if [[ "$DRY_RUN" == "1" ]]; then
+          info "[dry-run] would back up auth.json -> ${bak/#$HOME/~}"
+        else
+          cp -p "$HOME/.codex/auth.json" "$bak" && ok "backed up auth.json -> ${bak/#$HOME/~}"
+        fi
       fi
       run rm -rf "$HOME/.codex"
     else
@@ -234,6 +243,23 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Normalize --only/--skip (strip spaces so `--only "shell, packages"` works),
+# then reject any unknown token up front instead of silently selecting nothing.
+ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
+_validate_ids() {
+  local list="$1" tok id found valid="${GROUP_IDS[*]}"
+  while [[ -n "$list" ]]; do
+    tok="${list%%,*}"
+    if [[ "$list" == *,* ]]; then list="${list#*,}"; else list=""; fi
+    [[ -z "$tok" ]] && continue
+    found=0
+    for id in "${GROUP_IDS[@]}"; do [[ "$id" == "$tok" ]] && found=1; done
+    [[ "$found" == 1 ]] || die "unknown group id: '$tok' (valid: $valid)"
+  done
+}
+[[ -n "$ONLY" ]] && _validate_ids "$ONLY"
+[[ -n "$SKIP" ]] && _validate_ids "$SKIP"
 
 selected() {
   local id keep

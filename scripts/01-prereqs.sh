@@ -14,8 +14,14 @@ step_prereqs() {
     else
       xcode-select --install >/dev/null 2>&1 || true
       info "A system dialog opened — click Install and wait for it to finish."
+      # Bound the wait so a cancelled dialog can't spin forever (~30 min max).
+      local waited=0 max=1800
       until xcode-select -p >/dev/null 2>&1; do
-        sleep 15; info "…waiting for Command Line Tools to finish installing"
+        if [[ "$waited" -ge "$max" ]]; then
+          die "Timed out waiting for Command Line Tools. Install them manually (run 'xcode-select --install' or use Software Update), then re-run this script."
+        fi
+        sleep 15; waited=$((waited + 15))
+        [[ $((waited % 60)) -eq 0 ]] && info "…still waiting for Command Line Tools (${waited}s elapsed)"
       done
       ok "Xcode Command Line Tools installed"
     fi
