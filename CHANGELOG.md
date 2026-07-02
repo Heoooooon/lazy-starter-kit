@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-03
+
 ### Added
 - **Claude Code (`claude`) installs by default on all three kits** via the
   official native installer (`claude.ai/install.sh` / `install.ps1`) into
@@ -14,6 +16,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   keeps itself updated. Uninstall removes the binary and (confirm-gated,
   with a `.claude.json` backup) the `~/.claude` settings/history. CI verifies
   install and removal on all six environments.
+
+### Fixed
+- CI: mise's GitHub API version lookups are authenticated with the job token
+  (anonymous requests share the runner IP's 60/hr limit and flaked).
 
 ## [0.2.0] - 2026-07-02
 
@@ -139,6 +145,7 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.1.0
