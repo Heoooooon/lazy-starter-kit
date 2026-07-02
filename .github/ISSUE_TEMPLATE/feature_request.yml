@@ -1,0 +1,37 @@
+name: 💡 기능 제안 (Feature request)
+description: 새 도구·옵션·개선 아이디어 (Suggest a tool, option, or improvement)
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        이 키트는 스코프를 일부러 좁게 유지합니다. 도구 추가라면
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)의 base vs optional 기준도 함께 봐주세요.
+        (This kit keeps a tight scope — see CONTRIBUTING.md for base vs optional.)
+
+  - type: textarea
+    id: what
+    attributes:
+      label: 무엇을 (What?)
+      description: 어떤 도구·옵션·동작을 추가·변경하고 싶나요?
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: 왜 (Why?)
+      description: 어떤 상황에서 필요한가요? 누구에게 도움이 되나요? (What problem does it solve?)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 어떤 OS에 해당하나요? (Which OS?)
+      multiple: true
+      options:
+        - macOS
+        - Linux 배포판 (distro)
+        - Windows
+        - 전부 / 공통 (all / shared)

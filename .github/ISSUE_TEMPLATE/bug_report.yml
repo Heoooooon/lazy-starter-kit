@@ -1,0 +1,62 @@
+name: 🐛 버그 신고 (Bug report)
+description: 설치·검증·제거 중 뭔가 잘못됐어요 (Something went wrong)
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        재현에 필요한 정보를 채워주시면 훨씬 빨리 고칠 수 있어요.
+        (Fill in what you can — it helps us reproduce the issue.)
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 어떤 OS인가요? (Which OS?)
+      options:
+        - macOS
+        - Linux 배포판 (distro)
+        - Windows
+    validations:
+      required: true
+
+  - type: input
+    id: os-detail
+    attributes:
+      label: OS 상세 (OS details)
+      description: 버전·배포판·아키텍처 (e.g. macOS 15 arm64 / Ubuntu 24.04 / Windows 11)
+      placeholder: "예) Ubuntu 24.04 x86_64"
+
+  - type: dropdown
+    id: how-run
+    attributes:
+      label: 어떻게 실행했나요? (How did you run it?)
+      options:
+        - 한 줄 명령 (curl … | bash / irm … | iex)
+        - 클론 후 실행 (cloned, then ./install.sh)
+    validations:
+      required: true
+
+  - type: input
+    id: flags
+    attributes:
+      label: 사용한 플래그·단계 (Flags / steps used)
+      description: 예) --only agents, --skip docker, -DryRun
+      placeholder: "예) ./install.sh --only shell"
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 무슨 일이 일어났나요? (What happened?)
+      description: |
+        오류 메시지·출력을 그대로 붙여주세요.
+        `--dry-run`(맥/리눅스) 또는 `-DryRun`(윈도우) 출력이 있으면 원인 찾기에 큰 도움이 됩니다.
+        (Paste the output. `--dry-run` / `-DryRun` output is especially helpful.)
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 결과 (What did you expect?)
+      description: 원래 어떻게 됐어야 하나요? (What should have happened instead?)
