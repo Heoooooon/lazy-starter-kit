@@ -47,13 +47,24 @@ function Undo-Agents {
   Write-Step "Remove AI agents (codex + lazycodex)"
   Update-SessionPath
 
+  # codex is installed either through mise's npm shim OR plain global npm --
+  # 07-agents falls back to `npm install -g '@openai/codex'` when mise is absent,
+  # so uninstall must cover both or it silently leaves codex behind.
   if (Test-HasCommand mise) {
     $installed = (Invoke-NativeSilently 'mise' @('exec', '--', 'npm', 'ls', '-g', '--depth=0') | Out-String)
     if ($installed -match '@openai/codex') {
-      Write-Info "Uninstalling @openai/codex..."
+      Write-Info "Uninstalling @openai/codex (mise npm)..."
       if (-not $script:DryRun) { & mise exec -- npm uninstall -g '@openai/codex'; Invoke-NativeSilently 'mise' @('reshim') }
       else { Write-Info "[dry-run] mise exec -- npm uninstall -g @openai/codex" }
-    } else { Write-Info "codex npm package not installed" }
+    } else { Write-Info "codex npm package not installed (mise)" }
+  }
+  if (Test-HasCommand npm) {
+    $installedNpm = (Invoke-NativeSilently 'npm' @('ls', '-g', '--depth=0') | Out-String)
+    if ($installedNpm -match '@openai/codex') {
+      Write-Info "Uninstalling @openai/codex (npm -g)..."
+      if (-not $script:DryRun) { Invoke-NativeSilently 'npm' @('uninstall', '-g', '@openai/codex') | Out-Null; Write-Ok "removed @openai/codex (npm)" }
+      else { Write-Info "[dry-run] npm uninstall -g @openai/codex" }
+    } else { Write-Info "codex npm package not installed (npm)" }
   }
 
   # lazycodex npx cache
@@ -80,9 +91,11 @@ function Undo-Agents {
       $auth = Join-Path $codexHome 'auth.json'
       if (Test-Path $auth) {
         $bak = Join-Path $env:USERPROFILE ("codex-auth-backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss') + ".json")
-        if (-not $script:DryRun) { Copy-Item $auth $bak; Write-Ok "backed up auth.json -> $bak" }
+        if ($script:DryRun) { Write-Info "[dry-run] would back up ~/.codex/auth.json -> $($bak.Replace($env:USERPROFILE, '~'))" }
+        else { Copy-Item $auth $bak; Write-Ok "backed up auth.json -> $bak" }
       }
-      if (-not $script:DryRun) { Remove-Item $codexHome -Recurse -Force -ErrorAction SilentlyContinue }
+      if ($script:DryRun) { Write-Info "[dry-run] would remove ~/.codex" }
+      else { Remove-Item $codexHome -Recurse -Force -ErrorAction SilentlyContinue; Write-Ok "removed ~/.codex" }
     } else { Write-Info "kept ~/.codex" }
   }
 
@@ -104,7 +117,11 @@ function Undo-Agents {
 # ---------------------------------------------------------------------------
 function Undo-Shell {
   Write-Step "Revert shell configuration"
-  Remove-ManagedBlock -Path $PROFILE.CurrentUserAllHosts -Tag 'lazy-starter-kit:main'
+  # Strip the block from BOTH host profiles (5.1 WindowsPowerShell\ and 7
+  # PowerShell\); the installer writes both.
+  foreach ($profilePath in (Get-AllHostsProfilePaths)) {
+    Remove-ManagedBlock -Path $profilePath -Tag 'lazy-starter-kit:main'
+  }
 
   $starshipToml = Join-Path $env:USERPROFILE '.config\starship.toml'
   if (Test-Path $starshipToml) {
@@ -193,6 +210,12 @@ function Get-SelectedGroups {
     if ($onlyList.Count -gt 0) { if ($onlyList -contains $id) { $id } }
     elseif ($skipList -notcontains $id) { $id }
   }
+}
+
+# Validate every -Only/-Skip token against the known group ids -- a typo would
+# otherwise silently select zero groups and exit 0.
+foreach ($tok in (@(@($Only) + @($Skip)) | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+  if ($GroupIds -notcontains $tok) { Stop-Kit "unknown step id: '$tok' (valid: $($GroupIds -join ' '))" }
 }
 
 if (-not (Test-IsWindows)) { Stop-Kit "Windows only." }

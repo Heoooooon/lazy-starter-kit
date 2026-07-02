@@ -128,18 +128,55 @@ function Confirm-Action {
 # current process won't see them until we re-read the environment.
 # ---------------------------------------------------------------------------
 function Update-SessionPath {
+  # MERGE newly-installed tool dirs into the CURRENT process PATH -- do NOT rebuild
+  # from Machine+User only. A rebuild drops process-level entries (VS dev shell,
+  # portable git, dirs the profile prepended) and, with $ErrorActionPreference=
+  # 'Stop', a later CommandNotFoundException would abort the whole run. We keep the
+  # existing $env:Path entries in their original order and append Machine/User and
+  # the known tool dirs that aren't already present (case-insensitive, and
+  # trailing-backslash-insensitive so 'C:\x' and 'C:\x\' count as the same entry).
   $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
   $user    = [Environment]::GetEnvironmentVariable('Path', 'User')
-  $parts = @()
-  foreach ($p in @($machine, $user)) { if ($p) { $parts += $p } }
+
+  $extra = @()
+  foreach ($p in @($machine, $user)) { if ($p) { $extra += ($p -split ';') } }
   # user-local tool dirs (guard each base env var; may be unset off-Windows)
   if ($env:USERPROFILE) {
-    $parts += (Join-Path $env:USERPROFILE '.cargo\bin')
-    $parts += (Join-Path $env:USERPROFILE '.bun\bin')
+    $extra += (Join-Path $env:USERPROFILE '.cargo\bin')
+    $extra += (Join-Path $env:USERPROFILE '.bun\bin')
   }
-  if ($env:LOCALAPPDATA) { $parts += (Join-Path $env:LOCALAPPDATA 'mise\shims') }
-  if ($env:APPDATA)      { $parts += (Join-Path $env:APPDATA 'npm') }
-  if ($parts.Count -gt 0) { $env:Path = ($parts -join ';') }
+  if ($env:LOCALAPPDATA) { $extra += (Join-Path $env:LOCALAPPDATA 'mise\shims') }
+  if ($env:APPDATA)      { $extra += (Join-Path $env:APPDATA 'npm') }
+
+  $seen   = @{}
+  $merged = @()
+  foreach ($p in @(($env:Path -split ';') + $extra)) {
+    if ([string]::IsNullOrWhiteSpace($p)) { continue }
+    $norm = $p.TrimEnd('\').ToLowerInvariant()
+    if ($seen.ContainsKey($norm)) { continue }
+    $seen[$norm] = $true
+    $merged += $p
+  }
+  if ($merged.Count -gt 0) { $env:Path = ($merged -join ';') }
+}
+
+# ---------------------------------------------------------------------------
+# CurrentUserAllHosts profile.ps1 paths for BOTH Windows PowerShell 5.1 and
+# PowerShell 7. $PROFILE.CurrentUserAllHosts is HOST-specific (5.1 ->
+# WindowsPowerShell\profile.ps1, 7 -> PowerShell\profile.ps1), so installing
+# from one host leaves the other with no prompt/PSReadLine/mise. The README
+# recommends switching to PS7 after installing, so we write both. Documents is
+# derived from MyDocuments (never hardcoded ~\Documents -- OneDrive redirects it).
+# ---------------------------------------------------------------------------
+function Get-AllHostsProfilePaths {
+  $docs = [Environment]::GetFolderPath('MyDocuments')
+  if ([string]::IsNullOrWhiteSpace($docs)) {
+    if ($env:USERPROFILE) { $docs = Join-Path $env:USERPROFILE 'Documents' } else { $docs = $HOME }
+  }
+  return @(
+    (Join-Path $docs 'WindowsPowerShell\profile.ps1'),
+    (Join-Path $docs 'PowerShell\profile.ps1')
+  )
 }
 
 # ---------------------------------------------------------------------------
@@ -147,8 +184,10 @@ function Update-SessionPath {
 # ---------------------------------------------------------------------------
 function Test-WingetPackage {
   param([Parameter(Mandatory)][string]$Id)
-  $null = Invoke-NativeSilently 'winget' @('list', '--id', $Id, '-e', '--accept-source-agreements') | Out-String -Stream | Select-String -SimpleMatch $Id
-  return ($LASTEXITCODE -eq 0)
+  # Confirm BOTH the exit code AND that the id actually appears in the output:
+  # some winget versions exit 0 even when nothing matched, so the match guards it.
+  $match = Invoke-NativeSilently 'winget' @('list', '--id', $Id, '-e', '--accept-source-agreements') | Out-String -Stream | Select-String -SimpleMatch $Id
+  return (($LASTEXITCODE -eq 0) -and [bool]$match)
 }
 
 # Install-WingetPackage <Id> [<Friendly name>]  -- idempotent winget install
@@ -195,7 +234,11 @@ function Uninstall-WingetPackage {
     return
   }
   winget uninstall --id $Id -e --silent --disable-interactivity
-  Write-Ok "$Name removed"
+  if ($LASTEXITCODE -eq 0) {
+    Write-Ok "$Name removed"
+  } else {
+    Write-Warn "could not remove $Name (winget exit $LASTEXITCODE) -- likely needs admin/UAC, or it isn't installed"
+  }
 }
 
 # ---------------------------------------------------------------------------

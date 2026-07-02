@@ -61,13 +61,19 @@ function Step-Shell {
     Write-Ok "PSFzf present"
   }
 
-  # --- inject our managed profile block ----------------------------------
-  $profilePath = $PROFILE.CurrentUserAllHosts
+  # --- inject our managed profile block into BOTH host profiles ----------
+  # $PROFILE.CurrentUserAllHosts is host-specific (5.1 -> WindowsPowerShell\,
+  # 7 -> PowerShell\). Write both so installing from 5.1 still sets up PS7 (which
+  # the README recommends switching to) and vice-versa. The block itself guards
+  # every host-specific bit (try/catch around PSReadLine 2.2+ options), so the
+  # same content is safe in both.
   $blockFile = Join-Path $PSScriptRoot '..\config\profile.block.ps1'
   $blockFile = [System.IO.Path]::GetFullPath($blockFile)
   if (Test-Path $blockFile) {
     $content = [System.IO.File]::ReadAllText($blockFile)
-    Update-ManagedBlock -Path $profilePath -Tag 'lazy-starter-kit:main' -Content $content
+    foreach ($profilePath in (Get-AllHostsProfilePaths)) {
+      Update-ManagedBlock -Path $profilePath -Tag 'lazy-starter-kit:main' -Content $content
+    }
   } else {
     Write-Warn "profile block file missing: $blockFile"
   }

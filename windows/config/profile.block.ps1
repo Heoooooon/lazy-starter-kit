@@ -41,9 +41,23 @@ if (Get-Module -ListAvailable -Name PSFzf) {
   try { Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t' -PSReadlineChordReverseHistory 'Ctrl+r' -ErrorAction SilentlyContinue } catch {}
 }
 
-# bat: nicer cat
+# bat: nicer cat. 'cat' is a built-in ALIAS for Get-Content and PowerShell resolves
+# Alias > Function, so a plain `function cat` would be dead code -- remove the alias
+# first. The process/end blocks let it work both with file args (`cat file`) and as
+# a pipeline target (`git diff | cat`): piped input is collected and forwarded.
 if (Get-Command bat -ErrorAction SilentlyContinue) {
-  function cat { bat --paging=never @args }
+  Remove-Item Alias:cat -Force -ErrorAction SilentlyContinue
+  function cat {
+    begin { $piped = @() }
+    # A process block runs ONCE with $_ = $null when the function is called
+    # standalone (`cat file`), so filter nulls or that phantom item would make us
+    # pipe a blank line to bat instead of passing the file argument through.
+    process { if ($null -ne $_) { $piped += $_ } }
+    end {
+      if ($piped.Count -gt 0) { $piped | bat --paging=never @args }
+      else { bat --paging=never @args }
+    }
+  }
 }
 
 # starship prompt -- keep LAST so it owns the prompt

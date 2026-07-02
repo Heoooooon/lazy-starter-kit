@@ -144,6 +144,12 @@ if ($Version) { Write-Output "lazy-starter-kit $KitVersion";    if ($script:RunF
 
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 
+# Validate every -Only/-Skip token against the known step ids -- a typo like
+# `-Only pacakges` would otherwise silently select zero steps and exit 0.
+foreach ($tok in (@(@($Only) + @($Skip)) | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+  if ($StepIds -notcontains $tok) { Stop-Kit "unknown step id: '$tok' (valid: $($StepIds -join ' '))" }
+}
+
 function Get-SelectedSteps {
   $onlyList = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
   $skipList = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
