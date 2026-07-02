@@ -55,6 +55,10 @@ jobs:
       - name: install (non-interactive; skip Docker; HERMES off for speed)
         env:
           HERMES: "0"
+          # mise resolves versions via api.github.com; anonymous requests share
+          # the runner IP's 60/hr limit and flake — authenticate with the job
+          # token (5000/hr) instead.
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./linux/install.sh --yes --skip docker
 
       - name: verify installed
@@ -136,6 +140,10 @@ jobs:
       - name: install (non-interactive; skip Docker; HERMES off for speed)
         env:
           HERMES: "0"
+          # mise resolves versions via api.github.com; anonymous requests share
+          # the runner IP's 60/hr limit and flake — authenticate with the job
+          # token (5000/hr) instead.
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./linux/install.sh --yes --skip docker
 
       - name: verify installed
@@ -212,6 +220,8 @@ jobs:
         # plain run: non-tty so Colima start is auto-declined; everything else runs.
         # HERMES=0 skips the heavy external Hermes installer to keep CI lean
         # (its wiring is still covered by the dry-run job).
+        env:
+          GITHUB_TOKEN: ${{ github.token }}  # authenticated mise version lookups
         run: HERMES=0 ./install.sh
 
       - name: verify installed
@@ -260,6 +270,8 @@ jobs:
 
       - name: install (non-interactive; skip Docker Desktop; Hermes n/a on Windows)
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}  # authenticated mise version lookups
         run: .\windows\install.ps1 -Yes -Skip docker
 
       - name: verify installed
