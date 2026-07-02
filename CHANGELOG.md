@@ -46,6 +46,33 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   blocks so re-runs stay duplicate-free.
 - `set -e` bug: `load_local_bins` aborted the Linux install when the mise shims
   dir did not exist yet.
+- **Config safety (all OSes)**: managed-block editing now refuses to touch a file
+  with an unmatched `>>>`/`<<<` marker (previously everything below a lone marker
+  could be deleted) and makes a one-time `<file>.lazy-starter-kit.bak` backup
+  before the first edit of an existing file.
+- **Windows / PowerShell 5.1**: native commands with `2>$null` no longer kill the
+  installer under `$ErrorActionPreference='Stop'` (e.g. `gh auth status` when not
+  logged in); profile edits preserve the file's original encoding/BOM (Korean
+  comments survive); `irm … | iex` no longer closes the terminal on exit; the
+  profile block is written to (and removed from) **both** the 5.1 and PS 7
+  profiles; session PATH updates merge instead of replacing.
+- **Linux**: a box without usable sudo now skips system packages with one clear
+  warning and still installs the user-space tools (previously the whole run
+  aborted); `pacman -Syu` is confirm-gated instead of upgrading the system
+  unprompted; the gh apt-repo setup and `$USER` expansion can no longer abort
+  the install; `pm_install` lazily refreshes the package index so
+  `--only packages` works on a fresh machine.
+- **Non-interactive honesty**: `--yes`/`-Yes` no longer launches the interactive
+  `gh auth login` / lazycodex wizards, and no longer auto-installs Docker Desktop
+  on Windows (licensing); dry-run output now previews steps it previously skipped
+  silently and no longer claims "backed up" without copying.
+- **Uninstall**: codex is detected/removed with plain `npm -g` (previously missed
+  unless mise managed node); Windows winget uninstalls no longer report "removed"
+  when they failed.
+- **CLI polish**: unknown `--only`/`--skip` (`-Only`/`-Skip`) step ids now fail
+  loudly instead of silently doing nothing; `--help` no longer leaks code lines;
+  `-V/--version` documented; the macOS Xcode CLT wait is bounded (~30 min) instead
+  of spinning forever; `cat`→`bat` now actually works on Windows (alias precedence).
 
 ## [0.1.0] - 2026-06-27
 
