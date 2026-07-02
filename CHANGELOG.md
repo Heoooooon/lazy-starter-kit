@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-02
+
 ### Added
 - **Linux kit** (`linux/`): the same 7-step, idempotent, dry-run-first installer
   for Linux. Auto-detects the package manager (apt · dnf/yum · pacman · zypper)
@@ -129,5 +131,6 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.1.0
