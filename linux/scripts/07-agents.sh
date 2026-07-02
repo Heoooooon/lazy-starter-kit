@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Hermes
+# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Hermes, Claude Code
 
 step_agents() {
-  step "AI agents: gajae-code + codex + lazycodex + Hermes"
+  step "AI agents: gajae-code + codex + lazycodex + Hermes + Claude Code"
   load_local_bins
   load_mise
   export PATH="$HOME/.bun/bin:$PATH"   # bun global bins (gjc) live here
@@ -17,6 +17,29 @@ step_agents() {
     fi
   else
     warn "bun not found — skipping gajae-code (install bun via the 'packages' step)"
+  fi
+
+  # --- Claude Code (Anthropic) ------------------------------------------
+  # Official installer drops the `claude` binary into ~/.local/bin and then
+  # self-updates in the background. Installs by default everywhere (incl. CI).
+  # Kept ahead of the npm-dependent agents so a box without node still gets it.
+  if have claude; then
+    ok "Claude Code present ($(claude --version 2>/dev/null | head -1))"
+  elif [[ "$DRY_RUN" == "1" ]]; then
+    info "[dry-run] curl -fsSL https://claude.ai/install.sh | bash"
+  else
+    info "Installing Claude Code (Anthropic)…"
+    # Download first, then verify it's a real script (non-empty + shebang)
+    # before executing — a truncated/failed download must not run as bash.
+    local cc_tmp; cc_tmp="$(mktemp)"
+    if curl -fsSL https://claude.ai/install.sh -o "$cc_tmp" \
+       && [[ -s "$cc_tmp" ]] && head -1 "$cc_tmp" | grep -q '^#!'; then
+      bash "$cc_tmp" \
+        || warn "Claude Code install did not complete — re-run later: curl -fsSL https://claude.ai/install.sh | bash"
+    else
+      warn "Claude Code install did not complete — re-run later: curl -fsSL https://claude.ai/install.sh | bash"
+    fi
+    rm -f "$cc_tmp"
   fi
 
   # --- codex (base harness that lazycodex extends) ----------------------

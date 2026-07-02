@@ -42,10 +42,10 @@ GROUP_IDS=(agents shell docker runtimes brew)
 usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/uninstall.sh"; }
 
 # ---------------------------------------------------------------------------
-# agents — codex + lazycodex (+ optionally gajae-code)
+# agents — codex + lazycodex + Claude Code (+ optionally gajae-code)
 # ---------------------------------------------------------------------------
 undo_agents() {
-  step "Remove AI agents (codex + lazycodex)"
+  step "Remove AI agents (codex + lazycodex + Claude Code)"
   load_brew; load_mise
   export PATH="$HOME/.bun/bin:$PATH"
 
@@ -112,6 +112,32 @@ undo_agents() {
     ok "Hermes Agent removed"
   else
     info "Hermes Agent not installed"
+  fi
+
+  # Claude Code — native install is ours, remove it unconditionally
+  if [[ -e "$HOME/.local/bin/claude" || -d "$HOME/.local/share/claude" ]]; then
+    run rm -f  "$HOME/.local/bin/claude"
+    run rm -rf "$HOME/.local/share/claude"
+    ok "Claude Code removed"
+  else
+    info "Claude Code not installed"
+  fi
+  # user data (settings, history, MCP config, auth) — confirm-gated
+  if [[ -d "$HOME/.claude" || -f "$HOME/.claude.json" ]]; then
+    if confirm "Remove ~/.claude and ~/.claude.json (Claude Code settings, history, auth)?"; then
+      if [[ -f "$HOME/.claude.json" ]]; then
+        local ccbak; ccbak="$HOME/claude-json-backup-$(date +%Y%m%d-%H%M%S).json"
+        if [[ "$DRY_RUN" == "1" ]]; then
+          info "[dry-run] would back up ~/.claude.json -> ${ccbak/#$HOME/~}"
+        else
+          cp -p "$HOME/.claude.json" "$ccbak" && ok "backed up ~/.claude.json -> ${ccbak/#$HOME/~}"
+        fi
+      fi
+      run rm -rf "$HOME/.claude"
+      run rm -f  "$HOME/.claude.json"
+    else
+      info "kept ~/.claude"
+    fi
   fi
 
   # gajae-code (gjc) — protected by default

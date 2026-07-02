@@ -144,6 +144,8 @@ function Update-SessionPath {
   if ($env:USERPROFILE) {
     $extra += (Join-Path $env:USERPROFILE '.cargo\bin')
     $extra += (Join-Path $env:USERPROFILE '.bun\bin')
+    # Claude Code (claude.exe) installs here via https://claude.ai/install.ps1
+    $extra += (Join-Path $env:USERPROFILE '.local\bin')
   }
   if ($env:LOCALAPPDATA) { $extra += (Join-Path $env:LOCALAPPDATA 'mise\shims') }
   if ($env:APPDATA)      { $extra += (Join-Path $env:APPDATA 'npm') }

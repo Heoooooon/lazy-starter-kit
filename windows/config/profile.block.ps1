@@ -16,6 +16,13 @@ if (Test-Path (Join-Path $env:USERPROFILE '.cargo\bin')) {
   $env:Path = (Join-Path $env:USERPROFILE '.cargo\bin') + ';' + $env:Path
 }
 
+# Claude Code (claude.exe) installs to ~/.local/bin. The installer also adds a
+# User-scope PATH entry of its own, so this may be redundant -- but it's a cheap,
+# idempotent guarantee that `claude` resolves in every new shell.
+if (Test-Path (Join-Path $env:USERPROFILE '.local\bin')) {
+  $env:Path = (Join-Path $env:USERPROFILE '.local\bin') + ';' + $env:Path
+}
+
 # PSReadLine: zsh-autosuggestions-style inline prediction + completion menu.
 # (Syntax highlighting as you type is built into PSReadLine -- no config needed.)
 if (Get-Module -ListAvailable -Name PSReadLine) {

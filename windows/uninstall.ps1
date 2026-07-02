@@ -44,7 +44,7 @@ $GroupIds = @('agents', 'shell', 'docker', 'runtimes', 'packages')
 # agents
 # ---------------------------------------------------------------------------
 function Undo-Agents {
-  Write-Step "Remove AI agents (codex + lazycodex)"
+  Write-Step "Remove AI agents (codex + lazycodex + Claude Code)"
   Update-SessionPath
 
   # codex is installed either through mise's npm shim OR plain global npm --
@@ -97,6 +97,43 @@ function Undo-Agents {
       if ($script:DryRun) { Write-Info "[dry-run] would remove ~/.codex" }
       else { Remove-Item $codexHome -Recurse -Force -ErrorAction SilentlyContinue; Write-Ok "removed ~/.codex" }
     } else { Write-Info "kept ~/.codex" }
+  }
+
+  # Claude Code (claude) -- native install from https://claude.ai/install.ps1.
+  # Remove the binary + data dir unconditionally (mirrors the native uninstall);
+  # ~/.claude settings/auth are confirm-gated below like ~/.codex.
+  $claudeBin  = Join-Path $env:USERPROFILE '.local\bin\claude.exe'
+  $claudeData = Join-Path $env:USERPROFILE '.local\share\claude'
+  if ((Test-Path $claudeBin) -or (Test-Path $claudeData)) {
+    if ($script:DryRun) {
+      if (Test-Path $claudeBin)  { Write-Info "[dry-run] would remove ~/.local/bin/claude.exe" }
+      if (Test-Path $claudeData) { Write-Info "[dry-run] would remove ~/.local/share/claude" }
+    } else {
+      if (Test-Path $claudeBin)  { Remove-Item $claudeBin -Force -ErrorAction SilentlyContinue }
+      if (Test-Path $claudeData) { Remove-Item $claudeData -Recurse -Force -ErrorAction SilentlyContinue }
+      Write-Ok "removed Claude Code (claude.exe + data dir)"
+    }
+  } else {
+    Write-Info "Claude Code not installed"
+  }
+
+  # ~/.claude + ~/.claude.json (Claude Code settings, history, auth)
+  $claudeHome = Join-Path $env:USERPROFILE '.claude'
+  $claudeJson = Join-Path $env:USERPROFILE '.claude.json'
+  if ((Test-Path $claudeHome) -or (Test-Path $claudeJson)) {
+    if (Confirm-Action "Remove ~/.claude and ~/.claude.json (Claude Code settings, history, auth)?") {
+      if (Test-Path $claudeJson) {
+        $bak = Join-Path $env:USERPROFILE ("claude-json-backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss') + ".json")
+        if ($script:DryRun) { Write-Info "[dry-run] would back up ~/.claude.json -> $($bak.Replace($env:USERPROFILE, '~'))" }
+        else { Copy-Item $claudeJson $bak; Write-Ok "backed up .claude.json -> $bak" }
+      }
+      if ($script:DryRun) { Write-Info "[dry-run] would remove ~/.claude and ~/.claude.json" }
+      else {
+        if (Test-Path $claudeHome) { Remove-Item $claudeHome -Recurse -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $claudeJson) { Remove-Item $claudeJson -Force -ErrorAction SilentlyContinue }
+        Write-Ok "removed ~/.claude and ~/.claude.json"
+      }
+    } else { Write-Info "kept ~/.claude and ~/.claude.json" }
   }
 
   # gajae-code (gjc)
