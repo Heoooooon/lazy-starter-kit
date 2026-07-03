@@ -14,6 +14,8 @@
 #   --only  a,b,c    Run only these steps.
 #   --skip  a,b,c    Run all steps except these.
 #   --no-agents      Shortcut for --skip agents.
+#   --doctor         Diagnose the install (health report), change nothing, exit.
+#   --update         Git-pull the latest kit, then continue the run.
 #   --list           List step ids and exit.
 #   --version, -V    Print the kit version and exit.
 #   --help, -h       Show this help.
@@ -95,9 +97,68 @@ step_file() {
 usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/install.sh"; }
 
 # ---------------------------------------------------------------------------
+# Doctor (--doctor): print an installation health report and exit; changes
+# nothing. The tool→step lists below mirror the CI verify steps + Brewfile; the
+# probing mechanism lives in lib/common.sh (_doctor_* helpers).
+# ---------------------------------------------------------------------------
+_doctor_config() {
+  _doctor_managed "$HOME/.zshrc"    "lazy-starter-kit:main"
+  _doctor_managed "$HOME/.zprofile" "lazy-starter-kit:brew"
+  _doctor_exists  "$HOME/.config/starship.toml"
+}
+
+doctor() {
+  _DOCTOR_BINS="$(brew_prefix)/bin"   # macOS: also search the Homebrew prefix
+  load_mise                           # so `mise which` resolves node/python/go
+  printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION · doctor ==$_C_RESET"
+
+  step "Tools"
+  _doctor_tool brew prereqs
+  local t
+  for t in git gh jq rg fd fzf bat tree wget ast-grep mo starship mise uv rustup bun colima docker; do
+    _doctor_tool "$t" brew
+  done
+  _doctor_runtime node   runtimes
+  _doctor_runtime python runtimes
+  _doctor_runtime go     runtimes
+  _doctor_tool rustc runtimes
+  _doctor_tool zsh   prereqs
+  for t in gjc codex claude; do
+    _doctor_tool "$t" agents
+  done
+
+  step "Config"
+  _doctor_config
+
+  step "Summary"
+  local issues=$((_DOCTOR_MISSING + _DOCTOR_PATHONLY))
+  if [[ "$issues" -eq 0 ]]; then
+    ok "all good"
+  else
+    warn "$issues issue(s) — see above"
+  fi
+  [[ "$_DOCTOR_MISSING" -eq 0 ]] && exit 0 || exit 1
+}
+
+# ---------------------------------------------------------------------------
+# Update (--update): pull the latest kit, then re-exec the freshly-pulled
+# installer with the remaining args. Handled BEFORE normal parsing so it
+# composes with any other flag (order-independent) and the run always uses the
+# updated step files rather than the stale ones already on disk.
+# ---------------------------------------------------------------------------
+DO_UPDATE=0; PASS_ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" == "--update" ]]; then DO_UPDATE=1; else PASS_ARGS+=("$arg"); fi
+done
+if [[ "$DO_UPDATE" == "1" ]]; then
+  update_kit "$ROOT"
+  exec bash "$ROOT/install.sh" ${PASS_ARGS[@]+"${PASS_ARGS[@]}"}
+fi
+
+# ---------------------------------------------------------------------------
 # Arg parsing
 # ---------------------------------------------------------------------------
-ONLY=""; SKIP=""
+ONLY=""; SKIP=""; DOCTOR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)   export DRY_RUN=1 ;;
@@ -107,6 +168,7 @@ while [[ $# -gt 0 ]]; do
     --skip)      SKIP="${2:-}"; shift ;;
     --skip=*)    SKIP="${1#*=}" ;;
     --no-agents) SKIP="${SKIP:+$SKIP,}agents" ;;
+    --doctor)    DOCTOR=1 ;;
     --list)      printf '%s\n' "${STEP_IDS[@]}"; exit 0 ;;
     -V|--version) echo "lazy-starter-kit $KIT_VERSION"; exit 0 ;;
     -h|--help)   usage; exit 0 ;;
@@ -114,6 +176,9 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# --doctor: health report, then exit (like --list — before any step runs).
+[[ "$DOCTOR" == "1" ]] && doctor
 
 # Normalize --only/--skip (strip spaces so `--only "brew, shell"` works), then
 # reject any unknown token up front instead of silently selecting nothing.

@@ -23,12 +23,24 @@
   List step ids and exit.
 .PARAMETER Version
   Print the kit version and exit.
+.PARAMETER Doctor
+  Diagnose the current setup (tools, runtimes, profile/starship config) and exit.
+  Changes nothing; exits 1 if anything is missing, else 0.
+.PARAMETER Update
+  git pull --ff-only the kit checkout, then continue the install with the
+  remaining switches (e.g. -Update -Only agents). Requires a git checkout.
 
 .EXAMPLE
   irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
 
 .EXAMPLE
   .\install.ps1 -DryRun
+
+.EXAMPLE
+  .\install.ps1 -Doctor
+
+.EXAMPLE
+  .\install.ps1 -Update -Only agents
 #>
 [CmdletBinding()]
 param(
@@ -39,6 +51,8 @@ param(
   [switch]$NoAgents,
   [switch]$List,
   [switch]$Version,
+  [switch]$Doctor,
+  [switch]$Update,
   [switch]$Help
 )
 
@@ -116,6 +130,40 @@ $versionFile = Join-Path $Root '..\VERSION'
 $KitVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { 'dev' }
 
 # ---------------------------------------------------------------------------
+# -Update: pull the latest kit, then re-run the UPDATED installer with the
+# remaining switches. $Root is the windows\ subdir, so the git checkout root is
+# its parent (mirrors Resolve-Root, which returns the windows\ dir). We handle
+# this before the -Help/-List/-Version/-Doctor early exits so `-Update -Doctor`
+# et al. run against the freshly-pulled copy.
+# ---------------------------------------------------------------------------
+if ($Update) {
+  $checkoutRoot = [System.IO.Path]::GetFullPath((Join-Path $Root '..'))
+  if (-not (Test-Path (Join-Path $checkoutRoot '.git'))) {
+    Stop-Kit "-Update needs a git checkout, but '$checkoutRoot' isn't one. Re-clone the kit (or drop -Update)."
+  }
+  $oldVersion = $KitVersion
+  Write-Step "Update: git -C '$checkoutRoot' pull --ff-only"
+  # Invoke-NativeSilently: git writes progress to stderr, which under EAP=Stop on
+  # WinPS 5.1 would abort the run; we only probe $LASTEXITCODE here.
+  Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'pull', '--ff-only') | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    Stop-Kit "git pull --ff-only failed (exit $LASTEXITCODE). Resolve local changes or divergence, then re-run."
+  }
+  $newVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { 'dev' }
+  if ($oldVersion -eq $newVersion) { Write-Ok "already up to date ($newVersion)" }
+  else { Write-Ok "updated $oldVersion -> $newVersion" }
+
+  # Re-invoke the updated installer with the bound params minus -Update (so we
+  # don't loop). Mirrors the bootstrap hand-off's `& $target @params` splat.
+  $params = @{}
+  foreach ($kv in $PSBoundParameters.GetEnumerator()) {
+    if ($kv.Key -ne 'Update') { $params[$kv.Key] = $kv.Value }
+  }
+  & $target @params
+  if ($script:RunFromFile) { exit $LASTEXITCODE } else { return }
+}
+
+# ---------------------------------------------------------------------------
 # Step registry
 # ---------------------------------------------------------------------------
 $StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents')
@@ -138,9 +186,107 @@ $StepFunc = @{
   agents   = 'Step-Agents'
 }
 
+# ---------------------------------------------------------------------------
+# -Doctor: read-only diagnosis. Reports tool/runtime/config health in the kit's
+# Write-Step/Write-Ok/Write-Warn style, changes nothing, and returns an exit
+# code (0 = all present, PATH-only warnings included; 1 = something missing).
+# The tool list mirrors the CI windows-e2e "verify installed" step.
+# ---------------------------------------------------------------------------
+function Invoke-Doctor {
+  Write-Host "== lazy-starter-kit doctor (v$KitVersion) ==" -ForegroundColor White
+
+  # tool -> fixing step id (used for the `.\install.ps1 -Only <step>` hint)
+  $toolStep = [ordered]@{
+    git = 'packages'; gh = 'packages'; jq = 'packages'; rg = 'packages'
+    fd = 'packages'; bat = 'packages'; fzf = 'packages'; starship = 'packages'
+    mise = 'packages'; uv = 'packages'; rustup = 'packages'; bun = 'packages'
+    gjc = 'agents'; codex = 'agents'; claude = 'agents'
+  }
+
+  # user-local install dirs to probe when a tool isn't resolvable on PATH.
+  $knownDirs = @()
+  if ($env:USERPROFILE) {
+    $knownDirs += (Join-Path $env:USERPROFILE '.local\bin')
+    $knownDirs += (Join-Path $env:USERPROFILE '.bun\bin')
+    $knownDirs += (Join-Path $env:USERPROFILE '.cargo\bin')
+  }
+  if ($env:LOCALAPPDATA) { $knownDirs += (Join-Path $env:LOCALAPPDATA 'mise\shims') }
+  if ($env:APPDATA)      { $knownDirs += (Join-Path $env:APPDATA 'npm') }
+
+  $missing = 0
+
+  Write-Step "Tools"
+  foreach ($tool in $toolStep.Keys) {
+    if (Get-Command $tool -ErrorAction SilentlyContinue) {
+      # ok: resolvable in this session -- show the first --version line, best-effort.
+      $ver = ''
+      try { $ver = (Invoke-NativeSilently $tool @('--version') | Select-Object -First 1) } catch {}
+      if ($ver) { Write-Ok "$tool ($ver)" } else { Write-Ok "$tool" }
+      continue
+    }
+    # not on PATH -- is the exe sitting in a known user-local install dir?
+    $found = $null
+    foreach ($d in $knownDirs) {
+      foreach ($ext in @('.exe', '.cmd', '.bat', '')) {
+        $candidate = Join-Path $d ($tool + $ext)
+        if (Test-Path $candidate) { $found = $candidate; break }
+      }
+      if ($found) { break }
+    }
+    if ($found) {
+      Write-Warn "$tool installed but not on PATH ($found) -- open a new PowerShell window to pick it up"
+    } else {
+      Write-Err "$tool missing -- fix: .\install.ps1 -Only $($toolStep[$tool])"
+      $missing++
+    }
+  }
+
+  # runtimes are mise-managed; resolve node/go/python via `mise which`.
+  if (Get-Command mise -ErrorAction SilentlyContinue) {
+    foreach ($rt in @('node', 'go', 'python')) {
+      $p = (Invoke-NativeSilently 'mise' @('which', $rt) | Select-Object -First 1)
+      if (($LASTEXITCODE -eq 0) -and $p) {
+        Write-Ok "$rt (mise: $p)"
+      } else {
+        Write-Err "$rt missing -- fix: .\install.ps1 -Only runtimes"
+        $missing++
+      }
+    }
+  } else {
+    Write-Warn "mise not resolvable -- skipping node/go/python checks (fix: .\install.ps1 -Only packages)"
+  }
+
+  Write-Step "Config"
+  # managed profile block must be in BOTH CurrentUserAllHosts profiles (5.1 + 7).
+  foreach ($profilePath in (Get-AllHostsProfilePaths)) {
+    $short = if ($env:USERPROFILE) { $profilePath.Replace($env:USERPROFILE, '~') } else { $profilePath }
+    if ((Test-Path $profilePath) -and (Select-String -Path $profilePath -SimpleMatch 'lazy-starter-kit:main' -Quiet)) {
+      Write-Ok "profile block present ($short)"
+    } else {
+      Write-Warn "profile block missing ($short) -- fix: .\install.ps1 -Only shell"
+    }
+  }
+  # starship.toml (04-shell.ps1 installs it at ~\.config\starship.toml)
+  $starshipToml = Join-Path $HomeDir '.config\starship.toml'
+  if (Test-Path $starshipToml) {
+    Write-Ok "starship.toml present (~\.config\starship.toml)"
+  } else {
+    Write-Warn "starship.toml missing (~\.config\starship.toml) -- fix: .\install.ps1 -Only shell"
+  }
+
+  Write-Step "Summary"
+  if ($missing -gt 0) {
+    Write-Err "$missing item(s) missing -- run the suggested step(s) above, then re-check with -Doctor."
+    return 1
+  }
+  Write-Ok "all expected tools present."
+  return 0
+}
+
 if ($Help)    { Get-Help $target -Detailed;                    if ($script:RunFromFile) { exit 0 } else { return } }
 if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; if ($script:RunFromFile) { exit 0 } else { return } }
 if ($Version) { Write-Output "lazy-starter-kit $KitVersion";    if ($script:RunFromFile) { exit 0 } else { return } }
+if ($Doctor)  { $code = Invoke-Doctor;                         if ($script:RunFromFile) { exit $code } else { return } }
 
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 

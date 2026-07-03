@@ -273,6 +273,8 @@ STARTER_KIT_BRANCH=v0.3.1 bash -c "$(curl -fsSL https://raw.githubusercontent.co
 ## 고급 / 커스터마이즈
 
 - **단계 선택 실행**: `--only`, `--skip`, `--dry-run`, `--yes`, `--list`, `--version` (윈도우는 `-Only` 처럼 대시 하나).
+- **설치 상태 진단**: `./install.sh --doctor` — 도구별 ok/누락/PATH 문제를 한눈에 (윈도우 `-Doctor`).
+- **키트 업데이트**: `./install.sh --update` — 최신 키트를 받아온 뒤 그대로 재실행 (윈도우 `-Update`).
 - **설치 도구 편집**: 각 OS의 `Brewfile`(맥) / `scripts/02-packages.*` / `scripts/03-runtimes.*`.
 - **프롬프트/셸 블록**: `config/starship.toml`, `config/zshrc.block.sh`(맥/리눅스), `config/profile.block.ps1`(윈도우).
 - 자세한 옵션·문제해결은 각 OS 상세 문서를 보세요.

@@ -141,6 +141,117 @@ inject_block() {
   ok "wrote '$tag' block -> ${file/#$HOME/~}"
 }
 
+# ---------------------------------------------------------------------------
+# Doctor — installation health probe (install.sh --doctor).
+# OS-agnostic mechanism only; each install.sh supplies its own tool→step lists
+# (and, on macOS, seeds _DOCTOR_BINS with $(brew_prefix)/bin). NEVER modifies
+# anything — no step files are sourced and no installers run.
+# ---------------------------------------------------------------------------
+: "${_DOCTOR_BINS:=}"   # extra kit bin dirs to search (macOS seeds brew prefix)
+_DOCTOR_MISSING=0       # count of ✗ (nowhere) tools — drives the exit code
+_DOCTOR_PATHONLY=0      # count of ! (installed but off-PATH) tools
+
+# _doctor_find_off_path <tool> — echo the first kit bin dir holding an
+# executable <tool> (only meaningful when <tool> is NOT on PATH), else nothing.
+_doctor_find_off_path() {
+  local tool="$1" d
+  # shellcheck disable=SC2086
+  for d in ${_DOCTOR_BINS:-} \
+           "$HOME/.local/bin" "$HOME/.bun/bin" "$HOME/.cargo/bin" \
+           "$HOME/.local/share/mise/shims"; do
+    [[ -n "$d" && -x "$d/$tool" ]] && { echo "$d"; return 0; }
+  done
+  return 1
+}
+
+# _doctor_tool <tool> <step> [altname]  — report one tool's state:
+#   ok  on the current PATH   |   !  installed in a kit bin but off PATH
+#   ✗   nowhere (missing)
+# [altname] lets Debian's fdfind/batcat count as fd/bat.
+_doctor_tool() {
+  local tool="$1" step="$2" alt="${3:-}" ver dir
+  if have "$tool"; then
+    ver="$("$tool" --version 2>/dev/null | head -1 || true)"
+    ok "$tool${ver:+ $ver}"; return 0
+  fi
+  if [[ -n "$alt" ]] && have "$alt"; then
+    ver="$("$alt" --version 2>/dev/null | head -1 || true)"
+    ok "$tool${ver:+ $ver}"; return 0
+  fi
+  if dir="$(_doctor_find_off_path "$tool")" \
+     || { [[ -n "$alt" ]] && dir="$(_doctor_find_off_path "$alt")"; }; then
+    warn "$tool — installed at $dir but not on PATH (open a new terminal, or: source ~/.zshrc)"
+    _DOCTOR_PATHONLY=$((_DOCTOR_PATHONLY + 1)); return 0
+  fi
+  err "$tool — missing (install: ./install.sh --only $step)"
+  _DOCTOR_MISSING=$((_DOCTOR_MISSING + 1))
+}
+
+# _doctor_runtime <tool> <step>  — a mise-managed runtime (node/python/go).
+# Resolution goes through `mise which` when mise is present (so it's found even
+# when the shims dir isn't on PATH yet), else falls back to a plain PATH probe.
+_doctor_runtime() {
+  local tool="$1" step="$2" p ver
+  if have mise; then
+    p="$(mise which "$tool" 2>/dev/null || true)"
+    if [[ -n "$p" ]]; then
+      if have "$tool"; then
+        ver="$("$tool" --version 2>/dev/null | head -1 || true)"
+        ok "$tool${ver:+ $ver}"
+      else
+        warn "$tool — installed at $(dirname "$p") but not on PATH (open a new terminal, or: source ~/.zshrc)"
+        _DOCTOR_PATHONLY=$((_DOCTOR_PATHONLY + 1))
+      fi
+      return 0
+    fi
+  fi
+  _doctor_tool "$tool" "$step"
+}
+
+# _doctor_managed <file> <tag>  — report whether a managed block is present.
+_doctor_managed() {
+  local file="$1" tag="$2" begin="# >>> $2 >>>"
+  if [[ -f "$file" ]] && grep -qxF "$begin" "$file"; then
+    ok "${file/#$HOME/~} has '$tag' block"
+  else
+    err "${file/#$HOME/~} missing '$tag' block (install: ./install.sh --only shell)"
+    _DOCTOR_MISSING=$((_DOCTOR_MISSING + 1))
+  fi
+}
+
+# _doctor_exists <path>  — report whether a config file is present.
+_doctor_exists() {
+  local path="$1"
+  if [[ -e "$path" ]]; then
+    ok "${path/#$HOME/~} present"
+  else
+    err "${path/#$HOME/~} missing (install: ./install.sh --only shell)"
+    _DOCTOR_MISSING=$((_DOCTOR_MISSING + 1))
+  fi
+}
+
+# ---------------------------------------------------------------------------
+# Update — git-pull the kit in place (install.sh --update).
+# update_kit <repo_dir>  fetches + fast-forwards the checkout and prints the
+# version delta. The caller re-execs the freshly-pulled installer afterwards,
+# so stale step files never run. Touches nothing but the git checkout.
+# ---------------------------------------------------------------------------
+update_kit() {
+  local repo="$1" old new
+  [[ -d "$repo/.git" ]] || die "not a git checkout — re-run the curl installer or git pull manually"
+  old="$(cat "$repo/VERSION" 2>/dev/null || echo dev)"
+  step "Updating lazy-starter-kit"
+  git -C "$repo" fetch --quiet || die "git fetch failed — check your network and try again"
+  git -C "$repo" pull --ff-only \
+    || die "git pull --ff-only failed (diverged history or local changes) — resolve manually: git -C \"$repo\" pull"
+  new="$(cat "$repo/VERSION" 2>/dev/null || echo dev)"
+  if [[ "$old" == "$new" ]]; then
+    ok "already up to date ($new)"
+  else
+    ok "updated $old -> $new"
+  fi
+}
+
 # remove_block <file> <tag>  — delete a managed block (markers + content). Idempotent.
 remove_block() {
   local file="$1" tag="$2"

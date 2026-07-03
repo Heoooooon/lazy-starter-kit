@@ -7,6 +7,16 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **`--doctor` / `-Doctor`** — read-only health report on all three kits:
+  every kit tool as ok / installed-but-off-PATH (with the "open a new
+  terminal" hint) / missing (with the exact `--only <step>` fix), plus
+  managed-block and starship config checks. Exit 1 only on real misses.
+- **`--update` / `-Update`** — pulls the latest kit (`git pull --ff-only`)
+  and re-runs the updated installer with your remaining flags.
+- **CI: idempotency is now a test** — the Ubuntu and macOS e2e jobs run the
+  full install a second time and assert zero duplicated managed blocks.
+
 ## [0.3.1] - 2026-07-03
 
 ### Added

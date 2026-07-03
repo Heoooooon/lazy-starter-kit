@@ -76,6 +76,19 @@ jobs:
           grep -q 'lazy-starter-kit:main' "$HOME/.zshrc" && echo "ok   zshrc block" || { echo "MISS zshrc block"; fail=1; }
           exit $fail
 
+      - name: install again (idempotency — "safe to re-run" is a test, not a claim)
+        env:
+          HERMES: "0"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          ./linux/install.sh --yes --skip docker
+          fail=0
+          for tag in 'lazy-starter-kit:main' 'lazy-starter-kit:ohmyzsh'; do
+            n=$(grep -cxF "# >>> $tag >>>" "$HOME/.zshrc" || true)
+            if [ "$n" -gt 1 ]; then echo "DUPLICATE $tag block (x$n)"; fail=1; else echo "ok   $tag block x$n"; fi
+          done
+          exit $fail
+
       - name: uninstall (teardown)
         run: ./linux/uninstall.sh --yes --with-gajae --skip docker
 
@@ -239,6 +252,19 @@ jobs:
           test -d "$HOME/.oh-my-zsh"            || { echo "MISS oh-my-zsh"; fail=1; }
           grep -q 'lazy-starter-kit:main' "$HOME/.zshrc" || { echo "MISS zshrc block"; fail=1; }
           test -d "$HOME/.codex/plugins/cache/sisyphuslabs/omo" && echo "ok   lazycodex/omo" || echo "warn lazycodex/omo not found"
+          exit $fail
+
+      - name: install again (idempotency — "safe to re-run" is a test, not a claim)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          HERMES=0 ./install.sh
+          fail=0
+          for spec in "lazy-starter-kit:main:$HOME/.zshrc" "lazy-starter-kit:ohmyzsh:$HOME/.zshrc" "lazy-starter-kit:brew:$HOME/.zprofile"; do
+            tag="${spec%:*}"; file="${spec##*:}"
+            n=$(grep -cxF "# >>> $tag >>>" "$file" || true)
+            if [ "$n" -gt 1 ]; then echo "DUPLICATE $tag block (x$n)"; fail=1; else echo "ok   $tag block x$n"; fi
+          done
           exit $fail
 
       - name: uninstall (full teardown)

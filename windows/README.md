@@ -68,6 +68,8 @@ prereqs  packages  runtimes  shell  docker  git  agents
 .\install.ps1 -NoAgents             # alias for -Skip agents
 .\install.ps1 -List                 # print step ids
 .\install.ps1 -Version              # print the kit version
+.\install.ps1 -Doctor               # health report: ok / missing / off-PATH per tool
+.\install.ps1 -Update               # pull the latest kit, then re-run
 ```
 
 Every step is **idempotent** — safe to re-run. Your PowerShell profile

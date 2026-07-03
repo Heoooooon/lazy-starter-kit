@@ -102,6 +102,8 @@ prereqs  brew  runtimes  shell  docker  git  agents
 ./install.sh --skip agents      # run all but one
 ./install.sh --no-agents        # alias for --skip agents
 ./install.sh --list             # print step ids
+./install.sh --doctor           # health report: ok / missing / off-PATH per tool
+./install.sh --update           # pull the latest kit, then re-run
 ```
 
 Every step is **idempotent** — safe to re-run. `~/.zshrc`, `~/.zprofile`, and
