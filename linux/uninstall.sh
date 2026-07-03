@@ -161,6 +161,11 @@ undo_shell() {
     if confirm "Remove ~/.oh-my-zsh (framework + plugins)?"; then run rm -rf "$HOME/.oh-my-zsh"
     else info "kept oh-my-zsh"; fi
   fi
+  # The install may have made zsh the login shell; we never chsh back
+  # automatically (that's the user's call), but say how.
+  if [[ "${SHELL:-}" == */zsh ]]; then
+    info "your login shell is still zsh — revert with: chsh -s /bin/bash"
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -177,6 +182,14 @@ undo_docker() {
       pacman) pm_remove docker docker-compose docker-buildx ;;
       zypper) pm_remove docker docker-compose ;;
       apk)    pm_remove docker docker-cli-compose ;;
+    esac
+    # get.docker.com registered Docker's own package repo — drop it too so the
+    # package index stops hitting it after removal (non-fatal, needs sudo).
+    case "$PM" in
+      apt)     run $SUDO rm -f /etc/apt/sources.list.d/docker.list \
+                              /etc/apt/keyrings/docker.asc /etc/apt/keyrings/docker.gpg 2>/dev/null || true ;;
+      dnf|yum) run $SUDO rm -f /etc/yum.repos.d/docker-ce.repo 2>/dev/null || true ;;
+      zypper)  run $SUDO zypper --non-interactive removerepo docker-ce-stable 2>/dev/null || true ;;
     esac
     ok "Docker removed (your user's docker group membership is left as-is)"
   else
@@ -241,6 +254,12 @@ undo_packages() {
     esac
     # drop the fd/bat compatibility symlinks we created on Debian/Ubuntu
     for l in fd bat; do [[ -L "$HOME/.local/bin/$l" ]] && run rm -f "$HOME/.local/bin/$l" || true; done
+    # the installer added GitHub's apt repo for gh — drop it with the package
+    # so apt stops hitting cli.github.com (non-fatal, needs sudo).
+    if [[ "$PM" == "apt" ]]; then
+      run $SUDO rm -f /etc/apt/sources.list.d/github-cli.list \
+                      /usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null || true
+    fi
     ok "CLI utilities processed"
   else
     info "kept CLI utilities"

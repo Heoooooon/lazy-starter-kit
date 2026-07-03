@@ -8,6 +8,18 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **CI: upgrade-path test** — installs from the newest release tag, then
+  re-runs the current kit on top and verifies tools + zero duplicated
+  managed blocks, so upgrades are proven, not assumed.
+- **CI: silent-failure alert** — the weekly drift-detection cron now opens
+  (or bumps) a `ci-drift` issue when it fails instead of failing silently.
+
+### Fixed
+- **Linux uninstall leftovers**: removing gh now also drops GitHub's apt
+  repo + keyring; removing Docker drops Docker's package repo (apt/dnf/
+  zypper); the shell group points out how to `chsh` back if zsh was made
+  the login shell.
+
 - **Windows: WSL2 automation (`wsl` step, experimental — real-Windows validation in progress)** — detects the current WSL state and
   advances one stage per run (never reboots for you): enables WSL2 + Ubuntu
   behind a Docker-Desktop-style default-No gate (admin required; big

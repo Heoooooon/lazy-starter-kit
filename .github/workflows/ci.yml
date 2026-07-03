@@ -187,6 +187,48 @@ jobs:
           if command -v claude >/dev/null 2>&1; then echo "STILL claude"; exit 1; fi
           echo "ok   claude removed"
 
+  linux-upgrade-path:
+    # Install from the newest release tag, then re-run the CURRENT kit on top —
+    # proves migrations and managed-block replacement survive real upgrades,
+    # not just fresh installs.
+    name: linux upgrade path (latest tag -> main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: install from the newest release tag
+        env:
+          HERMES: "0"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(git tag --sort=-v:refname | head -1)
+          echo "installing from $tag"
+          git worktree add /tmp/kit-old "$tag"
+          /tmp/kit-old/linux/install.sh --yes --skip docker
+
+      - name: upgrade — re-run the current (main) kit on top
+        env:
+          HERMES: "0"
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./linux/install.sh --yes --skip docker
+
+      - name: verify upgraded state
+        run: |
+          set -uo pipefail
+          export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/share/mise/shims:$PATH"
+          fail=0
+          for t in rg fd bat fzf jq gh starship mise uv bun rustup zsh gjc codex claude; do
+            command -v "$t" >/dev/null 2>&1 && echo "ok   $t" || { echo "MISS $t"; fail=1; }
+          done
+          for tag in 'lazy-starter-kit:main' 'lazy-starter-kit:ohmyzsh'; do
+            n=$(grep -cxF "# >>> $tag >>>" "$HOME/.zshrc" || true)
+            if [ "$n" -gt 1 ]; then echo "DUPLICATE $tag block (x$n)"; fail=1; else echo "ok   $tag block x$n"; fi
+          done
+          exit $fail
+
   lint-windows:
     name: windows powershell parse
     runs-on: ubuntu-latest
@@ -345,3 +387,30 @@ jobs:
             Write-Host "STILL claude"; exit 1
           }
           Write-Host "ok   claude removed"
+
+  cron-failure-alert:
+    # The weekly scheduled run exists to catch upstream drift (bit-rot); a
+    # silent failure defeats the point. Open — or bump — a tracking issue.
+    name: alert on scheduled-run failure
+    runs-on: ubuntu-latest
+    needs: [lint, lint-linux, linux-e2e, linux-e2e-distros, linux-upgrade-path, lint-windows, dryrun, integration, windows-e2e]
+    if: failure() && github.event_name == 'schedule'
+    permissions:
+      issues: write
+    steps:
+      - name: open or bump the drift issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create ci-drift --repo "$REPO" --color D93F0B \
+            --description "weekly scheduled CI failed — upstream drift" --force
+          existing=$(gh issue list --repo "$REPO" --label ci-drift --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPO" --body "The weekly drift check failed again: $RUN_URL"
+          else
+            gh issue create --repo "$REPO" --label ci-drift \
+              --title "Weekly drift check failed — an upstream likely changed" \
+              --body "The scheduled CI run (which exists to catch Homebrew/installer/distro drift without a commit) failed. Logs: $RUN_URL"
+          fi
