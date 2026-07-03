@@ -8,6 +8,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **`--profile` / `-Profile` presets** — `minimal` (toolchain only: CLI +
+  runtimes + shell + git), `work` (corporate PCs: everything except Docker —
+  and WSL on Windows — with the heavy Hermes agent off), `full` (default).
+  Combines with `--skip` (union) and refuses `--only` (contradictory).
 - **CI: upgrade-path test** — installs from the newest release tag, then
   re-runs the current kit on top and verifies tools + zero duplicated
   managed blocks, so upgrades are proven, not assumed.

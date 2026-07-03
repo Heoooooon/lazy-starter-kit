@@ -13,6 +13,7 @@
 #   --yes, -y        Non-interactive: accept defaults, never prompt.
 #   --only  a,b,c    Run only these steps.
 #   --skip  a,b,c    Run all steps except these.
+#   --profile NAME   Preset step set: full · minimal · work.
 #   --no-agents      Shortcut for --skip agents.
 #   --doctor         Diagnose the install (health report), change nothing, exit.
 #   --update         Git-pull the latest kit, then continue the run.
@@ -162,7 +163,7 @@ fi
 # ---------------------------------------------------------------------------
 # Arg parsing
 # ---------------------------------------------------------------------------
-ONLY=""; SKIP=""; DOCTOR=0
+ONLY=""; SKIP=""; PROFILE=""; DOCTOR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)   export DRY_RUN=1 ;;
@@ -171,6 +172,8 @@ while [[ $# -gt 0 ]]; do
     --only=*)    ONLY="${1#*=}" ;;
     --skip)      SKIP="${2:-}"; shift ;;
     --skip=*)    SKIP="${1#*=}" ;;
+    --profile)   PROFILE="${2:-}"; shift ;;
+    --profile=*) PROFILE="${1#*=}" ;;
     --no-agents) SKIP="${SKIP:+$SKIP,}agents" ;;
     --doctor)    DOCTOR=1 ;;
     --list)      printf '%s\n' "${STEP_IDS[@]}"; exit 0 ;;
@@ -187,6 +190,22 @@ done
 # Normalize --only/--skip (strip spaces so `--only "brew, shell"` works), then
 # reject any unknown token up front instead of silently selecting nothing.
 ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
+
+# --profile NAME — expand a named preset into extra SKIP steps (unioned with any
+# --skip), reusing the SKIP machinery below. Mutually exclusive with --only. The
+# preset→skip mapping is this file's own (step ids: prereqs packages runtimes
+# shell docker git agents); `work` also disables the heavy Hermes agent via HERMES=0.
+if [[ -n "$PROFILE" ]]; then
+  [[ -n "$ONLY" ]] && die "choose either --profile or --only"
+  case "$PROFILE" in
+    full)    PRESET_SKIP="" ;;
+    minimal) PRESET_SKIP="docker,agents" ;;
+    work)    PRESET_SKIP="docker"; export HERMES=0 ;;
+    *) die "unknown profile: '$PROFILE' (valid: full minimal work)" ;;
+  esac
+  [[ -n "$PRESET_SKIP" ]] && SKIP="${SKIP:+$SKIP,}$PRESET_SKIP"
+fi
+
 _validate_ids() {
   local list="$1" tok id found valid="${STEP_IDS[*]}"
   while [[ -n "$list" ]]; do
@@ -222,7 +241,7 @@ is_linux || die "This kit targets Linux only (macOS users: use the repo root ins
 [[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION ==$_C_RESET"
-info "steps: $(selected | tr '\n' ' ')"
+info "steps: $(selected | tr '\n' ' ')${PROFILE:+(profile: $PROFILE)}"
 
 # ---------------------------------------------------------------------------
 # Execute

@@ -13,6 +13,13 @@
   Show what would happen, change nothing.
 .PARAMETER Yes
   Non-interactive: accept defaults, never prompt.
+.PARAMETER Profile
+  Preset step selection (full|minimal|work):
+    full     everything (same as no switch).
+    minimal  prereqs packages runtimes shell git (skips docker, agents, wsl).
+    work     everything except docker and wsl, with HERMES=0 for the run.
+  Implemented as a preset skip-set UNIONed with -Skip. Mutually exclusive with
+  -Only.
 .PARAMETER Only
   Comma-separated list of steps to run (e.g. -Only packages,shell).
 .PARAMETER Skip
@@ -46,6 +53,10 @@
 param(
   [switch]$DryRun,
   [switch]$Yes,
+  # Validation is intentionally manual (not [ValidateSet]) so an unknown name
+  # gets the same friendly "valid: ..." message as an unknown step id, rather
+  # than PowerShell's raw binding error.
+  [string]$Profile,
   [string[]]$Only = @(),
   [string[]]$Skip = @(),
   [switch]$NoAgents,
@@ -292,6 +303,30 @@ if ($Doctor)  { $code = Invoke-Doctor;                         if ($script:RunFr
 
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 
+# ---------------------------------------------------------------------------
+# -Profile <name>: a preset skip-set UNIONed with the user's -Skip. A preset
+# picks steps to *drop*; -Only picks steps to *keep* -- combining them is
+# ambiguous, so they're mutually exclusive. Unknown names get the same friendly
+# "valid: ..." listing as an unknown step id. 'work' also exports HERMES=0 for
+# parity with the bash kits (harmless on Windows, where Hermes is WSL-only).
+# ($Profile is bound in $PSBoundParameters, so it survives the -Update
+# re-invoke's param rebuild and the bootstrap hand-off's splat automatically.)
+# ---------------------------------------------------------------------------
+$ProfileNames = @('full', 'minimal', 'work')
+$ProfileSkip  = @{
+  full    = @()
+  minimal = @('docker', 'agents', 'wsl')
+  work    = @('docker', 'wsl')
+}
+if ($Profile) {
+  if (@($Only).Count -gt 0) { Stop-Kit "choose either -Profile or -Only, not both." }
+  if ($ProfileNames -notcontains $Profile) {
+    Stop-Kit "unknown profile: '$Profile' (valid: $($ProfileNames -join ' '))"
+  }
+  $Skip = @($Skip) + $ProfileSkip[$Profile]
+  if ($Profile -eq 'work') { $env:HERMES = '0' }
+}
+
 # Validate every -Only/-Skip token against the known step ids -- a typo like
 # `-Only pacakges` would otherwise silently select zero steps and exit 0.
 foreach ($tok in (@(@($Only) + @($Skip)) | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
@@ -318,7 +353,9 @@ if ($script:DryRun) { Write-Warn "DRY-RUN: no changes will be made." }
 
 Write-Host "== lazy-starter-kit v$KitVersion ==" -ForegroundColor White
 $selected = @(Get-SelectedSteps)
-Write-Info ("steps: " + ($selected -join ' '))
+$stepsLine = "steps: " + ($selected -join ' ')
+if ($Profile) { $stepsLine += "  (profile: $Profile)" }
+Write-Info $stepsLine
 
 # ---------------------------------------------------------------------------
 # Execute
