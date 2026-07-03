@@ -8,7 +8,7 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- **Windows: WSL2 automation (`wsl` step)** — detects the current WSL state and
+- **Windows: WSL2 automation (`wsl` step, experimental — real-Windows validation in progress)** — detects the current WSL state and
   advances one stage per run (never reboots for you): enables WSL2 + Ubuntu
   behind a Docker-Desktop-style default-No gate (admin required; big
   reboot-and-re-run guidance when Windows needs it), initializes Ubuntu
