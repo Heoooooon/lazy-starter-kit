@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-03
+
 ### Added
 - **`--doctor` / `-Doctor`** — read-only health report on all three kits:
   every kit tool as ok / installed-but-off-PATH (with the "open a new
@@ -163,7 +165,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...v0.2.0
