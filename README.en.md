@@ -213,8 +213,8 @@ see [CHANGELOG.md](./CHANGELOG.md). Check your copy with `./install.sh --version
 Pin the installer to a release instead of `main`:
 
 ```sh
-STARTER_KIT_BRANCH=v0.3.0 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.3.0/install.sh)"
+STARTER_KIT_BRANCH=v0.3.1 \
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.3.1/install.sh)"
 ```
 
 ## Credits

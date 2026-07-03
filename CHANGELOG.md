@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-03
+
 ### Added
 - After a successful **interactive** install, the kit asks (default **No**)
   whether to star the repo on GitHub via the just-authenticated `gh` session.
@@ -151,7 +153,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.1.0
