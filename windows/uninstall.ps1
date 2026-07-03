@@ -7,7 +7,7 @@
   Destructive groups are confirm-gated. Never auto-removes your git identity.
   gajae-code (gjc) is kept unless you pass -WithGajae.
 
-  Groups (reverse order): agents shell docker runtimes packages
+  Groups (reverse order): wsl agents shell docker runtimes packages
 
 .PARAMETER DryRun         Show what would happen, change nothing.
 .PARAMETER Yes            Non-interactive: accept every removal prompt.
@@ -38,7 +38,54 @@ $script:AssumeYes = [bool]$Yes
 $versionFile = Join-Path $Root '..\VERSION'
 $KitVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { 'dev' }
 
-$GroupIds = @('agents', 'shell', 'docker', 'runtimes', 'packages')
+$GroupIds = @('wsl', 'agents', 'shell', 'docker', 'runtimes', 'packages')
+
+# ---------------------------------------------------------------------------
+# wsl -- reverse of install: the WSL step runs LAST (it bootstraps a whole Linux
+# environment and runs the Linux kit inside it), so its teardown runs FIRST.
+# Unregistering the distro deletes everything the Linux kit / Hermes installed
+# inside it, so it belongs ahead of the Windows-side agents.
+# ---------------------------------------------------------------------------
+function Undo-Wsl {
+  Write-Step "Remove the WSL Ubuntu distro (optional)"
+
+  $distro = 'Ubuntu'
+  # WSL_UTF8=1 makes wsl.exe emit UTF-8 so `--list` output is parseable.
+  $env:WSL_UTF8 = '1'
+
+  if (-not (Test-HasCommand wsl)) { Write-Info "wsl.exe not present -- nothing to remove"; return }
+
+  Invoke-NativeSilently 'wsl' @('--status') | Out-Null
+  if ($LASTEXITCODE -ne 0) { Write-Info "WSL not installed -- nothing to remove"; return }
+
+  $names = Invoke-NativeSilently 'wsl' @('--list', '--quiet')
+  $registered = $false
+  if (($LASTEXITCODE -eq 0) -and $names) {
+    $registered = [bool](@($names | ForEach-Object { $_.Trim() } | Where-Object { $_ }) -contains $distro)
+  }
+  if (-not $registered) { Write-Info "$distro not registered -- nothing to remove"; return }
+
+  if ($script:DryRun) {
+    Write-Info "[dry-run] would offer:  wsl --unregister $distro  (DELETES the distro filesystem)"
+    Write-Info "[dry-run] WSL itself (the platform) is left installed either way."
+    return
+  }
+
+  # DATA LOSS: `wsl --unregister` permanently deletes the entire distro
+  # filesystem -- everything the Linux kit / Hermes installed inside it. So this
+  # is a DefaultNo gate that NEVER fires under -Yes (AssumeYes returns $false),
+  # and a bare Enter declines.
+  Write-Warn "DATA LOSS: 'wsl --unregister $distro' permanently deletes the $distro filesystem"
+  Write-Warn "(all files, packages, and the Linux kit / Hermes install inside it)."
+  if (Confirm-Action "Unregister (delete) the $distro distro?" -DefaultNo) {
+    & wsl --unregister $distro
+    if ($LASTEXITCODE -eq 0) { Write-Ok "unregistered $distro (distro filesystem deleted)" }
+    else { Write-Warn "wsl --unregister $distro exited $LASTEXITCODE" }
+  } else {
+    Write-Info "kept the $distro distro"
+  }
+  Write-Info "WSL itself (the platform) stays installed -- remove it via 'Turn Windows features on or off' if wanted."
+}
 
 # ---------------------------------------------------------------------------
 # agents
@@ -234,7 +281,7 @@ function Undo-Packages {
 # Run
 # ---------------------------------------------------------------------------
 $GroupFunc = @{
-  agents = 'Undo-Agents'; shell = 'Undo-Shell'; docker = 'Undo-Docker'
+  wsl = 'Undo-Wsl'; agents = 'Undo-Agents'; shell = 'Undo-Shell'; docker = 'Undo-Docker'
   runtimes = 'Undo-Runtimes'; packages = 'Undo-Packages'
 }
 

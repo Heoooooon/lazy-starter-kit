@@ -57,7 +57,7 @@ If `winget` is missing, install *App Installer* from the Microsoft Store first.
 Steps run in this order:
 
 ```
-prereqs  packages  runtimes  shell  docker  git  agents
+prereqs  packages  runtimes  shell  docker  git  agents  wsl
 ```
 
 ```powershell
@@ -96,6 +96,44 @@ re-runs. Existing files you own are preserved.
   with `Get-Command node -All`.
 - **Hermes Agent** has no native Windows build — install it inside a WSL2 distro:
   `wsl bash -c 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup'`
+  The `wsl` step below does this for you (it runs the Linux kit inside Ubuntu,
+  and Hermes lands there via that kit).
+
+## WSL2 + Ubuntu (the `wsl` step)
+
+The final step can stand up a full Linux environment on Windows and then run the
+**lazy-starter-kit Linux installer inside it** — so `claude`, `codex`, mise,
+starship, and **Hermes Agent** (no native Windows build) all land inside Ubuntu.
+
+It's an **idempotent, resumable pipeline**: each run detects the current WSL
+state, advances one stage, and **never reboots your machine for you**.
+
+1. **Detect** — is WSL usable? is WSL2 the default? is `Ubuntu` registered and
+   initialized (can it run `wsl -d Ubuntu -u root -e true`)?
+2. **Not installed** → **opt-in, exactly like Docker Desktop**: it defaults to
+   **No**, is **never** installed under `-Yes` or non-interactively, and needs an
+   **administrator** PowerShell. On an explicit `y` it runs
+   `wsl --install --no-launch -d Ubuntu`. If Windows reports a reboot is needed,
+   it prints a big **REBOOT REQUIRED** next-step — reboot, then re-run.
+3. **Installed but Ubuntu not initialized** → initializes it non-interactively as
+   root (`ubuntu install --root`, which skips the first-run username prompt).
+4. **Ready** → offers (default **Yes** — this is the point of the step) to run the
+   Linux kit inside Ubuntu as root, skipping its docker step; output is streamed
+   live. Failure here is non-fatal. Set `$env:STARTER_KIT_BRANCH` to pin a branch.
+
+```powershell
+.\install.ps1 -Only wsl            # run just this step (interactive; asks first)
+.\install.ps1 -Only wsl -DryRun    # print the staged plan for your current state
+```
+
+The **reboot-resume flow**: `wsl --install` may require a reboot. This step never
+reboots you; it tells you to reboot and re-run `.\install.ps1 -Only wsl`, and the
+next run picks up from wherever it left off (initialize → run the Linux kit).
+
+> A default full run **includes** `wsl`, but it self-gates: under `-Yes` /
+> non-interactive it just prints a skip line (WSL can't be installed
+> unattended, and CI can't do nested virtualization). Use `-Only wsl` to run it
+> explicitly, or `-Skip wsl` to leave it out.
 
 ## Uninstall
 
@@ -106,9 +144,14 @@ re-runs. Existing files you own are preserved.
 .\uninstall.ps1 -Only agents
 ```
 
-Groups (reverse order): `agents shell docker runtimes packages`.
+Groups (reverse order): `wsl agents shell docker runtimes packages`.
 
 Safe by design:
+- **WSL distro is never auto-removed**: the `wsl` group offers
+  `wsl --unregister Ubuntu` behind a **default-No** prompt with an explicit
+  **data-loss** warning (unregister permanently deletes the whole distro
+  filesystem). It's **never** run under `-Yes`. **WSL itself stays installed** —
+  only the Ubuntu distro is offered for removal.
 - **Never auto-removed**: your **git identity**, `git` itself, and the Nerd Font.
 - **gajae-code (`gjc`) is kept** unless you pass `-WithGajae` (refused while running).
 - Removing codex backs up `~/.codex/auth.json` first; `-KeepCodexHome` leaves it intact.

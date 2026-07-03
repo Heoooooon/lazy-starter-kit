@@ -7,7 +7,7 @@
   From a fresh machine -> winget packages, runtimes, PowerShell profile, Docker,
   and AI coding agents (gajae-code + codex + lazycodex).
 
-  Steps (in order): prereqs packages runtimes shell docker git agents
+  Steps (in order): prereqs packages runtimes shell docker git agents wsl
 
 .PARAMETER DryRun
   Show what would happen, change nothing.
@@ -166,7 +166,7 @@ if ($Update) {
 # ---------------------------------------------------------------------------
 # Step registry
 # ---------------------------------------------------------------------------
-$StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents')
+$StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents', 'wsl')
 $StepFile = @{
   prereqs  = '01-prereqs.ps1'
   packages = '02-packages.ps1'
@@ -175,6 +175,7 @@ $StepFile = @{
   docker   = '05-docker.ps1'
   git      = '06-git.ps1'
   agents   = '07-agents.ps1'
+  wsl      = '08-wsl.ps1'
 }
 $StepFunc = @{
   prereqs  = 'Step-Prereqs'
@@ -184,6 +185,7 @@ $StepFunc = @{
   docker   = 'Step-Docker'
   git      = 'Step-Git'
   agents   = 'Step-Agents'
+  wsl      = 'Step-Wsl'
 }
 
 # ---------------------------------------------------------------------------
