@@ -194,5 +194,24 @@ if ($script:DryRun) {
   }
   Write-Info "3) Set your terminal font to 'JetBrainsMono Nerd Font' (Windows Terminal > Settings > Appearance)."
   Write-Info "Note: on Windows PowerShell 5.1, restart it once if PSReadLine was upgraded. PowerShell 7 is smoother."
+
+  # --- optional: ask for a GitHub star (opt-in, default No) ---------------
+  # Interactive runs only -- -Yes and non-interactive/CI never see this
+  # (Confirm-Action -DefaultNo declines in both), and nothing is starred
+  # without an explicit 'y'.
+  $repoSlug = $RepoUrl -replace '^https://github\.com/', '' -replace '\.git$', ''
+  if ((Test-HasCommand gh)) {
+    Invoke-NativeSilently 'gh' @('auth', 'status') | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+      Invoke-NativeSilently 'gh' @('api', "user/starred/$repoSlug") | Out-Null
+      if ($LASTEXITCODE -ne 0) {
+        if (Confirm-Action "Enjoyed the setup? Star $repoSlug on GitHub?" -DefaultNo) {
+          Invoke-NativeSilently 'gh' @('api', '-X', 'PUT', "user/starred/$repoSlug") | Out-Null
+          if ($LASTEXITCODE -eq 0) { Write-Ok "thanks for the star!" }
+          else { Write-Info "couldn't star from here -- https://github.com/$repoSlug" }
+        }
+      }
+    }
+  }
 }
 if ($script:RunFromFile) { exit 0 } else { return }

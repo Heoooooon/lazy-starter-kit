@@ -72,6 +72,17 @@ confirm() {
   [[ -z "$ans" || "$ans" =~ ^[Yy] ]]
 }
 
+# confirm_default_no "Question?"  -> yes(0)/no(1). Bare Enter DECLINES, and both
+# --yes and non-interactive runs decline too — for purely optional extras (like
+# the GitHub star ask) that must never happen without an explicit yes.
+confirm_default_no() {
+  local q="$1"
+  [[ "$ASSUME_YES" == "1" ]] && return 1
+  is_tty || return 1
+  local ans; read -r -p "$q [y/N] " ans || true
+  [[ "$ans" =~ ^[Yy] ]]
+}
+
 # ---------------------------------------------------------------------------
 # Managed-block injection — idempotent insert/replace between markers
 # inject_block <file> <tag> <<<"content"   (content read from stdin)

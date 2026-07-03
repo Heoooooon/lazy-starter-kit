@@ -7,6 +7,12 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- After a successful **interactive** install, the kit asks (default **No**)
+  whether to star the repo on GitHub via the just-authenticated `gh` session.
+  Never shown — and nothing is ever starred — under `--yes`/`-Yes`,
+  non-interactive runs, or CI, and it skips users who already starred.
+
 ## [0.3.0] - 2026-07-03
 
 ### Added

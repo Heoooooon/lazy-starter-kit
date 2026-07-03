@@ -179,5 +179,18 @@ else
     info "3) Docker: log out/in (or run 'newgrp docker') so group access applies."
   fi
   info "Set your terminal font to 'JetBrainsMono Nerd Font' for prompt icons."
+
+  # --- optional: ask for a GitHub star (opt-in, default No) ---------------
+  # Interactive runs only — --yes and non-interactive/CI never see this, and
+  # nothing is ever starred without an explicit 'y' (see confirm_default_no).
+  repo_slug="${REPO_URL#https://github.com/}"; repo_slug="${repo_slug%.git}"
+  if have gh && gh auth status >/dev/null 2>&1 \
+     && ! gh api "user/starred/$repo_slug" >/dev/null 2>&1; then
+    if confirm_default_no "Enjoyed the setup? Star $repo_slug on GitHub? ⭐"; then
+      gh api -X PUT "user/starred/$repo_slug" >/dev/null 2>&1 \
+        && ok "thanks for the star! ⭐" \
+        || info "couldn't star from here — https://github.com/$repo_slug"
+    fi
+  fi
 fi
 exit 0
