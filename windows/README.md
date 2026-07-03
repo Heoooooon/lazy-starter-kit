@@ -104,10 +104,10 @@ re-runs. Existing files you own are preserved.
 
 ## WSL2 + Ubuntu (the `wsl` step)
 
-> 🧪 **Experimental — real-Windows validation in progress.** The step is fully
-> covered by parse checks and simulated state-machine tests (the commands are
-> verified against Microsoft's WSL docs), but it hasn't been exercised on real
-> hardware yet. If anything misbehaves, please open an issue with the output.
+> 🧪 **Beta.** The step is fully covered by parse checks and simulated
+> state-machine tests (the commands are verified against Microsoft's WSL docs),
+> but it hasn't been exercised on real hardware yet. If anything misbehaves,
+> please open an issue with the output.
 
 The final step can stand up a full Linux environment on Windows and then run the
 **lazy-starter-kit Linux installer inside it** — so `claude`, `codex`, mise,

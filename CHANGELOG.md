@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-04
+
 ### Added
 - **`--profile` / `-Profile` presets** — `minimal` (toolchain only: CLI +
   runtimes + shell + git), `work` (corporate PCs: everything except Docker —
@@ -24,7 +26,7 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   zypper); the shell group points out how to `chsh` back if zsh was made
   the login shell.
 
-- **Windows: WSL2 automation (`wsl` step, experimental — real-Windows validation in progress)** — detects the current WSL state and
+- **Windows: WSL2 automation (`wsl` step, beta — not yet exercised on real hardware)** — detects the current WSL state and
   advances one stage per run (never reboots for you): enables WSL2 + Ubuntu
   behind a Docker-Desktop-style default-No gate (admin required; big
   reboot-and-re-run guidance when Windows needs it), initializes Ubuntu
@@ -191,7 +193,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.2.0...v0.3.0
