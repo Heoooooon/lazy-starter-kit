@@ -16,6 +16,8 @@ _Runtimes · shell · containers · and AI coding agents — installed and verif
 
 **Platforms:** **macOS** (this page) · [Linux](./linux/README.md) · [Windows](./windows/README.md)
 
+<img src="./docs/demo.gif" alt="lazy-starter-kit demo — ./install.sh --dry-run" width="760" />
+
 </div>
 
 ---
