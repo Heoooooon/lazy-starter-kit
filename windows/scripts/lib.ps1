@@ -91,7 +91,15 @@ function Invoke-NativeSilently {
   $prev = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
-    & $Exe @Arguments 2>$null
+    # Buffer the full output BEFORE returning it. Streaming it out directly lets
+    # a caller's `| Select-Object -First 1` stop the pipeline early, which kills
+    # the still-running native process and leaves $LASTEXITCODE at -1 -- the
+    # doctor's `mise which` runtime checks lost that race every time and
+    # misreported installed runtimes as missing. With the output collected here,
+    # the process always runs to completion and $LASTEXITCODE is its real exit
+    # code.
+    $out = & $Exe @Arguments 2>$null
+    if ($null -ne $out) { $out }
   } finally {
     $ErrorActionPreference = $prev
   }

@@ -8,6 +8,13 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- **Windows: `-Doctor` misreported mise runtimes as missing** — piping
+  `Invoke-NativeSilently` output into `Select-Object -First 1` stopped the
+  pipeline early, killing the still-running native process and leaving
+  `$LASTEXITCODE` at `-1`; slow-starting `mise which` lost that race every
+  time, so node/go/python showed as missing on healthy installs. The helper
+  now buffers its output so the process always completes. Found on real
+  hardware (fresh Windows 11, ko-KR).
 - **Windows: the `irm | iex` one-liner died on fresh machines** — after
   bootstrapping (git install + clone), the hand-off executed the cloned
   `install.ps1` as a *file*, which the factory-default execution policy
