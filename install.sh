@@ -109,7 +109,9 @@ _doctor_config() {
 }
 
 doctor() {
-  _DOCTOR_BINS="$(brew_prefix)/bin"   # macOS: also search the Homebrew prefix
+  # macOS: also search the Homebrew prefix, and brew rustup's keg-only bin —
+  # its rustc/cargo proxies live there, not in <prefix>/bin.
+  _DOCTOR_BINS="$(brew_prefix)/bin $(brew_prefix)/opt/rustup/bin"
   load_mise                           # so `mise which` resolves node/python/go
   printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION · doctor ==$_C_RESET"
 
