@@ -7,6 +7,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Windows: the `irm | iex` one-liner died on fresh machines** — after
+  bootstrapping (git install + clone), the hand-off executed the cloned
+  `install.ps1` as a *file*, which the factory-default execution policy
+  (`Restricted`) blocks with `PSSecurityException` — the iex'd *string* was
+  exempt, the file was not. The iex path now hands off in a child process
+  with a process-scoped `-ExecutionPolicy Bypass` (GPO still wins).
+  Found reproducing a user report on a brand-new Windows 11 PC.
+
 ### Added
 - **Stability contract** — [VERSIONING.md](./VERSIONING.md) defines the
   semver-covered public interface (flags, step/group ids, profiles,

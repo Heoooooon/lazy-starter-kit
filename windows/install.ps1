@@ -123,10 +123,19 @@ try { $self = $MyInvocation.MyCommand.Path } catch {}
 $target = Join-Path $Root 'install.ps1'
 if ((-not $self) -or ($self -ne $target)) {
   if (Test-Path $target) {
-    & $target @PSBoundParameters
-    # Propagate the cloned copy's exit code when we're a file; under iex, `return`
-    # so we don't close the caller's terminal.
-    if ($script:RunFromFile) { exit $LASTEXITCODE } else { return }
+    if ($script:RunFromFile) {
+      & $target @PSBoundParameters
+      exit $LASTEXITCODE
+    }
+    # Under iex, `& $target` runs a .ps1 FILE -- which a fresh machine's default
+    # execution policy (Restricted) blocks with a PSSecurityException, even though
+    # the iex'd STRING itself was exempt. Hand off in a child process with a
+    # process-scoped policy bypass instead (GPO machine/user policy still wins).
+    # The console is inherited, so prompts keep working; `return` (not exit) so we
+    # don't close the caller's terminal.
+    $psExe = (Get-Process -Id $PID).Path
+    & $psExe -NoProfile -ExecutionPolicy Bypass -File $target
+    return
   }
 }
 
