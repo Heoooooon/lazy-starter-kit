@@ -61,6 +61,17 @@ cd lazy-starter-kit
 
 > If this kit saved you a setup day, **a ⭐ star** helps a lot!
 
+### Support tiers
+
+| Tier | Platforms | Promise |
+|---|---|---|
+| **Tier 1** | macOS 14+ (Apple Silicon) · Windows 11/Server 2025 · Ubuntu 24.04 · Fedora · Arch · openSUSE Tumbleweed | Real install → verify → uninstall in CI **on every commit** (+ idempotency & upgrade-path tests) |
+| **Tier 2** | Windows 10 1809+ · Debian 12+ · RHEL 9/Rocky · openSUSE Leap · WSL2 · Intel Macs | Same code paths, expected to work — reported regressions fixed with priority |
+| Unsupported | Alpine (musl) · 32-bit | Upstream tools ship no builds |
+
+What semver protects (flags, step ids, markers, env vars): [VERSIONING.md](./VERSIONING.md).
+
+
 ## Linux & Windows
 
 This repo ships parallel kits for the other two platforms — same 7-step,

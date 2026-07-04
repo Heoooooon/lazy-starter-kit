@@ -250,6 +250,17 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/lin
 > 커밋마다 설치→검증→제거(end-to-end)를 자동 테스트(CI)로 돌립니다.
 > 두 번 연속 설치(멱등성)와 **이전 릴리스→최신 업그레이드 경로**도 테스트에 포함돼요.
 
+### 지원 범위
+
+| 등급 | 플랫폼 | 보증 |
+|---|---|---|
+| **Tier 1** | macOS 14+ (Apple Silicon) · Windows 11/Server 2025 · Ubuntu 24.04 · Fedora · Arch · openSUSE Tumbleweed | **매 커밋마다 CI가 실제로 설치→검증→제거** (+ 2회 연속 설치, 업그레이드 경로) |
+| **Tier 2** | Windows 10 1809+ · Debian 12+ · RHEL 9/Rocky · openSUSE Leap · WSL2 · Intel Mac | 같은 코드라 동작 예상 — 문제 제보 시 우선 수정 |
+| 미지원 | Alpine(musl) · 32bit | 업스트림 도구에 빌드가 없음 |
+
+자세한 정책(무엇이 semver로 보호되는지)은 [VERSIONING.md](./VERSIONING.md) 참고.
+
+
 > 이 키트가 세팅 시간을 아껴줬다면 **⭐ 스타 하나**가 다음 개선의 큰 힘이 됩니다!
 
 ---

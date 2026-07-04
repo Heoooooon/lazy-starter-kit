@@ -7,6 +7,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Stability contract** — [VERSIONING.md](./VERSIONING.md) defines the
+  semver-covered public interface (flags, step/group ids, profiles,
+  managed-block markers, env vars, exit codes) and the Tier 1/2 support
+  matrix; READMEs gained the matrix, CONTRIBUTING gained multi-OS ground
+  rules + the exact pre-PR check commands.
+- **CI: `--doctor` exit-code contract** — after every e2e install (Ubuntu,
+  the distro matrix, macOS), CI now runs `--doctor` and requires exit 0.
+
 ## [0.5.0] - 2026-07-04
 
 ### Added

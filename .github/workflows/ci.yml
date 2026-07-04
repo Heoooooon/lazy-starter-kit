@@ -89,6 +89,9 @@ jobs:
           done
           exit $fail
 
+      - name: doctor exits 0 on a healthy install (exit code is a contract)
+        run: ./linux/install.sh --doctor
+
       - name: uninstall (teardown)
         run: ./linux/uninstall.sh --yes --with-gajae --skip docker
 
@@ -173,6 +176,9 @@ jobs:
           for t in gjc codex claude; do need "$t"; done
           grep -q 'lazy-starter-kit:main' "$HOME/.zshrc" && echo "ok   zshrc block" || { echo "MISS zshrc block"; fail=1; }
           exit $fail
+
+      - name: doctor exits 0 on a healthy install (exit code is a contract)
+        run: ./linux/install.sh --doctor
 
       - name: uninstall (teardown)
         run: ./linux/uninstall.sh --yes --with-gajae --skip docker
@@ -308,6 +314,9 @@ jobs:
             if [ "$n" -gt 1 ]; then echo "DUPLICATE $tag block (x$n)"; fail=1; else echo "ok   $tag block x$n"; fi
           done
           exit $fail
+
+      - name: doctor exits 0 on a healthy install (exit code is a contract)
+        run: ./install.sh --doctor
 
       - name: uninstall (full teardown)
         run: ./uninstall.sh --yes --with-gajae
