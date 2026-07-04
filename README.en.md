@@ -40,21 +40,22 @@ cd lazy-starter-kit
 ./install.sh               # apply
 ```
 
-## ✨ v0.2.0 highlights
-
-A hardening release built from dozens of real-world failure scenarios — locked-down
-work machines, no-sudo accounts, flaky networks, non-ASCII config files.
-([Full release notes ↗](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.2.0))
+## Why this kit
 
 - 🧪 **Really installed on 6 environments, every commit** — CI runs the full
   install → verify → uninstall on macOS, Windows, Ubuntu, Fedora, Arch and
-  openSUSE. "Does it work on my machine?" is answered by tests, not docs.
+  openSUSE, plus a second back-to-back install (idempotency) and a
+  previous-release → main **upgrade path**. "Does it work on my machine?" is
+  answered by tests, not docs.
 - 🛟 **Double safety for your config** — a one-time `.bak` backup before the
-  first edit of `~/.zshrc` / PowerShell profiles, and the kit refuses to touch
-  a file with damaged markers.
-- 🏢 **Tougher on corporate machines** — survives without sudo/admin (user-space
-  tools still install), fixes fatal Windows PowerShell 5.1 aborts, preserves
-  profile encoding (non-ASCII comments survive).
+  first edit of `~/.zshrc` / PowerShell profiles, marker-block-only edits, and
+  the kit refuses to touch a file with damaged markers.
+- 🏢 **Corporate machines are first-class** — survives without sudo/admin
+  (user-space tools still install), Docker Desktop stays opt-in (licensing),
+  profile encoding preserved, and a `--profile work` preset.
+- 🔁 **Not fire-and-forget** — `--doctor` diagnoses ok / missing / off-PATH per
+  tool, `--update` pulls the latest kit and re-runs, and re-running is always
+  safe.
 - 🔍 **Supply-chain transparency** — pinned/verified external installers,
   [SECURITY.md](./SECURITY.md), SHA-pinned GitHub Actions.
 
