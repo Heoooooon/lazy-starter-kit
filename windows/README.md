@@ -115,7 +115,10 @@ The final step can stand up a full Linux environment on Windows and then run the
 starship, and **Hermes Agent** (no native Windows build) all land inside Ubuntu.
 
 It's an **idempotent, resumable pipeline**: each run detects the current WSL
-state, advances one stage, and **never reboots your machine for you**.
+state and **advances as far as it can in one go** — it loops detect→act and
+falls straight through registration → root init → the Linux-kit offer in a
+**single run** whenever no reboot is pending. It **never reboots your machine
+for you**.
 
 1. **Detect** — is WSL usable? is WSL2 the default? is `Ubuntu` registered and
    initialized (can it run `wsl -d Ubuntu -u root -e true`)?
@@ -129,6 +132,11 @@ state, advances one stage, and **never reboots your machine for you**.
 4. **Ready** → offers (default **Yes** — this is the point of the step) to run the
    Linux kit inside Ubuntu as root, skipping its docker step; output is streamed
    live. Failure here is non-fatal. Set `$env:STARTER_KIT_BRANCH` to pin a branch.
+
+Only a **required reboot** stops the pipeline mid-flight; every stage that
+doesn't need one runs in the same invocation. So once WSL is usable, a single
+run registers Ubuntu, initializes it, and offers the Linux kit without asking
+you to re-run in between.
 
 ```powershell
 .\install.ps1 -Only wsl            # run just this step (interactive; asks first)

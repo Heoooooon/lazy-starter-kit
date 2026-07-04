@@ -2,6 +2,10 @@
 
 # mise: node / python / go version manager
 if (Get-Command mise -ErrorAction SilentlyContinue) {
+  # On Windows PowerShell 5.1 mise warns that its chpwd hook needs PS 7+ on
+  # every new shell -- scary noise for beginners, and the hook (auto version
+  # switch on cd) is a nice-to-have, not required. Suppress just that warning.
+  if ($PSVersionTable.PSVersion.Major -lt 7) { $env:MISE_PWSH_CHPWD_WARNING = '0' }
   (& mise activate pwsh) -join "`n" | Invoke-Expression
 }
 

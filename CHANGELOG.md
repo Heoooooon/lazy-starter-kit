@@ -7,6 +7,14 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **Windows: one `wsl` run now advances through every stage that doesn't need a
+  reboot** (was: one stage per run). The step loops detect→act, so once WSL is
+  usable a single interactive run registers Ubuntu, initializes it as root, and
+  offers the Linux kit — no more re-running between registration and init. A
+  required reboot still stops the pipeline (it never reboots for you); re-run
+  after rebooting to resume.
+
 ## [0.6.0] - 2026-07-05
 
 ### Changed

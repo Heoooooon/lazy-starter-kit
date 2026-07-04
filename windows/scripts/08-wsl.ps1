@@ -2,7 +2,9 @@
 #              inside it. Optional & heavily opt-in (needs admin + virtualization).
 #
 # This step is an IDEMPOTENT, RESUMABLE pipeline: each run detects the current
-# WSL state, advances at most one stage, and NEVER reboots the machine itself.
+# WSL state and advances AS FAR AS IT CAN in one go -- it loops detect->act,
+# falling through registration -> root init -> the Linux-kit offer in a single
+# run whenever no reboot is pending. It NEVER reboots the machine itself.
 # `wsl --install` can require a reboot; when it does we print a clear
 # "reboot, then re-run  .\install.ps1 -Only wsl" next-step and stop -- the next
 # run resumes from wherever this one left off.
@@ -156,6 +158,11 @@ function Initialize-WslDistro {
 # Install WSL2 + the distro (heavy, admin-only). Never reached under -Yes /
 # non-interactive (the DefaultNo gate in Step-Wsl blocks that). Detects the
 # reboot case and prints a big resume next-step.
+#
+# Returns $true when the install advanced WITHOUT needing a reboot (so the
+# caller's loop can re-detect and continue the pipeline in the same run), and
+# $false when the caller must stop now -- a reboot is required (banner already
+# printed) or the install errored.
 # ---------------------------------------------------------------------------
 function Install-WslPlatform {
   param([switch]$PlatformMissing)
@@ -163,7 +170,7 @@ function Install-WslPlatform {
   if (-not (Test-HasCommand wsl)) {
     Write-Err "wsl.exe not found -- your Windows is too old for one-command WSL."
     Write-Info "Update to Windows 10 2004 (build 19041)+ or Windows 11, then re-run  .\install.ps1 -Only wsl"
-    return
+    return $false
   }
 
   Write-Info "Installing WSL2 + $script:WslDistro (wsl --install --no-launch -d $script:WslDistro)..."
@@ -185,7 +192,7 @@ function Install-WslPlatform {
     Write-Warn "wsl --install exited $code."
     Write-Info "This usually means it needs an ADMINISTRATOR PowerShell, or hardware virtualization is disabled in BIOS/UEFI."
     Write-Info "Fix that, then re-run:  .\install.ps1 -Only wsl"
-    return
+    return $false
   }
 
   # Ensure WSL2 is the default for future distros (new installs are already WSL2,
@@ -211,112 +218,143 @@ function Install-WslPlatform {
     Write-Host "   After rebooting, run:   .\install.ps1 -Only wsl" -ForegroundColor Yellow
     Write-Host "   (that resumes: initializes $script:WslDistro, then offers the Linux kit)" -ForegroundColor Yellow
     Write-Host "  ============================================================" -ForegroundColor Yellow
-    return
+    return $false
   }
 
   Write-Ok "WSL2 + $script:WslDistro installed."
-  Write-Info "Re-run to initialize it and run the Linux kit:  .\install.ps1 -Only wsl"
+  # No reboot pending: signal the caller's loop to re-detect and continue this
+  # run straight into initialization and the Linux-kit offer.
+  return $true
 }
 
 # ---------------------------------------------------------------------------
-# Step entry point -- the state machine.
-#   READY               -> (re-)offer the Linux kit (default-Yes; idempotent)
-#   REGISTERED, not READY -> initialize non-interactively, then offer the kit
-#   not installed        -> heavy opt-in gate (default-No), then wsl --install
+# Step entry point -- the state machine, driven as a bounded detect->act LOOP.
+# Each cycle detects the current WSL state and performs the ONE action that
+# advances it, then re-detects and falls through to the next stage IN THE SAME
+# RUN, so one interactive run goes as far as it usefully can:
+#   READY                  -> (re-)offer the Linux kit (default-Yes; idempotent)
+#   REGISTERED, not READY  -> initialize non-interactively, then loop -> offer
+#   USABLE, not REGISTERED -> opt-in gate (default-No) -> register, then loop
+#   not installed          -> opt-in gate (default-No) -> wsl --install
+# The only place we stop MID-pipeline is when Windows needs a reboot to finish
+# installing WSL (Install-WslPlatform prints the REBOOT REQUIRED banner and
+# returns $false) -- we never reboot for you. A cycle that makes no forward
+# progress also stops (with a re-run next-step) so the loop can't spin forever.
 # ---------------------------------------------------------------------------
 function Step-Wsl {
   Write-Step "WSL2 + Ubuntu (optional; runs the Linux kit inside)"
 
   if (-not (Test-IsWindows)) { Write-Info "not Windows -- skipping WSL"; return }
 
-  $st = Get-WslState
+  # Rank the state so we can detect a cycle that failed to move forward:
+  #   0 nothing / 1 usable / 2 registered / 3 ready (each implies the ones below).
+  # There are only three stages, so a small cycle budget is plenty; the
+  # no-progress guard below is the real infinite-loop protection.
+  $prevRank = -1
+  $maxCycles = 6
 
-  # ------------------------------------------------------------------- READY
-  if ($st.Ready) {
-    Write-Ok "WSL2 default + $script:WslDistro registered and initialized"
-    if ($script:DryRun) {
-      Write-Info "[dry-run] plan: offer to run the Linux kit inside $script:WslDistro"
-      Invoke-WslLinuxKit
-      return
-    }
-    if (Confirm-Action "Run the lazy-starter-kit Linux setup inside $script:WslDistro now?") {
-      Invoke-WslLinuxKit
-    } else {
-      Write-Info "Skipped. Run it later:  .\install.ps1 -Only wsl"
-    }
-    return
-  }
-
-  # ------------------------------------------- REGISTERED but not initialized
-  if ($st.Registered) {
-    Write-Info "$script:WslDistro is registered but not initialized yet."
-    if ($script:DryRun) {
-      $launcher = $script:WslDistro.ToLower()
-      if (Test-HasCommand $launcher) {
-        Write-Host ("  [dry-run] {0} install --root   (non-interactive root init)" -f $launcher) -ForegroundColor DarkGray
-      } else {
-        Write-Host ("  [dry-run] wsl -d {0}   (interactive first-run init)" -f $script:WslDistro) -ForegroundColor DarkGray
-      }
-      Write-Info "[dry-run] then offer to run the Linux kit inside $script:WslDistro"
-      return
-    }
-    Initialize-WslDistro
-    # Re-detect: if it's runnable now, go ahead and offer the kit in this run
-    # (no reboot involved, so advancing here is safe).
+  for ($cycle = 1; $cycle -le $maxCycles; $cycle++) {
     $st = Get-WslState
+
+    $rank = 0
+    if ($st.Usable)     { $rank = 1 }
+    if ($st.Registered) { $rank = 2 }
+    if ($st.Ready)      { $rank = 3 }
+
+    # A cycle that didn't advance the state (e.g. init ran but the distro still
+    # isn't runnable) means we've done all we usefully can right now: stop with
+    # a re-run next-step instead of looping on the same action forever.
+    if ($rank -le $prevRank) {
+      Write-Warn "$script:WslDistro didn't advance to the next stage this run."
+      Write-Info "Re-run to continue (or open '$script:WslDistro' once from the Start menu if it's stuck):  .\install.ps1 -Only wsl"
+      return
+    }
+    $prevRank = $rank
+
+    # ----------------------------------------------------------------- READY
     if ($st.Ready) {
+      Write-Ok "WSL2 default + $script:WslDistro registered and initialized"
+      if ($script:DryRun) {
+        Write-Info "[dry-run] plan: offer to run the Linux kit inside $script:WslDistro"
+        Invoke-WslLinuxKit
+        return
+      }
       if (Confirm-Action "Run the lazy-starter-kit Linux setup inside $script:WslDistro now?") {
         Invoke-WslLinuxKit
       } else {
         Write-Info "Skipped. Run it later:  .\install.ps1 -Only wsl"
       }
-    } else {
-      Write-Warn "$script:WslDistro still not runnable after initialization."
-      Write-Info "Open it once (Start menu, or 'wsl -d $script:WslDistro'), then re-run  .\install.ps1 -Only wsl"
+      return
     }
-    return
-  }
 
-  # ------------------------------------------------ NOT installed (opt-in gate)
-  $platformMissing = -not $st.Usable
-  if ($platformMissing) {
-    Write-Info "WSL is not installed on this machine."
-  } else {
-    Write-Info "WSL2 is available but the $script:WslDistro distro isn't installed."
-  }
-  Write-Info "WSL needs administrator rights and hardware virtualization (BIOS/UEFI)."
-  Write-Warn "This installs a full Linux environment; a reboot may be required."
+    # ------------------------------------------- REGISTERED but not initialized
+    if ($st.Registered) {
+      Write-Info "$script:WslDistro is registered but not initialized yet."
+      if ($script:DryRun) {
+        $launcher = $script:WslDistro.ToLower()
+        if (Test-HasCommand $launcher) {
+          Write-Host ("  [dry-run] {0} install --root   (non-interactive root init)" -f $launcher) -ForegroundColor DarkGray
+        } else {
+          Write-Host ("  [dry-run] wsl -d {0}   (interactive first-run init)" -f $script:WslDistro) -ForegroundColor DarkGray
+        }
+        Write-Info "[dry-run] then offer to run the Linux kit inside $script:WslDistro"
+        return
+      }
+      Initialize-WslDistro
+      # Initialization involves no reboot, so loop and re-detect: if it's runnable
+      # now we fall straight through to the Linux-kit offer in this same run.
+      continue
+    }
 
-  if ($script:DryRun) {
-    Write-Host "  [dry-run] wsl --install --no-launch -d $script:WslDistro" -ForegroundColor DarkGray
-    Write-Host "  [dry-run] wsl --set-default-version 2" -ForegroundColor DarkGray
+    # ---------------------------------------- NOT registered (opt-in install gate)
+    $platformMissing = -not $st.Usable
     if ($platformMissing) {
-      Write-Info "[dry-run] a reboot may be required; then re-run  .\install.ps1 -Only wsl"
+      Write-Info "WSL is not installed on this machine."
     } else {
-      Write-Info "[dry-run] then re-run  .\install.ps1 -Only wsl  to initialize + run the Linux kit"
+      Write-Info "WSL2 is available but the $script:WslDistro distro isn't installed."
     }
-    return
+    Write-Info "WSL needs administrator rights and hardware virtualization (BIOS/UEFI)."
+    Write-Warn "This installs a full Linux environment; a reboot may be required."
+
+    if ($script:DryRun) {
+      Write-Host "  [dry-run] wsl --install --no-launch -d $script:WslDistro" -ForegroundColor DarkGray
+      Write-Host "  [dry-run] wsl --set-default-version 2" -ForegroundColor DarkGray
+      if ($platformMissing) {
+        Write-Info "[dry-run] a reboot may be required; then re-run  .\install.ps1 -Only wsl"
+      } else {
+        Write-Info "[dry-run] no reboot needed to register, so this run continues: initialize $script:WslDistro, then offer the Linux kit"
+      }
+      return
+    }
+
+    # Heavy opt-in, EXACTLY like Docker Desktop: default-No, and NEVER installed
+    # non-interactively. Under -Yes (AssumeYes) or redirected input this gate
+    # returns $false, so CI -- which can't do nested virtualization -- is
+    # deterministic: it just prints the skip line below and moves on.
+    if ($script:AssumeYes -or [Console]::IsInputRedirected) {
+      Write-Info "Skipped WSL (opt-in; not installed non-interactively)."
+      Write-Info "To install it explicitly: rerun interactively and answer y, or  .\install.ps1 -Only wsl"
+      return
+    }
+    if (-not (Confirm-Action "Install WSL2 + $script:WslDistro now? (needs admin + a likely reboot)" -DefaultNo)) {
+      Write-Info "Skipped. To set it up later:  .\install.ps1 -Only wsl"
+      return
+    }
+
+    if (-not (Test-IsAdmin)) {
+      Write-Err "WSL install needs an ADMINISTRATOR PowerShell."
+      Write-Info "Right-click PowerShell > 'Run as administrator', then:  .\install.ps1 -Only wsl"
+      return
+    }
+
+    # Install/register. $true = advanced with no reboot pending -> loop and
+    # continue the pipeline; $false = stop now (reboot required, banner already
+    # printed, or an install error).
+    if (-not (Install-WslPlatform -PlatformMissing:$platformMissing)) { return }
+    continue
   }
 
-  # Heavy opt-in, EXACTLY like Docker Desktop: default-No, and NEVER installed
-  # non-interactively. Under -Yes (AssumeYes) or redirected input this gate
-  # returns $false, so CI -- which can't do nested virtualization -- is
-  # deterministic: it just prints the skip line below and moves on.
-  if ($script:AssumeYes -or [Console]::IsInputRedirected) {
-    Write-Info "Skipped WSL (opt-in; not installed non-interactively)."
-    Write-Info "To install it explicitly: rerun interactively and answer y, or  .\install.ps1 -Only wsl"
-    return
-  }
-  if (-not (Confirm-Action "Install WSL2 + $script:WslDistro now? (needs admin + a likely reboot)" -DefaultNo)) {
-    Write-Info "Skipped. To set it up later:  .\install.ps1 -Only wsl"
-    return
-  }
-
-  if (-not (Test-IsAdmin)) {
-    Write-Err "WSL install needs an ADMINISTRATOR PowerShell."
-    Write-Info "Right-click PowerShell > 'Run as administrator', then:  .\install.ps1 -Only wsl"
-    return
-  }
-
-  Install-WslPlatform -PlatformMissing:$platformMissing
+  # Cycle budget exhausted (shouldn't happen: the pipeline is only three stages,
+  # and each cycle must strictly advance the rank to get here).
+  Write-Info "Re-run to continue:  .\install.ps1 -Only wsl"
 }
