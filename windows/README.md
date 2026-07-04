@@ -104,10 +104,11 @@ re-runs. Existing files you own are preserved.
 
 ## WSL2 + Ubuntu (the `wsl` step)
 
-> 🧪 **Beta.** The step is fully covered by parse checks and simulated
-> state-machine tests (the commands are verified against Microsoft's WSL docs),
-> but it hasn't been exercised on real hardware yet. If anything misbehaves,
-> please open an issue with the output.
+> ✅ **Validated on real hardware** (v0.6.0): the full pipeline — engine
+> install → reboot → Ubuntu registration → root init → the Linux kit running
+> inside → idempotent re-run — was exercised end-to-end on a fresh Windows 11
+> machine, on top of the parse checks and simulated state-machine tests. If
+> anything misbehaves, please open an issue with the output.
 
 The final step can stand up a full Linux environment on Windows and then run the
 **lazy-starter-kit Linux installer inside it** — so `claude`, `codex`, mise,

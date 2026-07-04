@@ -7,6 +7,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-05
+
+### Changed
+- **Windows: WSL step is out of beta** — the full pipeline (engine install →
+  reboot → Ubuntu registration → root init → the Linux kit inside →
+  idempotent re-run) was validated end-to-end on a real, factory-fresh
+  Windows 11 25H2 machine (ko-KR, OneDrive-redirected Documents), including
+  `--doctor` exit-0 inside Ubuntu.
+
 ### Fixed
 - **Windows: `-Doctor` misreported mise runtimes as missing** — piping
   `Invoke-NativeSilently` output into `Select-Object -First 1` stopped the
