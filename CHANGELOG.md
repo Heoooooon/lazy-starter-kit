@@ -7,13 +7,22 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-05
+
 ### Changed
 - **Windows: one `wsl` run now advances through every stage that doesn't need a
   reboot** (was: one stage per run). The step loops detect→act, so once WSL is
   usable a single interactive run registers Ubuntu, initializes it as root, and
   offers the Linux kit — no more re-running between registration and init. A
   required reboot still stops the pipeline (it never reboots for you); re-run
-  after rebooting to resume.
+  after rebooting to resume. Validated end-to-end on the real test machine,
+  including recovery after an interrupted in-distro install.
+
+### Fixed
+- **Windows: mise's "chpwd requires PowerShell 7" warning on every new 5.1
+  shell** — the kit's profile block now sets `MISE_PWSH_CHPWD_WARNING=0` on
+  PowerShell < 7; the auto-version-switch-on-cd hook is a nice-to-have there,
+  and the warning read as an error to beginners.
 
 ## [0.6.0] - 2026-07-05
 
