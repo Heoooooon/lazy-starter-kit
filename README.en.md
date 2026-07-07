@@ -2,9 +2,9 @@
 
 <img src="./docs/banner.png" alt="lazy-starter-kit" width="760" />
 
-### One command turns a fresh MacBook into a complete dev environment.
+### The fastest way to start AI coding on your own machine.
 
-_Runtimes · shell · containers · and AI coding agents — installed and verified._
+_One command turns a fresh Mac into a complete dev environment — runtimes, shell, containers, and AI coding agents like Claude Code, installed and verified._
 
 [![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
@@ -213,6 +213,24 @@ brew install --cask rectangle maccy
 2. **GitHub**: if `gh auth login` was skipped, run it once.
 3. **Colima**: starts on demand — `colima start` (or `brew services start colima` to auto-start at login). It does **not** survive a reboot unless you enable the service.
 4. **lazycodex**: launch `codex` once and **approve the OmO hooks** in the startup review; hooks never run before approval.
+
+### First prompt in 5 minutes
+
+Installed tools are the start, not the finish — your first AI-built artifact is. In a new terminal:
+
+```sh
+mkdir my-first-ai
+cd my-first-ai
+claude    # first run asks you to sign in with your claude.ai account
+```
+
+Then paste this prompt:
+
+> Build a single-file breakout game (index.html) in this folder that I can open directly in a browser. When you're done, tell me how to open it.
+
+A few minutes later, double-click `index.html` — that's your first AI-built result.
+Prefer Codex? Run `codex` and sign in with your ChatGPT account. For concepts,
+next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
 
 ## Notes on the AI agents
 
