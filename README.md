@@ -271,13 +271,13 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/lin
 
 | 에이전트 | 한 줄 소개 |
 |---|---|
-| **Claude Code** (`claude`) | 내 프로젝트 안에서 직접 코드를 읽고 고치는 Anthropic 에이전트 |
+| **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) | 내 프로젝트 안에서 직접 코드를 읽고 고치는 Anthropic 에이전트 |
 | **[Codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`codex`) | 터미널에서 도는 OpenAI 코딩 에이전트 |
 | **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) | 인터뷰·검토된 계획·검증까지 갖춘 자율 코딩 러너 |
 | **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** (OmO) | 복잡한 코드베이스를 위한 Codex 하네스 |
 | **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 |
 
-에이전트 이름을 누르면 각 도구의 **자세한 에디터 리뷰·설치법**으로 바로 갑니다. (Claude Code는 킷의 기본 에이전트라 생태계 목록엔 없어요.)
+에이전트 이름을 누르면 각 도구의 **자세한 에디터 리뷰·설치법**으로 바로 갑니다.
 
 ---
 

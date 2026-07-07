@@ -22,6 +22,26 @@ _Runtimes · shell · containers · and AI coding agents — installed and verif
 
 ---
 
+## Contents
+
+<details><summary>Jump to a section</summary>
+
+- [Quick start](#quick-start)
+- [Why this kit](#why-this-kit)
+- [Linux & Windows](#linux--windows)
+- [What you get](#what-you-get)
+- [Steps & flags](#steps--flags)
+- [Running on a Mac that already has tools](#running-on-a-mac-that-already-has-tools)
+- [Permissions](#permissions) · [Customize](#customize)
+- [After install](#after-install)
+- [Notes on the AI agents](#notes-on-the-ai-agents)
+- [Extend your agents (tool ecosystem)](#extend-your-agents-tool-ecosystem)
+- [Uninstall](#uninstall) · [Versioning](#versioning) · [Credits](#credits)
+
+</details>
+
+---
+
 ## Quick start
 
 ```sh
@@ -196,7 +216,7 @@ brew install --cask rectangle maccy
 
 ## Notes on the AI agents
 
-- **Claude Code** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
+- **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
 - **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
 - **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
