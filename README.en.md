@@ -202,6 +202,13 @@ brew install --cask rectangle maccy
 - **lazycodex** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
 - **Hermes Agent** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
 
+## Extend your agents (tool ecosystem)
+
+The kit installs the **agents**; their real power comes from the **skills, MCP servers, and plugins** you attach to them. Picking those is its own rabbit hole, so we curated them.
+
+> **→ [cmore.dev tool ecosystem](https://cmore.dev/lazy-starter-kit/ecosystem/)**
+> 21 open-source tools organized by field (documents, government/law, games, design, coding agents, and more), each with a hands-on **editor review and an honest limitation**, and an install command ready to copy.
+
 ## Uninstall
 
 Reverse everything the kit set up, in reverse dependency order:
