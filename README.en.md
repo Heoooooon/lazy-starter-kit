@@ -197,10 +197,10 @@ brew install --cask rectangle maccy
 ## Notes on the AI agents
 
 - **Claude Code** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
-- **gajae-code** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
-- **codex** (`@openai/codex`) installs globally via npm (mise-managed node).
-- **lazycodex** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
-- **Hermes Agent** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
+- **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
+- **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
+- **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
+- **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
 
 ## Extend your agents (tool ecosystem)
 
