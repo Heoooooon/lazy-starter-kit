@@ -229,8 +229,9 @@ Then paste this prompt:
 > Build a single-file breakout game (index.html) in this folder that I can open directly in a browser. When you're done, tell me how to open it.
 
 A few minutes later, double-click `index.html` — that's your first AI-built result.
-Prefer Codex? Run `codex` and sign in with your ChatGPT account. For concepts,
-next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
+Prefer Codex? Run `codex` and sign in with your ChatGPT account.
+Want Grok? After the kit, follow [Grok manual install](#grok-build-xai--manual-install), then run `grok` and sign in at grok.com.
+For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
 
 ## Notes on the AI agents
 
@@ -239,6 +240,33 @@ next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
 - **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
 - **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
+- **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit yet — install manually after the kit (see below).
+
+### Grok Build (xAI) — manual install
+
+> Not yet part of the `install.sh` / `install.ps1` agents step. After the kit finishes, run one of the official one-liners:
+
+**macOS / Linux**
+```sh
+curl -fsSL https://x.ai/cli/install.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://x.ai/cli/install.ps1 | iex
+```
+
+Verify → launch → sign in:
+
+```sh
+grok --version   # verify install
+grok             # first run opens the browser for grok.com login
+```
+
+- **Subscription**: SuperGrok or X Premium Plus ([details](https://x.ai/cli)).
+- **API key auth** (CI / no browser): `export XAI_API_KEY="xai-..."` then `grok`.
+- **Update**: `grok update`
+- Binary usually lands in `~/.grok/bin` (Windows: `%USERPROFILE%\.grok\bin`). If `grok` is not found, open a new terminal or add that path to your PATH.
 
 ## Extend your agents (tool ecosystem)
 
@@ -303,7 +331,7 @@ the upstream projects — please star/support them:
 - [cmux](https://www.cmux.dev/) (Ghostty-based; [Ghostty](https://github.com/ghostty-org/ghostty))
 
 **AI agents**
-- [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent)
+- [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent) · [Grok Build](https://x.ai/cli)
 
 ## License
 
