@@ -50,7 +50,7 @@ If `winget` is missing, install *App Installer* from the Microsoft Store first.
 | **Runtimes** | **mise** → node (LTS), python, go, **ast-grep** · **rustup** → rust + rust-analyzer · **uv** · **bun** |
 | **Containers** | **Docker Desktop** (optional; needs WSL2/virtualization) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, `core.autocrlf`, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO). Hermes Agent runs inside WSL2. |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Antigravity CLI** (`agy`, `$env:ANTIGRAVITY='1'`). Hermes Agent runs inside WSL2. |
 
 ## Steps & flags
 

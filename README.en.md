@@ -117,7 +117,7 @@ stays at the repo root.
 | **Runtimes** | **mise** → node (LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
 | **Containers** | **Colima** + docker / compose / buildx (Docker Desktop not required) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), **Hermes Agent** (`hermes`, Nous Research) |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), **Hermes Agent** (`hermes`, Nous Research), opt-in **Antigravity CLI** (`agy`) |
 
 ## Steps & flags
 
@@ -175,7 +175,7 @@ two places, and only on a truly fresh machine:
 
 Everything else runs in **user space, no sudo**: mise → `~/.local`, rustup →
 `~/.rustup`, bun → `~/.bun`, Homebrew packages (after setup), and all dotfiles in
-`~`. Installing a cask like cmux into `/Applications` may prompt for your password,
+`~`. Installing a cask like Orca into `/Applications` may prompt for your password,
 and first-launch Gatekeeper/permission prompts are normal (on use, not install).
 `gh auth login` is your GitHub account sign-in, not a system permission. Uninstall is
 also fully user-space (Homebrew itself is never removed).
@@ -189,7 +189,7 @@ also fully user-space (Homebrew itself is never removed).
 - **Prompt** — [`config/starship.toml`](./config/starship.toml) (copied to `~/.config/` only if absent).
 - **Shell block** — [`config/zshrc.block.sh`](./config/zshrc.block.sh).
 
-## Optional productivity apps
+## Optional productivity apps & CLI pack
 
 The default kit stays focused on **developer tools**. If you also want a more
 comfortable daily macOS setup, install this small, curated set of free/open-source
@@ -199,10 +199,13 @@ apps — it's intentionally minimal, not a "recommended apps" dump:
 brew bundle --file Brewfile.optional
 # or directly:
 brew install --cask rectangle maccy
+# modern-CLI pack (the kit's zsh block auto-detects these — no config needed):
+brew install eza zoxide atuin git-delta lazygit
 ```
 
 - **[Rectangle](https://github.com/rxhanson/Rectangle)** — window snapping, a free/open-source Magnet alternative.
 - **[Maccy](https://github.com/p0deje/Maccy)** — clipboard history manager, free/open-source.
+- **Modern-CLI pack** — [eza](https://github.com/eza-community/eza) (ls with git status; `ls`/`ll`/`lt` aliases activate automatically), [zoxide](https://github.com/ajeetdsouza/zoxide) (`z <partial>` smart cd), [atuin](https://github.com/atuinsh/atuin) (searchable history, takes over Ctrl-R), [git-delta](https://github.com/dandavison/delta) (pretty diffs; enable with `git config --global core.pager delta`), [lazygit](https://github.com/jesseduffield/lazygit) (git TUI).
 
 > **Base vs. optional:** the default install is the frozen, lean dev base; new
 > non-core tools go into `Brewfile.optional`. See [CONTRIBUTING.md](./CONTRIBUTING.md).
@@ -238,6 +241,7 @@ For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmor
 - **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
 - **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
+- **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`, Google) is **opt-in only** — never installed by default: `ANTIGRAVITY=1 ./install.sh` runs the official installer into `~/.local/bin/agy` (`$env:ANTIGRAVITY='1'` on Windows). Gemini CLI's closed-source successor with a small free tier; uninstall removes the binary.
 - **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
 - **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
 - **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit yet — install manually after the kit (see below).
@@ -328,10 +332,10 @@ the upstream projects — please star/support them:
 
 **Containers & terminal**
 - [Colima](https://github.com/abiosoft/colima) · [Docker CLI](https://github.com/docker/cli) · [Compose](https://github.com/docker/compose) · [Buildx](https://github.com/docker/buildx)
-- [cmux](https://www.cmux.dev/) (Ghostty-based; [Ghostty](https://github.com/ghostty-org/ghostty))
+- [Orca](https://github.com/stablyai/orca) (MIT ADE for parallel coding agents; previously [cmux](https://www.cmux.dev/))
 
 **AI agents**
-- [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent) · [Grok Build](https://x.ai/cli)
+- [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent) · [Antigravity CLI](https://antigravity.google/docs/cli-install) · [Grok Build](https://x.ai/cli)
 
 ## License
 

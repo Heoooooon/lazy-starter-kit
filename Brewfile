@@ -36,6 +36,10 @@ brew "docker-buildx"  # buildx plugin
 cask "font-jetbrains-mono-nerd-font"
 
 # --- terminal (optional; comment out if you use another) ----------------
-# cmux: Ghostty-based terminal purpose-built for AI coding agents
-# (vertical tabs + notifications). Swap for `cask "ghostty"` if preferred.
-cask "cmux"
+# orca: open-source Agent Development Environment (MIT, stablyai/orca) —
+# runs Claude Code/Codex/etc. in parallel git worktrees, Ghostty-class
+# terminal, scrollback survives restarts. Cask is sha256-pinned and ships
+# the `orca` CLI. Swap for `cask "cmux"` or `cask "ghostty"` if you prefer
+# a plain terminal.
+tap  "stablyai/orca"
+cask "orca"

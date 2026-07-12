@@ -7,6 +7,27 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **macOS: the default terminal cask is now [Orca](https://github.com/stablyai/orca)
+  (`stablyai/orca` tap), replacing cmux** — Orca is the MIT-licensed Agent
+  Development Environment (parallel agents in isolated git worktrees,
+  Ghostty-class terminal, restart-surviving scrollback, `orca` CLI on PATH,
+  sha256-pinned cask with a `zap` stanza). cmux remains detected by the
+  `shell` step, so existing installs keep their font seeding; swap back any
+  time by editing the Brewfile (`cask "cmux"` / `cask "ghostty"`).
+
+### Added
+- **Antigravity CLI (`agy`, Google) as a strictly opt-in agent** — Gemini
+  CLI's closed-source successor (small free tier), so it is never installed
+  by default: pass `ANTIGRAVITY=1` to the installer (`$env:ANTIGRAVITY='1'`
+  on Windows). Uses the same download-then-verify pattern as Claude Code;
+  the uninstallers remove the binary. Not part of `--doctor` or CI (opt-in
+  tools must not fail the health contract).
+- **Modern-CLI pack in `Brewfile.optional`** (opt-in): eza, zoxide, atuin,
+  git-delta, lazygit. The zsh block (macOS + Linux) gains guarded hooks —
+  eza `ls`/`ll`/`lt` aliases, `zoxide init`, and `atuin init` placed after
+  fzf so atuin owns Ctrl-R — all inert unless the tools are installed.
+
 ## [0.7.0] - 2026-07-05
 
 ### Changed

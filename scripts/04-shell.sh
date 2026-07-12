@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, cmux font
+# 04-shell.sh — zsh: oh-my-zsh, plugins, ~/.zshrc block, starship, terminal font
 
 OMZ_DIR="$HOME/.oh-my-zsh"
 ZSH_CUSTOM_DIR="$OMZ_DIR/custom"
@@ -102,10 +102,17 @@ EOF
     ok "installed ~/.config/starship.toml"
   fi
 
-  # --- cmux terminal font (Ghostty-based terminal for AI coding agents) ---
-  # cmux config is JSONC (allows // comments), so we never edit an existing
-  # file (jq would choke on comments). We only seed a minimal config when
-  # none exists; otherwise just point the user at the font.
+  # --- terminal font (orca / cmux) ----------------------------------------
+  # orca (the kit's default terminal cask): fonts live in its in-app settings,
+  # not a stable config file — so we only point the user there. cmux (the
+  # previous default, still handled for existing installs): config is JSONC
+  # (allows // comments), so we never edit an existing file (jq would choke);
+  # we only seed a minimal config when none exists.
+  local orca_found=0
+  if [[ -d /Applications/Orca.app ]] || have orca; then
+    orca_found=1
+    info "orca detected — for prompt icons set its terminal font to 'JetBrainsMono Nerd Font Mono' (Orca settings)"
+  fi
   local cmux_cfg="$HOME/.config/cmux/cmux.json"
   if have cmux || [[ -e "$cmux_cfg" ]] || [[ -d /Applications/cmux.app ]]; then
     if [[ "$DRY_RUN" == "1" ]]; then
@@ -122,7 +129,7 @@ EOF
 EOF
       ok "seeded ~/.config/cmux/cmux.json with the Nerd Font"
     fi
-  else
-    info "cmux not detected — Nerd Font is installed; set it in your terminal's settings"
+  elif [[ "$orca_found" == 0 ]]; then
+    info "no kit terminal detected — Nerd Font is installed; set it in your terminal's settings"
   fi
 }

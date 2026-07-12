@@ -28,5 +28,17 @@ command -v fzf >/dev/null && source <(fzf --zsh)
 # bat: nicer cat
 command -v bat >/dev/null && alias cat='bat --paging=never'
 
+# modern-CLI pack (opt-in — see Brewfile.optional); each hook below is inert
+# unless the tool is installed.
+if command -v eza >/dev/null; then
+  alias ls='eza --icons'
+  alias ll='eza -l --git --icons'
+  alias lt='eza --tree --level=2 --icons'
+fi
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+# atuin AFTER fzf on purpose: both bind Ctrl-R and the last one loaded wins,
+# so atuin owns history search while fzf keeps Ctrl-T / Alt-C.
+command -v atuin >/dev/null && eval "$(atuin init zsh)"
+
 # starship prompt — keep LAST so it owns the prompt
 command -v starship >/dev/null && eval "$(starship init zsh)"

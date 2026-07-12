@@ -114,6 +114,13 @@ function Undo-Agents {
     } else { Write-Info "codex npm package not installed (npm)" }
   }
 
+  # Antigravity CLI (opt-in install: ANTIGRAVITY=1) -- remove its install dir
+  $agyDir = Join-Path $env:LOCALAPPDATA 'agy'
+  if (Test-Path $agyDir) {
+    if ($script:DryRun) { Write-Info "[dry-run] remove $agyDir" }
+    else { Remove-Item $agyDir -Recurse -Force -ErrorAction SilentlyContinue }
+    Write-Ok "Antigravity CLI removed"
+  }
   # lazycodex npx cache
   $npxRoots = @(
     (Join-Path $env:LOCALAPPDATA 'npm-cache\_npx'),

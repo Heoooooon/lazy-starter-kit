@@ -9,3 +9,12 @@
 # --- optional productivity apps ------------------------------------------
 cask "rectangle"   # window snapping — free/open-source Magnet alternative (MIT)
 cask "maccy"       # clipboard history manager — free/open-source (MIT)
+
+# --- optional modern-CLI pack --------------------------------------------
+# The kit's zsh block already carries guarded hooks for each of these, so
+# installing them is all it takes — no config edits needed.
+brew "eza"         # modern ls (icons + git status; aliases ls/ll/lt when present)
+brew "zoxide"      # smarter cd — `z <partial-name>` jumps by frecency
+brew "atuin"       # searchable shell history in SQLite (takes over Ctrl-R)
+brew "git-delta"   # syntax-highlighted git diffs (enable: git config --global core.pager delta)
+brew "lazygit"     # terminal UI for git (stage hunks, rebase, branches)

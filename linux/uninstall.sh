@@ -104,6 +104,12 @@ undo_agents() {
     info "Hermes Agent not installed"
   fi
 
+  # Antigravity CLI (opt-in install: ANTIGRAVITY=1) — remove the agy binary
+  if [[ -e "$HOME/.local/bin/agy" ]]; then
+    run rm -f "$HOME/.local/bin/agy"
+    ok "Antigravity CLI removed"
+  fi
+
   # Claude Code — native install is ours, remove it unconditionally
   if [[ -e "$HOME/.local/bin/claude" || -d "$HOME/.local/share/claude" ]]; then
     run rm -f  "$HOME/.local/bin/claude"
