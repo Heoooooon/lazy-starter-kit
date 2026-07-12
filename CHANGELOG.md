@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-12
+
 ### Changed
 - **macOS: the default terminal cask is now [Orca](https://github.com/stablyai/orca)
   (`stablyai/orca` tap), replacing cmux** — Orca is the MIT-licensed Agent
