@@ -33,7 +33,7 @@ try {
   Expect-Throw { Remove-KitTree -AllowedRoot $allowed -Path 'relative\target' } 'relative target'
 
   $literal = Join-Path $allowed 'space [literal] 한글'
-  New-Item -ItemType Directory -LiteralPath $literal -Force | Out-Null
+  [IO.Directory]::CreateDirectory($literal) | Out-Null
   Remove-KitTree -AllowedRoot $allowed -Path $literal
   if (Test-Path -LiteralPath $literal) { Fail 'literal path remained' }
 
