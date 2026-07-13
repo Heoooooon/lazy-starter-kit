@@ -9,6 +9,11 @@ fail() {
   exit 1
 }
 
+grep -qF 'tap  "stablyai/orca", trusted: { cask: "orca" }' "$ROOT/Brewfile" \
+  || fail 'Brewfile does not limit third-party trust to the Orca cask'
+grep -qF 'cask "stablyai/orca/orca"' "$ROOT/Brewfile" \
+  || fail 'Brewfile does not use the fully qualified Orca cask'
+
 run_fixture() {
   local mode="$1" output status
   set +e

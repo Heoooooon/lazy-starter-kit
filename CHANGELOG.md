@@ -12,8 +12,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ### Fixed
 - **Recursive deletion now fails closed on every platform.** macOS/Linux route
   all recursive removal through one Bash 3.2-compatible strict-descendant guard;
-  Windows uses a literal-path guard that rejects roots and reparse points. The
-  every Bash batch and each Windows target is validated before deletion,
+  Windows uses a literal-path guard that rejects roots and reparse points.
+  Every Bash batch and each Windows target is validated before deletion,
   including dry-run and `--yes`.
 - **Codex and Claude Code now block recursive `rm` before execution.** The agents
   step idempotently merges `PreToolUse` hooks into existing user settings, keeps
@@ -24,7 +24,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   Homebrew sees a manually installed Orca app or another Brewfile entry fails.
   Existing formulae are not proactively upgraded (though Homebrew may still
   upgrade required dependencies), independent shell setup still runs, and a
-  partial package failure is reported with exit code 1 at the end.
+  partial package failure is reported with exit code 1 at the end. Fresh installs
+  trust only the fully qualified `stablyai/orca/orca` cask, not the entire tap.
 - **Existing custom oh-my-zsh plugin directories no longer hide the kit's
   autosuggestions and syntax-highlighting plugins** on macOS or Linux; the shell
   block falls back to the deterministic directory where the installer cloned

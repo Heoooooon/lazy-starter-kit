@@ -41,5 +41,5 @@ cask "font-jetbrains-mono-nerd-font"
 # terminal, scrollback survives restarts. Cask is sha256-pinned and ships
 # the `orca` CLI. Swap for `cask "cmux"` or `cask "ghostty"` if you prefer
 # a plain terminal.
-tap  "stablyai/orca"
-cask "orca"
+tap  "stablyai/orca", trusted: { cask: "orca" }
+cask "stablyai/orca/orca"
