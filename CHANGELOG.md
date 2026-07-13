@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-13
+
 ### Fixed
 - **Recursive deletion now fails closed on every platform.** macOS/Linux route
   all recursive removal through one Bash 3.2-compatible strict-descendant guard;
