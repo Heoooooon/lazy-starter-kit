@@ -14,6 +14,10 @@ step_runtimes() {
       info "[dry-run] would install via mise: ${MISE_TOOLS[*]}, and Rust stable via rustup (after the brew step provides them)"
       return 0
     fi
+    if [[ "${KIT_INSTALL_FAILED:-0}" == "1" ]]; then
+      warn "mise or rustup is unavailable after Brewfile errors — skipping runtimes so remaining setup can continue"
+      return 0
+    fi
     have mise   || die "mise not found — run the 'brew' step first."
     have rustup || die "rustup not found — run the 'brew' step first."
   fi

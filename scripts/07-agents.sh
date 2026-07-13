@@ -79,6 +79,18 @@ step_agents() {
   fi
   info "lazycodex: on first 'codex' launch, APPROVE the omo hooks in the startup review."
 
+  if have node; then
+    if [[ "$DRY_RUN" == "1" ]]; then
+      node "$ROOT/scripts/ai/install-shell-guard.js" --home "$HOME" --dry-run
+    else
+      node "$ROOT/scripts/ai/install-shell-guard.js" --home "$HOME" \
+        || warn "could not install the Codex/Claude recursive-rm guard"
+    fi
+  else
+    warn "node not found — could not install the Codex/Claude recursive-rm guard"
+  fi
+  info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks."
+
   # --- Hermes Agent (Nous Research) -------------------------------------
   # Official installer: clones NousResearch/hermes-agent, self-manages Python/
   # Node/Chromium, links `hermes` into ~/.local/bin (already on PATH, exported

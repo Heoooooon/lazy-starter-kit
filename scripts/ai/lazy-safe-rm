@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "--help" || "$#" -eq 0 ]]; then
+  printf '%s\n' 'Usage: lazy-safe-rm TARGET...' \
+    'Recursively removes targets only when they are strict, non-symlink descendants of the current Git workspace.'
+  [[ "$#" -gt 0 ]] && exit 0 || exit 2
+fi
+
+data_dir="${LAZY_STARTER_KIT_AI_SAFETY_DIR:-$HOME/.local/share/lazy-starter-kit/ai-safety}"
+if [[ ! -f "$data_dir/common.sh" ]]; then
+  printf 'lazy-safe-rm: missing safety library: %s\n' "$data_dir/common.sh" >&2
+  exit 1
+fi
+source "$data_dir/common.sh"
+
+prefix="$(git -C "$PWD" rev-parse --show-prefix 2>/dev/null)" || {
+  err 'lazy-safe-rm must run inside a Git workspace'
+  exit 1
+}
+workspace="$PWD"
+if [[ -n "$prefix" ]]; then
+  suffix="/${prefix%/}"
+  case "$workspace" in
+    *"$suffix") workspace="${workspace%"$suffix"}" ;;
+    *) err 'could not resolve the current Git workspace boundary'; exit 1 ;;
+  esac
+fi
+
+targets=()
+for target in "$@"; do
+  if [[ "$target" == /* ]]; then
+    targets+=("$target")
+  else
+    target="${target#./}"
+    targets+=("$PWD/$target")
+  fi
+done
+safe_rm_rf_under "$workspace" "${targets[@]}"

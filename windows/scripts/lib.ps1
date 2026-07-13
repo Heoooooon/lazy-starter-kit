@@ -73,6 +73,73 @@ function Invoke-Run {
   return ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE)
 }
 
+# Central recursive-delete boundary for the Windows kit.
+function Remove-KitTree {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory)][string]$AllowedRoot,
+    [Parameter(Mandatory)][string]$Path
+  )
+
+  if ([string]::IsNullOrWhiteSpace($AllowedRoot) -or [string]::IsNullOrWhiteSpace($Path)) {
+    throw 'safe recursive delete requires non-empty root and target paths'
+  }
+  if (($AllowedRoot -notmatch '^[A-Za-z]:[\\/]') -or ($Path -notmatch '^[A-Za-z]:[\\/]')) {
+    throw "safe recursive delete accepts absolute drive paths only: $Path"
+  }
+  if (($AllowedRoot -split '[\\/]') -contains '..' -or ($Path -split '[\\/]') -contains '..' -or
+      ($AllowedRoot -split '[\\/]') -contains '.' -or ($Path -split '[\\/]') -contains '.') {
+    throw "safe recursive delete refuses dot path components: $Path"
+  }
+
+  $trimChars = [char[]]@('\', '/')
+  $rootFull = [IO.Path]::GetFullPath($AllowedRoot).TrimEnd($trimChars)
+  $pathFull = [IO.Path]::GetFullPath($Path).TrimEnd($trimChars)
+  $volumeRoot = [IO.Path]::GetPathRoot($rootFull).TrimEnd($trimChars)
+  if ([string]::Equals($rootFull, $volumeRoot, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "refusing filesystem root as recursive-delete boundary: $AllowedRoot"
+  }
+  if (-not (Test-Path -LiteralPath $rootFull -PathType Container)) {
+    throw "safe recursive delete root is not an existing directory: $AllowedRoot"
+  }
+  if ([string]::Equals($pathFull, $rootFull, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "refusing recursive delete of allowed root: $Path"
+  }
+  $rootPrefix = $rootFull + [IO.Path]::DirectorySeparatorChar
+  if (-not $pathFull.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "recursive delete target escapes allowed root ${rootFull}: $Path"
+  }
+  if ($env:USERPROFILE) {
+    $homeFull = [IO.Path]::GetFullPath($env:USERPROFILE).TrimEnd($trimChars)
+    if ([string]::Equals($pathFull, $homeFull, [StringComparison]::OrdinalIgnoreCase)) {
+      throw "refusing recursive delete of USERPROFILE: $Path"
+    }
+  }
+
+  $cursor = $pathFull
+  while ($true) {
+    if (Test-Path -LiteralPath $cursor) {
+      $item = Get-Item -LiteralPath $cursor -Force
+      if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "refusing recursive delete through reparse point: $cursor"
+      }
+    }
+    if ([string]::Equals($cursor, $rootFull, [StringComparison]::OrdinalIgnoreCase)) { break }
+    $parent = [IO.Path]::GetDirectoryName($cursor)
+    if ([string]::IsNullOrWhiteSpace($parent)) {
+      throw "could not prove recursive-delete containment for: $Path"
+    }
+    $cursor = $parent.TrimEnd($trimChars)
+  }
+
+  if (-not (Test-Path -LiteralPath $pathFull)) { return }
+  if ($script:DryRun) {
+    Write-Info "[dry-run] would recursively remove $pathFull"
+    return
+  }
+  Remove-Item -LiteralPath $pathFull -Recurse -Force -ErrorAction Stop
+}
+
 # ---------------------------------------------------------------------------
 # Native-command invocation with stderr discarded.
 # On Windows PowerShell 5.1 a native command's stderr lines become ErrorRecords,

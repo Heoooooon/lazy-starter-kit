@@ -17,10 +17,13 @@ export BUN_INSTALL="$HOME/.bun"
 
 # oh-my-zsh plugins (sourced directly so they work regardless of plugins=() line)
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-[ -f "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ] \
-  && source "$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
-[ -f "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] \
-  && source "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+_lsk_plugin="$ZSH_CUSTOM/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+[ -f "$_lsk_plugin" ] || _lsk_plugin="$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh"
+[ -f "$_lsk_plugin" ] && source "$_lsk_plugin"
+_lsk_plugin="$ZSH_CUSTOM/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[ -f "$_lsk_plugin" ] || _lsk_plugin="$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+[ -f "$_lsk_plugin" ] && source "$_lsk_plugin"
+unset _lsk_plugin
 
 # fzf: fuzzy finder keybindings + completion (Ctrl-R history, Ctrl-T files, Alt-C cd)
 command -v fzf >/dev/null && source <(fzf --zsh)

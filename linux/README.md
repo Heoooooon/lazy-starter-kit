@@ -69,9 +69,14 @@ prereqs  packages  runtimes  shell  docker  git  agents
 ./install.sh --profile work        # presets: full · minimal · work (corporate PCs)
 ```
 
-Every step is **idempotent** — safe to re-run. `~/.zshrc` is edited via clearly
+Every step is **idempotent** — safe to re-run. `${ZDOTDIR-$HOME}/.zshrc` is edited via clearly
 marked managed blocks (`# >>> lazy-starter-kit:* >>>`) that get replaced (never
 duplicated) on re-runs. Existing files you own are preserved.
+
+The agents step also installs a Codex/Claude Code `PreToolUse` guard that blocks
+recursive `rm` and provides `lazy-safe-rm` for strict descendants of the current
+Git workspace. Recursive installer/uninstaller cleanup independently validates
+physical containment and refuses root, HOME, boundary, outside, and symlink targets.
 
 ## Design notes
 
@@ -107,7 +112,7 @@ Safe by design:
 - **gajae-code (`gjc`) is kept** unless you pass `--with-gajae`.
 - Removing codex backs up `~/.codex/auth.json` first; `--keep-codex-home` leaves
   `~/.codex` intact.
-- Only the kit's own managed blocks are stripped from `~/.zshrc`.
+- Only the kit's own managed blocks are stripped from `${ZDOTDIR-$HOME}/.zshrc`.
 
 ## Troubleshooting
 

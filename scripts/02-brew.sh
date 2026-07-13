@@ -18,6 +18,12 @@ step_brew() {
   fi
 
   export HOMEBREW_NO_ENV_HINTS=1
+  export HOMEBREW_BUNDLE_NO_UPGRADE=1
+  if [[ -d /Applications/Orca.app || -d "$HOME/Applications/Orca.app" ]] || have orca; then
+    export HOMEBREW_BUNDLE_CASK_SKIP="${HOMEBREW_BUNDLE_CASK_SKIP:+$HOMEBREW_BUNDLE_CASK_SKIP }orca"
+    export HOMEBREW_BUNDLE_TAP_SKIP="${HOMEBREW_BUNDLE_TAP_SKIP:+$HOMEBREW_BUNDLE_TAP_SKIP }stablyai/orca"
+    info "Orca already present — leaving the existing installation untouched"
+  fi
   if [[ "$DRY_RUN" == "1" ]]; then
     info "[dry-run] brew bundle --file=$brewfile  (would install missing formulae/casks)"
     info "[dry-run] pending entries:"
@@ -27,6 +33,10 @@ step_brew() {
 
   run brew update --quiet || warn "brew update failed (continuing)"
   # --no-lock was removed in modern Homebrew; bundle no longer writes a lockfile by default
-  run brew bundle install --file="$brewfile"
-  ok "Brewfile applied"
+  if run brew bundle install --file="$brewfile"; then
+    ok "Brewfile applied"
+  else
+    export KIT_INSTALL_FAILED=1
+    warn "some Brewfile entries failed — continuing with the remaining setup"
+  fi
 }

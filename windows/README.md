@@ -172,6 +172,12 @@ Safe by design:
 - **Never auto-removed**: your **git identity**, `git` itself, and the Nerd Font.
 - **gajae-code (`gjc`) is kept** unless you pass `-WithGajae` (refused while running).
 - Removing codex backs up `~/.codex/auth.json` first; `-KeepCodexHome` leaves it intact.
+- Recursive cleanup is centralized in `Remove-KitTree`: it requires a strict
+  descendant of an explicit root and rejects drive roots, `USERPROFILE`, outside
+  paths, dot segments, and junction/reparse-point traversal before deletion.
+- The agents step installs the same Codex/Claude Code recursive-`rm` hook used by
+  the macOS/Linux kits. `lazy-safe-rm.cmd` delegates guarded workspace cleanup to
+  Git Bash, which is installed with Git for Windows.
 - Only the kit's own managed block is stripped from your PowerShell profile.
 
 ## Troubleshooting

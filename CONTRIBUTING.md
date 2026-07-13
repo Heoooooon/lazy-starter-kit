@@ -76,7 +76,13 @@ Run what CI runs:
 # bash kits — lint
 bash -n install.sh linux/install.sh lib/common.sh
 shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh \
-  scripts/*.sh linux/install.sh linux/uninstall.sh linux/scripts/*.sh
+  scripts/*.sh scripts/ai/lazy-safe-rm linux/install.sh linux/uninstall.sh linux/scripts/*.sh
+node --check scripts/ai/shell-command-guard.js
+node --check scripts/ai/install-shell-guard.js
+tests/macos-existing-home.sh
+tests/zdotdir-existing-home.sh
+tests/safe-recursive-delete.sh
+tests/ai-shell-guard.sh
 
 # bash kits — behavior (no changes made)
 ./install.sh --dry-run && bash linux/install.sh --dry-run

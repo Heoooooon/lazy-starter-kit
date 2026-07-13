@@ -135,7 +135,7 @@
       <div class="num">1</div>
       <div class="card">
         <h3><span class="id">prereqs</span> 기반 설치</h3>
-        <p>모든 것의 토대. Xcode Command Line Tools(컴파일러·git·헤더)와 Homebrew를 깔고, brew 환경을 <code>~/.zprofile</code>에 영구 등록합니다.</p>
+        <p>모든 것의 토대. Xcode Command Line Tools(컴파일러·git·헤더)와 Homebrew를 깔고, brew 환경을 활성 Zsh 설정 디렉터리의 <code>.zprofile</code>에 영구 등록합니다.</p>
         <div class="tools"><span>Xcode CLT</span><span>Homebrew</span></div>
       </div>
     </div>
@@ -168,7 +168,7 @@
       <div class="num">4</div>
       <div class="card">
         <h3><span class="id">shell</span> 셸 환경</h3>
-        <p>oh-my-zsh + 플러그인, starship 프롬프트, Nerd Font를 연결. <code>~/.zshrc</code>는 마커 블록으로 주입해 재실행해도 중복되지 않습니다.</p>
+        <p>oh-my-zsh + 플러그인, starship 프롬프트, Nerd Font를 연결. <code>ZDOTDIR</code>을 반영한 <code>.zshrc</code>에 마커 블록으로 주입해 재실행해도 중복되지 않습니다.</p>
         <p class="needs">↳ 필요: brew (starship/fzf), runtimes (mise)</p>
         <div class="tools"><span>oh-my-zsh</span><span>git · npm · node · macos</span><span>autosuggestions</span><span>syntax-highlighting</span><span>starship.toml</span><span>orca (Nerd Font)</span></div>
       </div>

@@ -67,9 +67,9 @@ cd lazy-starter-kit
   openSUSE, plus a second back-to-back install (idempotency) and a
   previous-release → main **upgrade path**. "Does it work on my machine?" is
   answered by tests, not docs.
-- 🛟 **Double safety for your config** — a one-time `.bak` backup before the
-  first edit of `~/.zshrc` / PowerShell profiles, marker-block-only edits, and
-  the kit refuses to touch a file with damaged markers.
+- 🛟 **Layered safety for config and cleanup** — one-time `.bak` backups,
+  marker-block-only edits, fail-closed recursive-delete boundaries, and Codex /
+  Claude Code hooks that block recursive `rm` before execution.
 - 🏢 **Corporate machines are first-class** — survives without sudo/admin
   (user-space tools still install), Docker Desktop stays opt-in (licensing),
   profile encoding preserved, and a `--profile work` preset.
@@ -139,7 +139,7 @@ prereqs  brew  runtimes  shell  docker  git  agents
 ./install.sh --profile work     # presets: full · minimal · work (corporate PCs)
 ```
 
-Every step is **idempotent** — safe to re-run. `~/.zshrc`, `~/.zprofile`, and
+Every step is **idempotent** — safe to re-run. `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, and
 `~/.docker/config.json` are edited via clearly marked managed blocks that
 get replaced (never duplicated) on re-runs. Existing files you own are preserved.
 
@@ -157,7 +157,7 @@ set-up one — it never overwrites your config. Specifics:
   migrate the old one. You'll end up with both; mise's wins in new shells. The
   `runtimes` step now prints a warning when it detects a non-mise runtime. Verify
   with `which -a node`.
-- **Hand-edited `~/.zshrc`?** The kit appends its own marked block, so lines you
+- **Hand-edited `${ZDOTDIR-$HOME}/.zshrc`?** The kit appends its own marked block, so lines you
   added by hand (e.g. your own `mise activate` / `starship init`) will run *in
   addition* to the kit's — harmless but redundant. Move your lines into the managed
   block, or remove the duplicates.
@@ -212,7 +212,7 @@ brew install eza zoxide atuin git-delta lazygit
 
 ## After install
 
-1. **Open a new terminal** (or `source ~/.zshrc`) so PATH/prompt load.
+1. **Open a new terminal**, or from an existing Zsh session `source` the quoted `.zshrc` path printed by the installer.
 2. **GitHub**: if `gh auth login` was skipped, run it once.
 3. **Colima**: starts on demand — `colima start` (or `brew services start colima` to auto-start at login). It does **not** survive a reboot unless you enable the service.
 4. **lazycodex**: launch `codex` once and **approve the OmO hooks** in the startup review; hooks never run before approval.
@@ -238,6 +238,12 @@ For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmor
 
 ## Notes on the AI agents
 
+- The `agents` step installs a `PreToolUse` guard for Codex and Claude Code. It
+  blocks recursive `rm` (including direct `/bin/rm` and nested shell forms) and
+  installs `lazy-safe-rm`, which only removes strict non-symlink descendants of
+  the current Git workspace. Approve the hook when Codex first asks you to review it.
+  Hooks are defense in depth, not an unbypassable security boundary; keep Codex's
+  `workspace-write` sandbox enabled as the final containment layer.
 - **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
 - **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
@@ -291,6 +297,11 @@ Reverse everything the kit set up, in reverse dependency order:
 ```
 
 Groups: `agents shell docker runtimes brew` (run in reverse).
+
+Every recursive directory removal is validated as a strict physical descendant
+of its explicit allowed root before deletion starts. Root/HOME, boundary-equal,
+outside, dot-segment, and symlink/reparse-point targets abort the operation even
+under `--yes` or dry-run.
 
 Safe by design:
 - **Never auto-removed**: Homebrew, Xcode Command Line Tools, and your **git identity**.

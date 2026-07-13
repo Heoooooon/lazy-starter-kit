@@ -3,6 +3,7 @@
 *.bak
 .idea/
 .vscode/
+.claude/settings.local.json
 docs/preview.png
 .omo/
 .gjc/

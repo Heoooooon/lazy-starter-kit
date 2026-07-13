@@ -43,10 +43,13 @@ step_prereqs() {
 
   load_brew
 
-  # --- persist brew shellenv to ~/.zprofile (managed block) -------------
-  local p; p="$(brew_prefix)"
-  remove_block "$HOME/.zprofile" "macos-starter-kit:brew"   # migrate pre-rename block
-  inject_block "$HOME/.zprofile" "lazy-starter-kit:brew" <<EOF
+  local p zprofile; p="$(brew_prefix)"; zprofile="$(zsh_config_file .zprofile)"
+  remove_block "$zprofile" "macos-starter-kit:brew"   # migrate pre-rename block
+  if [[ "$zprofile" != "$HOME/.zprofile" ]]; then
+    remove_block "$HOME/.zprofile" "macos-starter-kit:brew"
+    remove_block "$HOME/.zprofile" "lazy-starter-kit:brew"
+  fi
+  inject_block "$zprofile" "lazy-starter-kit:brew" <<EOF
 eval "\$($p/bin/brew shellenv)"
 EOF
 }

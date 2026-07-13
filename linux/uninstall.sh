@@ -49,6 +49,15 @@ undo_agents() {
   load_local_bins; load_mise
   export PATH="$HOME/.bun/bin:$PATH"
 
+  if have node && [[ -f "$ROOT/../scripts/ai/install-shell-guard.js" ]]; then
+    if [[ "$DRY_RUN" == "1" ]]; then
+      node "$ROOT/../scripts/ai/install-shell-guard.js" uninstall --home "$HOME" --dry-run
+    else
+      node "$ROOT/../scripts/ai/install-shell-guard.js" uninstall --home "$HOME" \
+        || warn "could not remove the lazy-starter-kit AI safety hook"
+    fi
+  fi
+
   # codex (npm global — plain npm IS the mise npm once load_mise ran)
   if have npm && npm ls -g --depth=0 2>/dev/null | grep -q '@openai/codex'; then
     info "Uninstalling @openai/codex…"
@@ -62,7 +71,7 @@ undo_agents() {
   for d in "$HOME"/.npm/_npx/*/node_modules/lazycodex-ai; do
     [[ -e "$d" ]] || continue
     found=1
-    run rm -rf "$(dirname "$(dirname "$d")")"
+    safe_rm_rf_under "$HOME/.npm/_npx" "$(dirname "$(dirname "$d")")"
   done
   [[ "$found" == 1 ]] && ok "cleared lazycodex npx cache" || info "no lazycodex npx cache"
 
@@ -76,7 +85,7 @@ undo_agents() {
           cp -p "$HOME/.codex/auth.json" "$bak" && ok "backed up auth.json -> ${bak/#$HOME/~}"
         fi
       fi
-      run rm -rf "$HOME/.codex"
+      safe_rm_rf_under "$HOME" "$HOME/.codex"
     else
       info "kept ~/.codex"
     fi
@@ -94,7 +103,7 @@ undo_agents() {
     done
     if [[ -d "$HOME/.hermes" ]]; then
       if confirm "Remove ~/.hermes (Hermes code, data, sessions)?"; then
-        run rm -rf "$HOME/.hermes"
+        safe_rm_rf_under "$HOME" "$HOME/.hermes"
       else
         info "kept ~/.hermes"
       fi
@@ -113,7 +122,7 @@ undo_agents() {
   # Claude Code — native install is ours, remove it unconditionally
   if [[ -e "$HOME/.local/bin/claude" || -d "$HOME/.local/share/claude" ]]; then
     run rm -f  "$HOME/.local/bin/claude"
-    run rm -rf "$HOME/.local/share/claude"
+    safe_rm_rf_under "$HOME" "$HOME/.local/share/claude"
     ok "Claude Code removed"
   else
     info "Claude Code not installed"
@@ -129,7 +138,7 @@ undo_agents() {
           cp -p "$HOME/.claude.json" "$ccbak" && ok "backed up ~/.claude.json -> ${ccbak/#$HOME/~}"
         fi
       fi
-      run rm -rf "$HOME/.claude"
+      safe_rm_rf_under "$HOME" "$HOME/.claude"
       run rm -f  "$HOME/.claude.json"
     else
       info "kept ~/.claude"
@@ -155,16 +164,23 @@ undo_agents() {
 # shell — managed blocks + (optional) oh-my-zsh / starship.toml
 # ---------------------------------------------------------------------------
 undo_shell() {
+  local zshrc
+  cache_zsh_config_dir
+  zshrc="$(zsh_config_file .zshrc)"
   step "Revert shell configuration"
-  remove_block "$HOME/.zshrc"    "lazy-starter-kit:main"
-  remove_block "$HOME/.zshrc"    "lazy-starter-kit:ohmyzsh"
+  remove_block "$zshrc"          "lazy-starter-kit:main"
+  remove_block "$zshrc"          "lazy-starter-kit:ohmyzsh"
+  if [[ "$zshrc" != "$HOME/.zshrc" ]]; then
+    remove_block "$HOME/.zshrc" "lazy-starter-kit:main"
+    remove_block "$HOME/.zshrc" "lazy-starter-kit:ohmyzsh"
+  fi
 
   if [[ -f "$HOME/.config/starship.toml" ]]; then
     if confirm "Remove ~/.config/starship.toml?"; then run rm -f "$HOME/.config/starship.toml"
     else info "kept starship.toml"; fi
   fi
   if [[ -d "$HOME/.oh-my-zsh" ]]; then
-    if confirm "Remove ~/.oh-my-zsh (framework + plugins)?"; then run rm -rf "$HOME/.oh-my-zsh"
+    if confirm "Remove ~/.oh-my-zsh (framework + plugins)?"; then safe_rm_rf_under "$HOME" "$HOME/.oh-my-zsh"
     else info "kept oh-my-zsh"; fi
   fi
   # The install may have made zsh the login shell; we never chsh back
@@ -242,8 +258,8 @@ undo_packages() {
   if confirm "Remove user-space tools mise/starship/uv/bun and their homes?"; then
     run rm -f  "$HOME/.local/bin/mise" "$HOME/.local/bin/starship" \
                "$HOME/.local/bin/uv" "$HOME/.local/bin/uvx"
-    run rm -rf "$HOME/.local/share/mise" "$HOME/.config/mise" "$HOME/.cache/mise"
-    run rm -rf "$HOME/.bun"
+    safe_rm_rf_under "$HOME" "$HOME/.local/share/mise" "$HOME/.config/mise" "$HOME/.cache/mise"
+    safe_rm_rf_under "$HOME" "$HOME/.bun"
     ok "removed mise/starship/uv/bun"
   else
     info "kept user-space tools"

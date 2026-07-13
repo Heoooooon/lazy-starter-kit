@@ -103,11 +103,13 @@ usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/inst
 # fdfind/batcat names too.
 # ---------------------------------------------------------------------------
 _doctor_config() {
-  _doctor_managed "$HOME/.zshrc" "lazy-starter-kit:main"
+  _doctor_managed "$_DOCTOR_ZSHRC" "lazy-starter-kit:main"
   _doctor_exists  "$HOME/.config/starship.toml"
 }
 
 doctor() {
+  cache_zsh_config_dir
+  _DOCTOR_ZSHRC="$(zsh_config_file .zshrc)"
   load_mise   # so `mise which` resolves node/python/go (safe no-op if absent)
   printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION · doctor ==$_C_RESET"
 
@@ -260,7 +262,8 @@ if [[ "$DRY_RUN" == "1" ]]; then
   info "That was a dry run — re-run without --dry-run to apply."
 else
   step "Next steps"
-  info "1) Open a NEW terminal (or: source ~/.zshrc) so PATH + prompt load."
+  zshrc="$(zsh_config_file .zshrc)"
+  info "1) Open a NEW terminal (or: source $(shell_quote "$zshrc")) so PATH + prompt load."
   if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
     info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)"
   fi

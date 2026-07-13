@@ -7,6 +7,33 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Recursive deletion now fails closed on every platform.** macOS/Linux route
+  all recursive removal through one Bash 3.2-compatible strict-descendant guard;
+  Windows uses a literal-path guard that rejects roots and reparse points. The
+  every Bash batch and each Windows target is validated before deletion,
+  including dry-run and `--yes`.
+- **Codex and Claude Code now block recursive `rm` before execution.** The agents
+  step idempotently merges `PreToolUse` hooks into existing user settings, keeps
+  one-time backups, covers direct and nested-shell forms, and installs
+  `lazy-safe-rm` for cleanup confined to the current Git workspace. Hooks remain
+  defense in depth; the sandbox is still the final containment boundary.
+- **Existing macOS setups no longer stop before shell activation** when
+  Homebrew sees a manually installed Orca app or another Brewfile entry fails.
+  Existing formulae are not proactively upgraded (though Homebrew may still
+  upgrade required dependencies), independent shell setup still runs, and a
+  partial package failure is reported with exit code 1 at the end.
+- **Existing custom oh-my-zsh plugin directories no longer hide the kit's
+  autosuggestions and syntax-highlighting plugins** on macOS or Linux; the shell
+  block falls back to the deterministic directory where the installer cloned
+  them.
+- **Existing `ZDOTDIR` layouts now receive active Zsh configuration** on macOS
+  and Linux, including standard non-interactive values assigned in `.zshenv`.
+  Install, doctor, guidance, and uninstall consistently target the active
+  `.zshrc` and macOS `.zprofile`, while stale kit blocks from the old HOME path
+  are removed. Empty or relative values are rejected because they cannot provide
+  a stable per-user startup path.
+
 ## [0.8.0] - 2026-07-12
 
 ### Changed

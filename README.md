@@ -189,7 +189,7 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/ins
 
 ### 3단계 — 끝나면
 
-- **새 터미널을 열거나** `source ~/.zshrc` 실행.
+- **새 터미널을 열거나**, 현재 Zsh 세션에서 설치 종료 메시지에 표시된 `.zshrc` 경로를 `source`하세요.
 - 안내에 따라 `gh auth login`(GitHub 로그인), 터미널 글꼴을 `JetBrainsMono Nerd Font`로 설정.
 
 > 실행 전에 **무엇을 하는지 먼저 보고 싶다면**(권장):
@@ -219,7 +219,7 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/lin
 
 ### 3단계 — 끝나면
 
-- **새 터미널을 열거나** `source ~/.zshrc`.
+- **새 터미널을 열거나**, 현재 Zsh 세션에서 설치 종료 메시지에 표시된 `.zshrc` 경로를 `source`하세요.
 - Docker를 깔았다면 **로그아웃 후 다시 로그인**(또는 `newgrp docker`)해야 권한이 적용돼요.
 
 📖 **Linux 상세 문서**: [linux/README.md](./linux/README.md)
@@ -346,16 +346,19 @@ grok             # 첫 실행 시 브라우저에서 grok.com 로그인
 
 - **덮어쓰지 않음**: 이미 깔린 도구/설정은 건너뜁니다. 당신이 만든 파일은 보존돼요.
 - **몇 번을 다시 돌려도 안전**: CI가 매 커밋 **두 번 연속 설치**해서 확인합니다(멱등).
-- **표시된 블록만 편집**: 설정 파일(`~/.zshrc`, PowerShell 프로필 등)에는 `# >>> lazy-starter-kit ... >>>` 로
+- **표시된 블록만 편집**: 설정 파일(`${ZDOTDIR-$HOME}/.zshrc`, PowerShell 프로필 등)에는 `# >>> lazy-starter-kit ... >>>` 로
   **명확히 표시된 구역**만 넣고, 재실행 시 그 구역만 교체합니다(중복 없음). 손으로 쓴 줄은 안 건드려요.
   처음 고치기 전엔 **자동 백업**(`.bak`)을 만들고, 마커가 손상돼 있으면 수정을 거부합니다.
 - **git 신원 보호**: 이름/이메일이 **비어 있을 때만** 채우고, 있으면 절대 안 바꿉니다.
-- **데이터 삭제 없음**: 설치 과정에서 당신 데이터를 지우지 않습니다.
+- **재귀 삭제 경계 검증**: 설치 중 플러그인 재시도와 제거 스크립트의 디렉터리 정리는 대상 전체를 먼저 검사합니다. `HOME`·루트·허용 경계 자체·경계 밖 경로·심볼릭 링크가 섞이면 아무것도 지우지 않고 실패합니다. `--dry-run`에서도 같은 검증을 거칩니다.
+- **AI의 `rm -rf` 차단**: `agents` 단계가 Codex·Claude Code의 `PreToolUse` 훅을 설치해 재귀 `rm`을 실행 전에 거부하고, 현재 Git 작업공간의 엄격한 하위 경로만 받는 `lazy-safe-rm`을 제공합니다. Codex가 처음 훅 검토를 요청하면 승인해야 활성화됩니다.
+- **데이터 삭제 범위**: 설치는 사용자 데이터를 지우지 않습니다. 제거는 기존 확인 절차에 더해 위 경계 검증을 통과한 키트 관리 디렉터리만 정리합니다.
 - **되돌리기 제공**: 아래 [제거](#지우고-싶어요-제거)로 깔끔히 원복.
 - **공급망(supply chain) 정직 고지**: 이 키트는 Homebrew·oh-my-zsh·Docker·Hermes 등 **업스트림 프로젝트의 공식 설치 스크립트를 HTTPS로** 내려받아 실행하고, npm/bun 패키지는 **최신 버전으로** 설치합니다. 즉 그 업스트림들을 신뢰하는 셈이니, 걱정되면 각 프로젝트를 먼저 확인하세요. 보안 범위·신고는 [SECURITY.md](./SECURITY.md) 참고.
 
 > 정말 걱정되면 **먼저 `--dry-run`(맥/리눅스) 또는 `-DryRun`(윈도우)** 으로 "무엇을 할지"만 확인하세요.
 > 남의/회사 메인 PC라면 **여분 PC나 가상머신(VM)에서 먼저** 테스트하는 걸 권합니다.
+> AI 훅은 지원되는 셸 도구 호출을 막는 추가 방어층이며 끄거나 우회 가능한 절대 보안 경계는 아닙니다. Codex는 `workspace-write` 샌드박스를 함께 쓰는 것을 권장합니다.
 
 > **검증**: **macOS·Windows(Server 2025)·Ubuntu·Fedora·openSUSE·Arch** 모두
 > 커밋마다 설치→검증→제거(end-to-end)를 자동 테스트(CI)로 돌립니다.

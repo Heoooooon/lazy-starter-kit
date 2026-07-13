@@ -13,8 +13,8 @@ Breaking any of these requires a **major** version bump:
 | **CLI flags** | `--only`, `--skip`, `--dry-run`, `--yes`, `--profile`, `--doctor`, `--update`, `--list`, `--version`, `--with-gajae` (Windows: the `-PascalCase` equivalents) |
 | **Step / group ids** | install steps (`prereqs`, `brew`/`packages`, `runtimes`, `shell`, `docker`, `git`, `agents`, `wsl`) and uninstall groups — the values accepted by `--only`/`--skip` |
 | **Profile names** | `full`, `minimal`, `work` |
-| **Managed-block markers** | `# >>> lazy-starter-kit:<tag> >>>` … `# <<< lazy-starter-kit:<tag> <<<` in `~/.zshrc`, `~/.zprofile`, PowerShell profiles — tools and users may key on these |
-| **Environment variables** | `STARTER_KIT_BRANCH` (pin a ref), `HERMES=0` (skip the Hermes agent), `ASSUME_YES`/CI non-interactive behavior |
+| **Managed-block markers** | `# >>> lazy-starter-kit:<tag> >>>` … `# <<< lazy-starter-kit:<tag> <<<` in `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, PowerShell profiles — tools and users may key on these |
+| **Environment variables** | `STARTER_KIT_BRANCH` (pin a ref), `HERMES=0` (skip the Hermes agent), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
 | **Exit codes** | `0` success / `1` failure; `--doctor` exits `0` when nothing is missing (PATH-only warnings don't fail) and `1` when something is — CI enforces this contract |
 | **Backup behavior** | the one-time `.bak` backup before the first managed edit of a config file |
 

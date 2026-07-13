@@ -21,14 +21,24 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck zsh
       - name: bash syntax (3.2-safe parse)
         run: |
-          for f in install.sh uninstall.sh lib/common.sh scripts/*.sh config/zshrc.block.sh; do
+          for f in install.sh uninstall.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm config/zshrc.block.sh tests/*.sh; do
             bash -n "$f"
           done
       - name: shellcheck
-        run: shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh scripts/*.sh
+        run: shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm tests/*.sh
+      - name: node syntax
+        run: node --check scripts/ai/shell-command-guard.js && node --check scripts/ai/install-shell-guard.js
+      - name: existing Homebrew state regression
+        run: tests/macos-existing-home.sh
+      - name: existing ZDOTDIR regression
+        run: tests/zdotdir-existing-home.sh
+      - name: recursive deletion boundary regression
+        run: tests/safe-recursive-delete.sh
+      - name: AI shell guard regression
+        run: tests/ai-shell-guard.sh
 
   lint-linux:
     name: linux shellcheck + syntax
@@ -244,7 +254,7 @@ jobs:
         shell: pwsh
         run: |
           $fail = 0
-          Get-ChildItem -Path windows -Recurse -Include *.ps1 | ForEach-Object {
+          @(Get-ChildItem -Path windows -Recurse -Include *.ps1) + @(Get-Item tests/windows-safe-remove.ps1) | ForEach-Object {
             $tokens = $null; $errors = $null
             $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
             if ($errors.Count -gt 0) {
@@ -276,6 +286,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: existing ZDOTDIR regression
+        run: tests/zdotdir-existing-home.sh
 
       - name: install (non-interactive)
         # plain run: non-tty so Colima start is auto-declined; everything else runs.
@@ -340,6 +353,14 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: safe recursive delete regression (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\tests\windows-safe-remove.ps1
+
+      - name: safe recursive delete regression (PowerShell 7)
+        shell: pwsh
+        run: .\tests\windows-safe-remove.ps1
 
       - name: check winget (preinstalled on windows-2025 image)
         shell: pwsh

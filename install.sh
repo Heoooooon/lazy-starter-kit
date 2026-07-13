@@ -103,12 +103,15 @@ usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/inst
 # probing mechanism lives in lib/common.sh (_doctor_* helpers).
 # ---------------------------------------------------------------------------
 _doctor_config() {
-  _doctor_managed "$HOME/.zshrc"    "lazy-starter-kit:main"
-  _doctor_managed "$HOME/.zprofile" "lazy-starter-kit:brew"
+  _doctor_managed "$_DOCTOR_ZSHRC"    "lazy-starter-kit:main"
+  _doctor_managed "$_DOCTOR_ZPROFILE" "lazy-starter-kit:brew"
   _doctor_exists  "$HOME/.config/starship.toml"
 }
 
 doctor() {
+  cache_zsh_config_dir
+  _DOCTOR_ZSHRC="$(zsh_config_file .zshrc)"
+  _DOCTOR_ZPROFILE="$(zsh_config_file .zprofile)"
   # macOS: also search the Homebrew prefix, and brew rustup's keg-only bin —
   # its rustc/cargo proxies live there, not in <prefix>/bin.
   _DOCTOR_BINS="$(brew_prefix)/bin $(brew_prefix)/opt/rustup/bin"
@@ -238,6 +241,7 @@ selected() {
 is_macos || die "This kit targets macOS only."
 is_arm   || warn "Not Apple Silicon (arm64) — proceeding, but only tested on M-series."
 [[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
+cache_zsh_config_dir
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION ==$_C_RESET"
 info "steps: $(selected | tr '\n' ' ')${PROFILE:+(profile: $PROFILE)}"
@@ -245,6 +249,7 @@ info "steps: $(selected | tr '\n' ' ')${PROFILE:+(profile: $PROFILE)}"
 # ---------------------------------------------------------------------------
 # Execute
 # ---------------------------------------------------------------------------
+KIT_INSTALL_FAILED=0
 for id in $(selected); do
   file="$ROOT/scripts/$(step_file "$id")"
   fn="step_$id"
@@ -259,7 +264,8 @@ if [[ "$DRY_RUN" == "1" ]]; then
   info "That was a dry run — re-run without --dry-run to apply."
 else
   step "Next steps"
-  info "1) Open a NEW terminal (or: source ~/.zshrc) so PATH + prompt load."
+  zshrc="$(zsh_config_file .zshrc)"
+  info "1) Open a NEW terminal (or: source $(shell_quote "$zshrc")) so PATH + prompt load."
   if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
     info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)"
   fi
@@ -269,7 +275,8 @@ else
   # Interactive runs only — --yes and non-interactive/CI never see this, and
   # nothing is ever starred without an explicit 'y' (see confirm_default_no).
   repo_slug="${REPO_URL#https://github.com/}"; repo_slug="${repo_slug%.git}"
-  if have gh && gh auth status >/dev/null 2>&1 \
+  if [[ "$KIT_INSTALL_FAILED" == "0" ]] \
+     && have gh && gh auth status >/dev/null 2>&1 \
      && ! gh api "user/starred/$repo_slug" >/dev/null 2>&1; then
     if confirm_default_no "Enjoyed the setup? Star $repo_slug on GitHub? ⭐"; then
       gh api -X PUT "user/starred/$repo_slug" >/dev/null 2>&1 \
@@ -277,5 +284,9 @@ else
         || info "couldn't star from here — https://github.com/$repo_slug"
     fi
   fi
+fi
+if [[ "$KIT_INSTALL_FAILED" == "1" ]]; then
+  warn "setup finished with package errors — re-run ./install.sh --only brew, then use ./install.sh --doctor for remaining issues"
+  exit 1
 fi
 exit 0

@@ -90,6 +90,17 @@ function Step-Agents {
     }
   }
 
+  $safetyInstaller = Join-Path (Split-Path -Parent $Root) 'scripts\ai\install-shell-guard.js'
+  if ((Test-HasCommand node) -and (Test-Path -LiteralPath $safetyInstaller)) {
+    $safetyArgs = @($safetyInstaller, '--home', $env:USERPROFILE)
+    if ($script:DryRun) { $safetyArgs += '--dry-run' }
+    & node @safetyArgs
+    if ($LASTEXITCODE -ne 0) { Write-Warn "could not install the Codex/Claude recursive-rm guard" }
+    else { Write-Info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks." }
+  } else {
+    Write-Warn "node not found -- could not install the Codex/Claude recursive-rm guard"
+  }
+
   # --- Hermes Agent (Nous Research) -------------------------------------
   # The official installer is a bash/curl script with no native Windows build.
   # Run it inside WSL if you want Hermes on Windows.

@@ -19,7 +19,7 @@ _clone_plugin() {
   # Retry a few times: shallow clones over TLS occasionally flake mid-transfer.
   # A persistent failure only warns (non-fatal) so the whole install survives.
   for i in 1 2 3; do
-    rm -rf "$dest"
+    safe_rm_rf_under "$ZSH_CUSTOM_DIR/plugins" "$dest"
     if run git clone --depth 1 "$url" "$dest"; then return 0; fi
     [[ "$i" -lt 3 ]] && { warn "clone $name attempt $i failed; retrying…"; sleep 2; }
   done
@@ -28,6 +28,10 @@ _clone_plugin() {
 }
 
 step_shell() {
+  local zshrc zshrc_q
+  cache_zsh_config_dir
+  zshrc="$(zsh_config_file .zshrc)"
+  zshrc_q="$(shell_quote "$zshrc")"
   step "Shell: oh-my-zsh + plugins + zsh config + prompt"
   load_local_bins
 
@@ -65,13 +69,18 @@ step_shell() {
     _clone_plugin zsh-syntax-highlighting https://github.com/zsh-users/zsh-syntax-highlighting
   fi
 
+  if [[ "$zshrc" != "$HOME/.zshrc" ]]; then
+    remove_block "$HOME/.zshrc" "lazy-starter-kit:main"
+    remove_block "$HOME/.zshrc" "lazy-starter-kit:ohmyzsh"
+  fi
+
   # --- ensure oh-my-zsh is sourced (only if user isn't already doing it) -
   # Guard on the framework actually being present: injecting the source line
   # when the install failed would error on every new shell startup.
   if [[ "$DRY_RUN" == "1" ]]; then
-    info "[dry-run] would ensure oh-my-zsh is sourced in ~/.zshrc (lazy-starter-kit:ohmyzsh block)"
-  elif [[ -d "$OMZ_DIR" ]] && ! grep -qs 'oh-my-zsh.sh' "$HOME/.zshrc" 2>/dev/null; then
-    inject_block "$HOME/.zshrc" "lazy-starter-kit:ohmyzsh" <<'EOF'
+    info "[dry-run] would ensure oh-my-zsh is sourced in $zshrc_q (lazy-starter-kit:ohmyzsh block)"
+  elif [[ -d "$OMZ_DIR" ]] && ! grep -qs 'oh-my-zsh.sh' "$zshrc" 2>/dev/null; then
+    inject_block "$zshrc" "lazy-starter-kit:ohmyzsh" <<'EOF'
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME=""            # prompt handled by starship below
 plugins=(git npm node)
@@ -81,9 +90,9 @@ EOF
 
   # --- our zsh config block (mise, fzf, bat, cargo, bun, starship) -------
   if [[ "$DRY_RUN" == "1" ]]; then
-    info "[dry-run] inject 'lazy-starter-kit:main' block into ~/.zshrc"
+    info "[dry-run] inject 'lazy-starter-kit:main' block into $zshrc_q"
   else
-    inject_block "$HOME/.zshrc" "lazy-starter-kit:main" < "$ROOT/config/zshrc.block.sh"
+    inject_block "$zshrc" "lazy-starter-kit:main" < "$ROOT/config/zshrc.block.sh"
   fi
 
   # --- starship preset (don't clobber a user's existing one) -------------

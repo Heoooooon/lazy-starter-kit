@@ -94,6 +94,14 @@ function Undo-Agents {
   Write-Step "Remove AI agents (codex + lazycodex + Claude Code)"
   Update-SessionPath
 
+  $safetyInstaller = Join-Path (Split-Path -Parent $Root) 'scripts\ai\install-shell-guard.js'
+  if ((Test-HasCommand node) -and (Test-Path -LiteralPath $safetyInstaller)) {
+    $safetyArgs = @($safetyInstaller, 'uninstall', '--home', $env:USERPROFILE)
+    if ($script:DryRun) { $safetyArgs += '--dry-run' }
+    & node @safetyArgs
+    if ($LASTEXITCODE -ne 0) { Write-Warn "could not remove the lazy-starter-kit AI safety hook" }
+  }
+
   # codex is installed either through mise's npm shim OR plain global npm --
   # 07-agents falls back to `npm install -g '@openai/codex'` when mise is absent,
   # so uninstall must cover both or it silently leaves codex behind.
@@ -118,7 +126,7 @@ function Undo-Agents {
   $agyDir = Join-Path $env:LOCALAPPDATA 'agy'
   if (Test-Path $agyDir) {
     if ($script:DryRun) { Write-Info "[dry-run] remove $agyDir" }
-    else { Remove-Item $agyDir -Recurse -Force -ErrorAction SilentlyContinue }
+    else { Remove-KitTree -AllowedRoot $env:LOCALAPPDATA -Path $agyDir }
     Write-Ok "Antigravity CLI removed"
   }
   # lazycodex npx cache
@@ -131,7 +139,7 @@ function Undo-Agents {
     if (-not (Test-Path $root)) { continue }
     foreach ($dir in (Get-ChildItem $root -Directory -ErrorAction SilentlyContinue)) {
       if (Test-Path (Join-Path $dir.FullName 'node_modules\lazycodex-ai')) {
-        if (-not $script:DryRun) { Remove-Item $dir.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+        Remove-KitTree -AllowedRoot $root -Path $dir.FullName
         $cleared = $true
       }
     }
@@ -149,7 +157,7 @@ function Undo-Agents {
         else { Copy-Item $auth $bak; Write-Ok "backed up auth.json -> $bak" }
       }
       if ($script:DryRun) { Write-Info "[dry-run] would remove ~/.codex" }
-      else { Remove-Item $codexHome -Recurse -Force -ErrorAction SilentlyContinue; Write-Ok "removed ~/.codex" }
+      else { Remove-KitTree -AllowedRoot $env:USERPROFILE -Path $codexHome; Write-Ok "removed ~/.codex" }
     } else { Write-Info "kept ~/.codex" }
   }
 
@@ -163,8 +171,8 @@ function Undo-Agents {
       if (Test-Path $claudeBin)  { Write-Info "[dry-run] would remove ~/.local/bin/claude.exe" }
       if (Test-Path $claudeData) { Write-Info "[dry-run] would remove ~/.local/share/claude" }
     } else {
-      if (Test-Path $claudeBin)  { Remove-Item $claudeBin -Force -ErrorAction SilentlyContinue }
-      if (Test-Path $claudeData) { Remove-Item $claudeData -Recurse -Force -ErrorAction SilentlyContinue }
+      if (Test-Path $claudeBin)  { Remove-Item -LiteralPath $claudeBin -Force -ErrorAction SilentlyContinue }
+      if (Test-Path $claudeData) { Remove-KitTree -AllowedRoot $env:USERPROFILE -Path $claudeData }
       Write-Ok "removed Claude Code (claude.exe + data dir)"
     }
   } else {
@@ -183,8 +191,8 @@ function Undo-Agents {
       }
       if ($script:DryRun) { Write-Info "[dry-run] would remove ~/.claude and ~/.claude.json" }
       else {
-        if (Test-Path $claudeHome) { Remove-Item $claudeHome -Recurse -Force -ErrorAction SilentlyContinue }
-        if (Test-Path $claudeJson) { Remove-Item $claudeJson -Force -ErrorAction SilentlyContinue }
+        if (Test-Path $claudeHome) { Remove-KitTree -AllowedRoot $env:USERPROFILE -Path $claudeHome }
+        if (Test-Path $claudeJson) { Remove-Item -LiteralPath $claudeJson -Force -ErrorAction SilentlyContinue }
         Write-Ok "removed ~/.claude and ~/.claude.json"
       }
     } else { Write-Info "kept ~/.claude and ~/.claude.json" }
@@ -217,7 +225,7 @@ function Undo-Shell {
   $starshipToml = Join-Path $env:USERPROFILE '.config\starship.toml'
   if (Test-Path $starshipToml) {
     if (Confirm-Action "Remove ~/.config/starship.toml?") {
-      if (-not $script:DryRun) { Remove-Item $starshipToml -Force }
+      if (-not $script:DryRun) { Remove-Item -LiteralPath $starshipToml -Force }
     } else { Write-Info "kept starship.toml" }
   }
 }
