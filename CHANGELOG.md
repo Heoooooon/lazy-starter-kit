@@ -7,7 +7,7 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.8.1] - 2026-07-13
+## [0.8.1] - 2026-07-15
 
 ### Fixed
 - **Recursive deletion now fails closed on every platform.** macOS/Linux route
@@ -297,7 +297,11 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.0...v0.8.1
+[0.8.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.3.0...v0.3.1
