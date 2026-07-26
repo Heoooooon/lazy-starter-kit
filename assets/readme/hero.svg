@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 540" width="1200" height="540" role="img" aria-labelledby="lsk-hero-title lsk-hero-desc">
+  <title id="lsk-hero-title">lazy-starter-kit — 명령어 한 줄로 새 컴퓨터를 개발 환경으로</title>
+  <desc id="lsk-hero-desc">왼쪽에는 프로젝트 이름과 한 줄 설명, 오른쪽에는 커밋마다 설치·검증·제거를 e2e로 돌리는 CI 대상 6개 플랫폼(macOS, Windows, Ubuntu, Fedora, Arch, openSUSE) 목록, 아래에는 잘리지 않은 전체 설치 명령어가 있습니다.</desc>
+
+  <rect width="1200" height="540" rx="18" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="1199" height="539" rx="17.5" fill="none" stroke="#21262d"/>
+
+  <g font-family="ui-sans-serif, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', Helvetica, Arial, sans-serif">
+    <text x="64" y="118" font-size="64" font-weight="700" fill="#f0f6fc" letter-spacing="-1">lazy-starter-kit</text>
+    <path d="M64 140 L560 140" stroke="#2ea043" stroke-width="4" stroke-linecap="round"/>
+
+    <text x="64" y="200" font-size="27" font-weight="600" fill="#c9d1d9">명령어 한 줄로,</text>
+    <text x="64" y="238" font-size="27" font-weight="600" fill="#c9d1d9">빈 컴퓨터를 개발 환경으로.</text>
+
+    <text x="64" y="288" font-size="20" fill="#8b949e">런타임 · 셸 · 컨테이너 · AI 코딩 에이전트까지</text>
+    <text x="64" y="318" font-size="20" fill="#8b949e">설치하고, 제대로 깔렸는지 검증까지 합니다.</text>
+
+    <g font-size="19" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" fill="#8b949e">
+      <text x="64" y="366">v0.8.1</text>
+      <text x="160" y="366">MIT</text>
+      <text x="228" y="366">덮어쓰지 않음 · 되돌릴 수 있음</text>
+    </g>
+  </g>
+
+  <!-- 우: 진짜 차별점 = CI 실측 -->
+  <g>
+    <rect x="660" y="48" width="476" height="330" rx="14" fill="#161b22" stroke="#21262d"/>
+    <text x="692" y="88" font-size="17" font-weight="700" fill="#8b949e" letter-spacing="1.4" font-family="ui-sans-serif, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', Helvetica, Arial, sans-serif">커밋마다 CI · 설치 → 검증 → 제거</text>
+    <path d="M692 104 L1104 104" stroke="#21262d" stroke-width="2"/>
+
+    <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="21">
+      <g fill="#2ea043">
+        <text x="692" y="146">✓</text><text x="692" y="184">✓</text><text x="692" y="222">✓</text>
+        <text x="692" y="260">✓</text><text x="692" y="298">✓</text><text x="692" y="336">✓</text>
+      </g>
+      <g fill="#c9d1d9">
+        <text x="726" y="146">macOS 14</text>
+        <text x="726" y="184">Windows</text>
+        <text x="726" y="222">Ubuntu</text>
+        <text x="726" y="260">Fedora</text>
+        <text x="726" y="298">Arch</text>
+        <text x="726" y="336">openSUSE</text>
+      </g>
+      <g fill="#6e7681" font-size="18">
+        <text x="944" y="146">e2e</text>
+        <text x="944" y="184">e2e</text>
+        <text x="944" y="222">e2e</text>
+        <text x="944" y="260">container</text>
+        <text x="944" y="298">container</text>
+        <text x="944" y="336">container</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- 하단: 잘리지 않은 실제 명령어 -->
+  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace">
+    <rect x="64" y="408" width="1072" height="60" rx="10" fill="#161b22" stroke="#21262d"/>
+    <text x="88" y="446" font-size="18" fill="#2ea043">$</text>
+    <text x="112" y="446" font-size="17" fill="#f0f6fc">curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash</text>
+    <text x="64" y="500" font-size="18" fill="#6e7681">먼저 무엇을 할지만 보고 싶다면 · --dry-run (macOS/Linux) · -DryRun (Windows)</text>
+  </g>
+</svg>

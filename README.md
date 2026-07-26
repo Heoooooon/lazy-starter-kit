@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/banner.png" alt="lazy-starter-kit" width="760" />
+<img src="./assets/readme/hero.svg" alt="lazy-starter-kit — 명령어 한 줄로 빈 컴퓨터를 개발 환경으로. macOS·Windows·Ubuntu·Fedora·Arch·openSUSE 6개 플랫폼에서 커밋마다 설치·검증·제거를 CI로 돌립니다." width="100%" />
 
 ### AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 
@@ -75,9 +75,9 @@ _명령어 한 줄로 새 컴퓨터를 개발 환경으로 — 런타임·셸·�
 
 | 내 컴퓨터 | 여기로 |
 |---|---|
-| <img src="./docs/icons/windows.svg" width="16" height="16" alt=""> **Windows** (회사 PC 대부분) | [→ Windows 설치](#-windows-설치-제일-자세히) |
-| <img src="./docs/icons/apple.svg" width="16" height="16" alt=""> **Mac** (맥북 등) | [→ macOS 설치](#-macos-설치) |
-| <img src="./docs/icons/linux.svg" width="16" height="16" alt=""> **Linux** (우분투/페도라 등) | [→ Linux 설치](#-linux-설치) |
+| <img src="./docs/icons/windows.svg" width="16" height="16" alt="Windows 로고"> **Windows** (회사 PC 대부분) | [→ Windows 설치](#-windows-설치-제일-자세히) |
+| <img src="./docs/icons/apple.svg" width="16" height="16" alt="Apple 로고"> **Mac** (맥북 등) | [→ macOS 설치](#-macos-설치) |
+| <img src="./docs/icons/linux.svg" width="16" height="16" alt="Linux 로고"> **Linux** (우분투/페도라 등) | [→ Linux 설치](#-linux-설치) |
 
 각 가이드는 **터미널을 처음 여는 분** 기준으로 썼어요. 그대로 따라만 하면 됩니다.
 
@@ -104,7 +104,7 @@ irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/in
 
 ---
 
-## <img src="./docs/icons/windows.svg" width="20" height="20" alt=""> Windows 설치 (제일 자세히)
+## <img src="./docs/icons/windows.svg" width="20" height="20" alt="Windows 로고"> Windows 설치 (제일 자세히)
 
 > 대상: **Windows 10(1809 이상) 또는 Windows 11**. 대부분의 회사 PC가 여기 해당합니다.
 > 개발 경험이 전혀 없어도 아래만 그대로 따라 하면 됩니다.
@@ -170,7 +170,7 @@ powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.c
 
 ---
 
-## <img src="./docs/icons/apple.svg" width="20" height="20" alt=""> macOS 설치
+## <img src="./docs/icons/apple.svg" width="20" height="20" alt="Apple 로고"> macOS 설치
 
 > 대상: **Apple Silicon 맥**(M1/M2/M3/M4…). 새 맥에 최적화돼 있어요.
 
@@ -202,7 +202,7 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/ins
 
 ---
 
-## <img src="./docs/icons/linux.svg" width="20" height="20" alt=""> Linux 설치
+## <img src="./docs/icons/linux.svg" width="20" height="20" alt="Linux 로고"> Linux 설치
 
 > 지원: **Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE** (glibc 배포판). 패키지 매니저를 **자동 감지**합니다.
 > ⚠️ **Alpine(musl)은 미지원** — 업스트림 도구(node/ast-grep/bun)에 musl 빌드가 없어요.

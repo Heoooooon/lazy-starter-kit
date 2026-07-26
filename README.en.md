@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/banner.png" alt="lazy-starter-kit" width="760" />
+<img src="./assets/readme/hero.svg" alt="lazy-starter-kit — one command turns a bare machine into a dev environment. CI runs install, verify and uninstall on macOS, Windows, Ubuntu, Fedora, Arch and openSUSE on every commit." width="100%" />
 
 ### The fastest way to start AI coding on your own machine.
 
