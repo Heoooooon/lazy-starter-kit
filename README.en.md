@@ -4,8 +4,6 @@
 
 ### The fastest way to start AI coding on your own machine.
 
-_One command turns a fresh Mac into a complete dev environment — runtimes, shell, containers, and AI coding agents like Claude Code, installed and verified._
-
 [![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)

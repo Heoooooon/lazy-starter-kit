@@ -4,8 +4,6 @@
 
 ### AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 
-_명령어 한 줄로 새 컴퓨터를 개발 환경으로 — 런타임·셸·컨테이너에 Claude Code 같은 AI 코딩 에이전트까지, 설치부터 검증까지 자동으로._
-
 [![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
