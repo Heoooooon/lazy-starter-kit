@@ -16,7 +16,7 @@
     <text x="64" y="318" font-size="20" fill="#8b949e">설치하고, 제대로 깔렸는지 검증까지 합니다.</text>
 
     <g font-size="19" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" fill="#8b949e">
-      <text x="64" y="366">v0.8.1</text>
+      <text x="64" y="366">v0.9.0</text>
       <text x="160" y="366">MIT</text>
       <text x="228" y="366">덮어쓰지 않음 · 되돌릴 수 있음</text>
     </g>

@@ -416,7 +416,7 @@ Linux는 sudo가 없으면 시스템 패키지는 건너뛰고 사용자 도구�
 
 **Q. 특정 버전으로 고정해서 설치하려면?**
 ```sh
-STARTER_KIT_BRANCH=v0.8.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.8.0/install.sh)"
+STARTER_KIT_BRANCH=v0.9.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.9.0/install.sh)"
 ```
 
 **Q. 여기 없는 질문은 어디서 물어보나요?**

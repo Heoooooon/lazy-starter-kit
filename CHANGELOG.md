@@ -7,6 +7,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-29
+
 ### Added
 - **zoxide now installs by default on all three platforms** (macOS via Homebrew,
   Linux via the official installer into `~/.local/bin`, Windows via winget). The
@@ -318,7 +320,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.6.0...v0.7.0
