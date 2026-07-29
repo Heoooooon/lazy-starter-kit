@@ -31,9 +31,18 @@ expect_block "sh -c 'rm -rf build'"
 expect_block "r''m -rf build"
 continued_rm="rm \\"$'\n'"-rf build"
 expect_block "$continued_rm"
+# recursive deletion that does not spell `rm -r`: find -delete (also split
+# across && segments) and brace-expanded rm flags must fail closed too.
+expect_block 'find . -delete'
+expect_block 'find build -type f -delete'
+expect_block 'cd src && find . -delete'
+expect_block 'rm -r{f,} build'
+expect_block 'rm -{r,R}f build'
 expect_allow 'rm -f file.txt'
 expect_allow 'lazy-safe-rm build'
 expect_allow 'printf safe'
+expect_allow 'find . -name "*.log"'
+expect_allow 'find src -type d -print'
 
 set +e
 printf 'not-json' | "$NODE" "$GUARD" >/dev/null 2>&1

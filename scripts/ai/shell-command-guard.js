@@ -23,13 +23,28 @@ process.stdin.on('end', () => {
   }
 
   const normalized = command.replace(/\\\r?\n/g, ' ').replace(/''|""/g, '').replace(/\\(?=(?:[^\s/]+\/)*rm(?:\s|$))/g, '');
+  const block = (message) => {
+    console.error(message);
+    process.exitCode = 2;
+  };
   const rmToken = /(?:^|[\s;&|()'"`])(?:[^\s;&|()'"`]+\/)?rm(?=$|[\s;&|()'"`])/g;
   let match;
   while ((match = rmToken.exec(normalized)) !== null) {
     const tail = normalized.slice(match.index + match[0].length).split(/[;&|)\n]/, 1)[0];
-    if (/(?:^|\s)--recursive(?:\s|$)/.test(tail) || /(?:^|\s)-[A-Za-z]*[rR][A-Za-z]*(?:\s|$)/.test(tail)) {
-      console.error('Blocked: AI agents may not run recursive rm. Use lazy-safe-rm with a target inside the current Git workspace.');
-      process.exitCode = 2;
+    // The flag class includes `{`, `,`, `}` so brace-expanded flags such as
+    // `-r{f,}` or `-{r,R}f` (which the shell expands to recursive forms) still
+    // fail closed.
+    if (/(?:^|\s)--recursive(?:\s|$)/.test(tail) || /(?:^|\s)-[A-Za-z{},]*[rR][A-Za-z{},]*(?:\s|$)/.test(tail)) {
+      block('Blocked: AI agents may not run recursive rm. Use lazy-safe-rm with a target inside the current Git workspace.');
+      return;
+    }
+  }
+
+  // `find -delete` removes whole trees without ever spelling `rm`. Scan each
+  // command segment (split on ; & | and newlines) for a find carrying -delete.
+  for (const segment of normalized.split(/[;&|\n]+/)) {
+    if (/(?:^|[\s'"`(])find(?:\s|$)/.test(segment) && /(?:^|\s)-delete(?:\s|$)/.test(segment)) {
+      block('Blocked: AI agents may not run recursive deletion via find -delete. Use lazy-safe-rm with a target inside the current Git workspace.');
       return;
     }
   }
