@@ -11,11 +11,8 @@ brew "fd"             # fast find
 brew "fzf"            # fuzzy finder (Ctrl-R / Ctrl-T)
 brew "bat"            # cat with syntax highlighting
 brew "tree"           # directory tree
-brew "wget"           # downloader
 brew "ast-grep"       # structural code search/rewrite
-
-# --- system maintenance --------------------------------------------------
-brew "mole"           # mo — clean / uninstall / analyze / optimize / monitor your Mac
+brew "zoxide"         # z — smarter cd, jumps by frecency (zsh hook auto-loads)
 
 # --- shell experience ----------------------------------------------------
 brew "starship"       # cross-shell prompt

@@ -121,7 +121,7 @@ doctor() {
   step "Tools"
   _doctor_tool brew prereqs
   local t
-  for t in git gh jq rg fd fzf bat tree wget ast-grep mo starship mise uv rustup bun colima docker; do
+  for t in git gh jq rg fd fzf bat tree ast-grep zoxide starship mise uv rustup bun colima docker; do
     _doctor_tool "$t" brew
   done
   _doctor_runtime node   runtimes
