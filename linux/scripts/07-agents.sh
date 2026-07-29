@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Hermes, Claude Code
+# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Claude Code
 
 step_agents() {
-  step "AI agents: gajae-code + codex + lazycodex + Hermes + Claude Code"
+  step "AI agents: gajae-code + codex + lazycodex + Claude Code"
   load_local_bins
   load_mise
   export PATH="$HOME/.bun/bin:$PATH"   # bun global bins (gjc) live here
