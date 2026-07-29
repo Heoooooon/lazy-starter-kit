@@ -68,7 +68,7 @@ prereqs  packages  runtimes  shell  docker  git  agents  wsl
 .\install.ps1 -NoAgents             # alias for -Skip agents
 .\install.ps1 -Profile full         # preset: everything (same as no switch)
 .\install.ps1 -Profile minimal      # preset: prereqs packages runtimes shell git (no docker/agents/wsl)
-.\install.ps1 -Profile work         # preset: everything except docker + wsl (sets HERMES=0)
+.\install.ps1 -Profile work         # preset: everything except docker + wsl
 .\install.ps1 -List                 # print step ids
 .\install.ps1 -Version              # print the kit version
 .\install.ps1 -Doctor               # health report: ok / missing / off-PATH per tool

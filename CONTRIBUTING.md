@@ -97,7 +97,7 @@ docker run --rm -v "$PWD":/src -w /src mcr.microsoft.com/powershell:latest \
 # optional: a real end-to-end run in a throwaway container
 docker run --rm -v "$PWD":/src ubuntu:24.04 bash -c \
   'apt-get update -qq && apt-get install -y -qq curl git ca-certificates >/dev/null &&
-   cp -r /src /kit && cd /kit && HERMES=0 bash linux/install.sh --yes --skip docker'
+   cp -r /src /kit && cd /kit && bash linux/install.sh --yes --skip docker'
 ```
 
 CI then runs the full install → verify → idempotency → doctor → uninstall cycle

@@ -42,12 +42,12 @@ end-to-end (install → verify → uninstall) in CI on every change.
 | Layer | Tools |
 |---|---|
 | **Base** | compiler/build tools, `git`, `curl`, `wget`, `unzip`, `zsh` (via your distro's package manager) |
-| **CLI** | ripgrep, fd, bat, fzf, jq, tree, **gh** (GitHub CLI) |
+| **CLI** | ripgrep, fd, bat, fzf, jq, tree, **gh** (GitHub CLI), zoxide |
 | **Shell** | zsh + oh-my-zsh (plugins: git, npm, node, autosuggestions, syntax-highlighting), **starship** prompt |
 | **Runtimes** | **mise** → node (LTS), python, go, **ast-grep** · **rustup** → rust + rust-analyzer · **uv** · **bun** |
 | **Containers** | **Docker Engine** + compose/buildx (official `get.docker.com`, opt-in) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), **Hermes Agent** (`hermes`, Nous Research), opt-in **Antigravity CLI** (`agy`, `ANTIGRAVITY=1`) |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`, `HERMES=1`) and **Antigravity CLI** (`agy`, `ANTIGRAVITY=1`) |
 
 ## Steps & flags
 

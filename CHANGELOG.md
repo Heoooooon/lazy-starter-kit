@@ -7,6 +7,27 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **zoxide now installs by default on all three platforms** (macOS via Homebrew,
+  Linux via the official installer into `~/.local/bin`, Windows via winget). The
+  guarded shell-init hooks already shipped, so `z <partial>` jumps activate as
+  soon as the binary lands.
+
+### Changed
+- **Hermes Agent is opt-in.** The heavy external installer (self-managed
+  Python/Node/Chromium) no longer runs by default — enable with
+  `HERMES=1 ./install.sh`, same pattern as the Antigravity CLI. The `work`
+  profiles stop setting the now-redundant `HERMES=0`.
+
+### Fixed
+- **AI shell guard also blocks `find -delete` and brace-expanded `rm` flags**
+  (e.g. `rm -r{f,}`), closing bypasses around the recursive-`rm` hook. Covered
+  by new regression cases in `tests/ai-shell-guard.sh`.
+
+### Removed
+- **mole** and **wget** from the macOS default set. Mole is a Mac maintenance
+  app, now opt-in via `Brewfile.optional`; wget duplicates the curl macOS ships.
+
 ## [0.8.1] - 2026-07-15
 
 ### Fixed

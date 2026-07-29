@@ -109,13 +109,12 @@ stays at the repo root.
 | Layer | Tools |
 |---|---|
 | **Base** | Xcode Command Line Tools, Homebrew |
-| **CLI** | git, gh, jq, ripgrep, fd, fzf, bat, tree, wget, ast-grep |
-| **Maintenance** | **Mole** (`mo`) — clean / uninstall / analyze / optimize / monitor your Mac |
+| **CLI** | git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide |
 | **Shell** | zsh + oh-my-zsh (plugins: git, npm, node, macos, autosuggestions, syntax-highlighting), **starship** prompt, JetBrainsMono Nerd Font |
 | **Runtimes** | **mise** → node (LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
 | **Containers** | **Colima** + docker / compose / buildx (Docker Desktop not required) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), **Hermes Agent** (`hermes`, Nous Research), opt-in **Antigravity CLI** (`agy`) |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`) and **Antigravity CLI** (`agy`) |
 
 ## Steps & flags
 
@@ -198,12 +197,13 @@ brew bundle --file Brewfile.optional
 # or directly:
 brew install --cask rectangle maccy
 # modern-CLI pack (the kit's zsh block auto-detects these — no config needed):
-brew install eza zoxide atuin git-delta lazygit
+brew install eza atuin git-delta lazygit
 ```
 
 - **[Rectangle](https://github.com/rxhanson/Rectangle)** — window snapping, a free/open-source Magnet alternative.
 - **[Maccy](https://github.com/p0deje/Maccy)** — clipboard history manager, free/open-source.
-- **Modern-CLI pack** — [eza](https://github.com/eza-community/eza) (ls with git status; `ls`/`ll`/`lt` aliases activate automatically), [zoxide](https://github.com/ajeetdsouza/zoxide) (`z <partial>` smart cd), [atuin](https://github.com/atuinsh/atuin) (searchable history, takes over Ctrl-R), [git-delta](https://github.com/dandavison/delta) (pretty diffs; enable with `git config --global core.pager delta`), [lazygit](https://github.com/jesseduffield/lazygit) (git TUI).
+- **[Mole](https://github.com/tw93/Mole)** — Mac clean/uninstall/analyze/optimize/monitor (`mo`).
+- **Modern-CLI pack** — [eza](https://github.com/eza-community/eza) (ls with git status; `ls`/`ll`/`lt` aliases activate automatically), [atuin](https://github.com/atuinsh/atuin) (searchable history, takes over Ctrl-R), [git-delta](https://github.com/dandavison/delta) (pretty diffs; enable with `git config --global core.pager delta`), [lazygit](https://github.com/jesseduffield/lazygit) (git TUI).
 
 > **Base vs. optional:** the default install is the frozen, lean dev base; new
 > non-core tools go into `Brewfile.optional`. See [CONTRIBUTING.md](./CONTRIBUTING.md).
@@ -247,7 +247,7 @@ For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmor
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
 - **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`, Google) is **opt-in only** — never installed by default: `ANTIGRAVITY=1 ./install.sh` runs the official installer into `~/.local/bin/agy` (`$env:ANTIGRAVITY='1'` on Windows). Gemini CLI's closed-source successor with a small free tier; uninstall removes the binary.
 - **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
-- **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (Nous Research) installs via its official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns) and can be skipped with `HERMES=0 ./install.sh`. After install, run `hermes setup --portal`, then `hermes`.
+- **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (`hermes`, Nous Research) is **opt-in only** — never installed by default: `HERMES=1 ./install.sh` runs the official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns). After install, run `hermes setup --portal`, then `hermes`.
 - **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit yet — install manually after the kit (see below).
 
 ### Grok Build (xAI) — manual install
@@ -328,8 +328,7 @@ the upstream projects — please star/support them:
 **Base & CLI**
 - [Homebrew](https://brew.sh) · [git](https://git-scm.com) · [GitHub CLI](https://github.com/cli/cli)
 - [ripgrep](https://github.com/BurntSushi/ripgrep) · [fd](https://github.com/sharkdp/fd) · [fzf](https://github.com/junegunn/fzf) · [bat](https://github.com/sharkdp/bat)
-- [jq](https://github.com/jqlang/jq) · [tree](https://gitlab.com/OldManProgrammer/unix-tree) · [wget](https://www.gnu.org/software/wget/) · [ast-grep](https://github.com/ast-grep/ast-grep)
-- [Mole](https://github.com/tw93/Mole) — Mac clean/uninstall/analyze/optimize
+- [jq](https://github.com/jqlang/jq) · [tree](https://gitlab.com/OldManProgrammer/unix-tree) · [ast-grep](https://github.com/ast-grep/ast-grep) · [zoxide](https://github.com/ajeetdsouza/zoxide)
 
 **Runtimes**
 - [mise](https://github.com/jdx/mise) · [uv](https://github.com/astral-sh/uv) · [rustup](https://github.com/rust-lang/rustup) · [bun](https://github.com/oven-sh/bun)

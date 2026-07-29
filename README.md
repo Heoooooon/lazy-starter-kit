@@ -277,12 +277,12 @@ claude
 
 | 계층 | 도구 |
 |---|---|
-| **CLI 기본** | git, gh(GitHub CLI), jq, ripgrep(rg), fd, fzf, bat, tree, ast-grep |
+| **CLI 기본** | git, gh(GitHub CLI), jq, ripgrep(rg), fd, fzf, bat, tree, ast-grep, zoxide |
 | **셸/프롬프트** | zsh + oh-my-zsh + 자동완성·구문강조, **starship** 프롬프트, JetBrainsMono Nerd Font (Windows는 PowerShell 프로필 + PSReadLine 자동완성) |
 | **런타임** | **mise** → Node(LTS)·Python·Go · **rustup** → Rust + rust-analyzer · **uv** · **bun** |
 | **컨테이너** | macOS=Colima, Linux=Docker Engine(선택), Windows=Docker Desktop(선택·라이선스 주의) 또는 WSL2 |
 | **Git/GitHub** | 계정 신원(이메일), HTTPS 자격증명, 합리적 기본값 |
-| **AI 에이전트** | **Claude Code**(`claude`), **gajae-code**(`gjc`), **codex**, **lazycodex**(OmO) (+ macOS/Linux는 Hermes, 옵션으로 Antigravity) |
+| **AI 에이전트** | **Claude Code**(`claude`), **gajae-code**(`gjc`), **codex**, **lazycodex**(OmO) (+ 옵션으로 Hermes·Antigravity) |
 | **WSL2** (Windows, 베타) | WSL2 + Ubuntu 활성화 후 그 안에 Linux 킷 자동 설치 (`-Only wsl`) |
 
 > 세부 목록·OS별 차이는 각 OS 상세 문서에 있어요.
@@ -305,7 +305,7 @@ claude
 | **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`) | 구글 코딩 에이전트(Gemini CLI 후속) — **옵션**: `ANTIGRAVITY=1 ./install.sh`로만 설치 (무료 티어 작음) |
 | **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) | 인터뷰·검토된 계획·검증까지 갖춘 자율 코딩 러너 |
 | **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** (OmO) | 복잡한 코드베이스를 위한 Codex 하네스 |
-| **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 |
+| **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 — **옵션**: `HERMES=1 ./install.sh`로만 설치 |
 | **[Grok Build](https://x.ai/cli)** (`grok`) | xAI 코딩 에이전트 — **킷 자동 설치 미포함**, 아래 수동 설치 |
 
 에이전트 이름을 누르면 각 도구의 **자세한 에디터 리뷰·설치법**으로 바로 갑니다.
