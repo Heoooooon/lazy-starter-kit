@@ -17,7 +17,7 @@
   Preset step selection (full|minimal|work):
     full     everything (same as no switch).
     minimal  prereqs packages runtimes shell git (skips docker, agents, wsl).
-    work     everything except docker and wsl, with HERMES=0 for the run.
+    work     everything except docker and wsl.
   Implemented as a preset skip-set UNIONed with -Skip. Mutually exclusive with
   -Only.
 .PARAMETER Only
@@ -316,8 +316,7 @@ if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 # -Profile <name>: a preset skip-set UNIONed with the user's -Skip. A preset
 # picks steps to *drop*; -Only picks steps to *keep* -- combining them is
 # ambiguous, so they're mutually exclusive. Unknown names get the same friendly
-# "valid: ..." listing as an unknown step id. 'work' also exports HERMES=0 for
-# parity with the bash kits (harmless on Windows, where Hermes is WSL-only).
+# "valid: ..." listing as an unknown step id.
 # ($Profile is bound in $PSBoundParameters, so it survives the -Update
 # re-invoke's param rebuild and the bootstrap hand-off's splat automatically.)
 # ---------------------------------------------------------------------------
@@ -333,7 +332,6 @@ if ($Profile) {
     Stop-Kit "unknown profile: '$Profile' (valid: $($ProfileNames -join ' '))"
   }
   $Skip = @($Skip) + $ProfileSkip[$Profile]
-  if ($Profile -eq 'work') { $env:HERMES = '0' }
 }
 
 # Validate every -Only/-Skip token against the known step ids -- a typo like

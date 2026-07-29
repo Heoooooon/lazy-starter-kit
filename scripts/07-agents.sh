@@ -91,13 +91,13 @@ step_agents() {
   fi
   info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks."
 
-  # --- Hermes Agent (Nous Research) -------------------------------------
+  # --- Hermes Agent (Nous Research, OPT-IN only) -------------------------
   # Official installer: clones NousResearch/hermes-agent, self-manages Python/
   # Node/Chromium, links `hermes` into ~/.local/bin (already on PATH, exported
-  # at the top of this step). Heavy + external, so it's non-fatal and
-  # toggleable with HERMES=0 (CI sets HERMES=0 to stay lean).
-  if [[ "${HERMES:-1}" != "1" ]]; then
-    info "Skipping Hermes Agent (HERMES=0)"
+  # at the top of this step). Heavy + external, so it's never installed by
+  # default — enable with: HERMES=1 ./install.sh (same pattern as Antigravity).
+  if [[ "${HERMES:-0}" != "1" ]]; then
+    info "Skipping Hermes Agent (opt-in; enable with HERMES=1)"
   elif have hermes; then
     ok "Hermes Agent present ($(hermes --version 2>/dev/null | head -1 || echo installed))"
   elif [[ "$DRY_RUN" == "1" ]]; then

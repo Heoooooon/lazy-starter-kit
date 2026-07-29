@@ -196,13 +196,13 @@ ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
 # --profile NAME — expand a named preset into extra SKIP steps (unioned with any
 # --skip), reusing the SKIP machinery below. Mutually exclusive with --only. The
 # preset→skip mapping is this file's own (step ids: prereqs packages runtimes
-# shell docker git agents); `work` also disables the heavy Hermes agent via HERMES=0.
+# shell docker git agents).
 if [[ -n "$PROFILE" ]]; then
   [[ -n "$ONLY" ]] && die "choose either --profile or --only"
   case "$PROFILE" in
     full)    PRESET_SKIP="" ;;
     minimal) PRESET_SKIP="docker,agents" ;;
-    work)    PRESET_SKIP="docker"; export HERMES=0 ;;
+    work)    PRESET_SKIP="docker" ;;
     *) die "unknown profile: '$PROFILE' (valid: full minimal work)" ;;
   esac
   [[ -n "$PRESET_SKIP" ]] && SKIP="${SKIP:+$SKIP,}$PRESET_SKIP"

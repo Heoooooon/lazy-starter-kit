@@ -62,9 +62,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: install (non-interactive; skip Docker; HERMES off for speed)
+      - name: install (non-interactive; skip Docker)
         env:
-          HERMES: "0"
           # mise resolves versions via api.github.com; anonymous requests share
           # the runner IP's 60/hr limit and flake — authenticate with the job
           # token (5000/hr) instead.
@@ -88,7 +87,6 @@ jobs:
 
       - name: install again (idempotency — "safe to re-run" is a test, not a claim)
         env:
-          HERMES: "0"
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           ./linux/install.sh --yes --skip docker
@@ -163,9 +161,8 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: install (non-interactive; skip Docker; HERMES off for speed)
+      - name: install (non-interactive; skip Docker)
         env:
-          HERMES: "0"
           # mise resolves versions via api.github.com; anonymous requests share
           # the runner IP's 60/hr limit and flake — authenticate with the job
           # token (5000/hr) instead.
@@ -217,7 +214,7 @@ jobs:
 
       - name: install from the newest release tag
         env:
-          HERMES: "0"
+          HERMES: "0"  # the released tag still defaults Hermes on; keep CI lean
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag=$(git tag --sort=-v:refname | head -1)
@@ -227,7 +224,6 @@ jobs:
 
       - name: upgrade — re-run the current (main) kit on top
         env:
-          HERMES: "0"
           GITHUB_TOKEN: ${{ github.token }}
         run: ./linux/install.sh --yes --skip docker
 
@@ -277,7 +273,9 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: ./install.sh --dry-run
+      # HERMES=1 keeps the opt-in Hermes wiring in the preview logs (dry-run
+      # only prints; nothing is executed).
+      - run: HERMES=1 ./install.sh --dry-run
       - run: ./uninstall.sh --dry-run --yes
 
   integration:
@@ -292,11 +290,9 @@ jobs:
 
       - name: install (non-interactive)
         # plain run: non-tty so Colima start is auto-declined; everything else runs.
-        # HERMES=0 skips the heavy external Hermes installer to keep CI lean
-        # (its wiring is still covered by the dry-run job).
         env:
           GITHUB_TOKEN: ${{ github.token }}  # authenticated mise version lookups
-        run: HERMES=0 ./install.sh
+        run: ./install.sh
 
       - name: verify installed
         run: |
@@ -319,7 +315,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          HERMES=0 ./install.sh
+          ./install.sh
           fail=0
           for spec in "lazy-starter-kit:main:$HOME/.zshrc" "lazy-starter-kit:ohmyzsh:$HOME/.zshrc" "lazy-starter-kit:brew:$HOME/.zprofile"; do
             tag="${spec%:*}"; file="${spec##*:}"
