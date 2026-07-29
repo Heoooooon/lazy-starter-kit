@@ -76,7 +76,7 @@ jobs:
           export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/share/mise/shims:$PATH"
           fail=0
           need() { command -v "$1" >/dev/null 2>&1 && echo "ok   $1" || { echo "MISS $1"; fail=1; }; }
-          for t in rg fd bat fzf jq gh starship mise uv bun rustup zsh; do need "$t"; done
+          for t in rg fd bat fzf jq gh starship mise uv bun rustup zoxide zsh; do need "$t"; done
           for t in node go python; do
             mise which "$t" >/dev/null 2>&1 && echo "ok   mise:$t" || { echo "MISS mise:$t"; fail=1; }
           done
@@ -175,7 +175,7 @@ jobs:
           export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$HOME/.local/share/mise/shims:$PATH"
           fail=0
           need() { command -v "$1" >/dev/null 2>&1 && echo "ok   $1" || { echo "MISS $1"; fail=1; }; }
-          for t in rg fd bat fzf jq gh starship mise uv bun rustup zsh; do need "$t"; done
+          for t in rg fd bat fzf jq gh starship mise uv bun rustup zoxide zsh; do need "$t"; done
           for t in node go python; do
             mise which "$t" >/dev/null 2>&1 && echo "ok   mise:$t" || { echo "MISS mise:$t"; fail=1; }
           done
@@ -379,7 +379,7 @@ jobs:
             if (Get-Command $c -ErrorAction SilentlyContinue) { Write-Host "ok   $c" }
             else { Write-Host "MISS $c"; $script:fail = 1 }
           }
-          foreach ($t in 'git','gh','jq','rg','fd','bat','fzf','starship','mise','uv','rustup','bun') { need $t }
+          foreach ($t in 'git','gh','jq','rg','fd','bat','fzf','starship','mise','uv','rustup','bun','zoxide') { need $t }
           & mise reshim 2>$null
           foreach ($t in 'node','go','python') {
             $p = (& mise which $t 2>$null)

@@ -123,7 +123,7 @@ doctor() {
   for t in rg fzf jq tree gh; do
     _doctor_tool "$t" packages
   done
-  for t in starship mise uv bun rustup; do
+  for t in starship mise uv bun rustup zoxide; do
     _doctor_tool "$t" packages
   done
   _doctor_runtime node   runtimes

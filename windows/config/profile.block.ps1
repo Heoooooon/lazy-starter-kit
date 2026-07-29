@@ -71,6 +71,11 @@ if (Get-Command bat -ErrorAction SilentlyContinue) {
   }
 }
 
+# zoxide: smarter cd -- `z <partial-name>` jumps by frecency
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+  Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
 # starship prompt -- keep LAST so it owns the prompt
 if (Get-Command starship -ErrorAction SilentlyContinue) {
   Invoke-Expression (& starship init powershell)

@@ -16,6 +16,7 @@ function Step-Packages {
     'sharkdp.fd'                     = 'fd'
     'sharkdp.bat'                    = 'bat'
     'junegunn.fzf'                   = 'fzf'
+    'ajeetdsouza.zoxide'             = 'zoxide'
     'Starship.Starship'             = 'starship'
     'jdx.mise'                       = 'mise'
     'astral-sh.uv'                   = 'uv'

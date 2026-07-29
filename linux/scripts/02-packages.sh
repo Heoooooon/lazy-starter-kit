@@ -3,7 +3,7 @@
 #
 # Strategy: install the plain CLI utilities from the distro (fast, cached),
 # but pull the "moving target" developer tools (starship, mise, uv, bun,
-# rustup) from their official user-space installers so we don't fight
+# rustup, zoxide) from their official user-space installers so we don't fight
 # per-distro package naming/versions. Everything lands in $HOME — no sudo.
 
 # distro-agnostic user-space installers -------------------------------------
@@ -16,6 +16,19 @@ _install_starship() {
     mkdir -p "$HOME/.local/bin"
     curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin" \
       || warn "starship install failed"
+  fi
+}
+
+_install_zoxide() {
+  have zoxide && { ok "zoxide present"; return 0; }
+  info "Installing zoxide (-> ~/.local/bin)…"
+  if [[ "$DRY_RUN" == "1" ]]; then
+    info "[dry-run] curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh"
+  else
+    mkdir -p "$HOME/.local/bin"
+    # Official installer defaults to ~/.local/bin; non-fatal like the others.
+    curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh \
+      || warn "zoxide install failed"
   fi
 }
 
@@ -121,6 +134,7 @@ step_packages() {
   # --- distro-agnostic developer tools ----------------------------------
   _install_mise
   _install_starship
+  _install_zoxide
   _install_uv
   _install_bun
   _install_rustup
