@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="./assets/readme/hero.svg" alt="lazy-starter-kit — one command turns a bare machine into a dev environment. CI runs install, verify and uninstall on macOS, Windows, Ubuntu, Fedora, Arch and openSUSE on every commit." width="100%" />
+<img src="./docs/images/lsk-hero.webp" alt="lazy-starter-kit — different machines, one starting line." width="100%" />
 
-### The fastest way to start AI coding on your own machine.
+### Different machines, one starting line.
+
+The fastest way to start AI coding on your own machine.
 
 [![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
@@ -24,8 +26,10 @@
 
 <details><summary>Jump to a section</summary>
 
-- [Quick start](#quick-start)
+- [Which one sounds like you?](#which-one-sounds-like-you)
+- [Quick start](#quick-start) · [A second Mac, or a fresh reinstall](#a-second-mac-or-a-fresh-reinstall)
 - [Why this kit](#why-this-kit)
+- [Running a class or study group](#running-a-class-or-study-group)
 - [Linux & Windows](#linux--windows)
 - [What you get](#what-you-get)
 - [Steps & flags](#steps--flags)
@@ -39,6 +43,53 @@
 </details>
 
 ---
+
+## Which one sounds like you?
+
+Same install, different blockers.
+
+<table>
+<tr>
+<td width="33%"><img src="./docs/images/lsk-card-start-en.webp" alt="Starting out — tangled cables and unopened boxes" width="100%"></td>
+<td width="33%"><img src="./docs/images/lsk-card-reproduce-en.webp" alt="Setting up another machine — several computers showing the same screen" width="100%"></td>
+<td width="33%"><img src="./docs/images/lsk-card-teach-en.webp" alt="Teaching a class — laptops starting from one line" width="100%"></td>
+</tr>
+<tr>
+<td valign="top">
+
+**First time doing AI coding?**
+
+Day one becomes setup day. Git is missing, the Node version is wrong, and the terminal prints an error you have no way to rank.
+
+→ Don't stall at setup — **start your first project today.**
+
+[Quick start ↓](#quick-start)
+
+</td>
+<td valign="top">
+
+**Setting up a second Mac (a new mini)?**
+
+Every new machine turns into an archaeology session about what you installed last time, and the machines drift apart from there.
+
+→ Don't memorize your environment — **reproduce it.**
+
+[A second Mac ↓](#a-second-mac-or-a-fresh-reinstall)
+
+</td>
+<td valign="top">
+
+**Teaching AI coding?**
+
+The first bottleneck in a class is never prompting — it's everyone's basic setup. One person has no Git, another is opening a terminal for the first time.
+
+→ Stop teaching installs — **teach building.**
+
+[Class setup ↓](#running-a-class-or-study-group)
+
+</td>
+</tr>
+</table>
 
 ## Quick start
 
@@ -57,6 +108,18 @@ cd lazy-starter-kit
 ./install.sh --dry-run     # see exactly what it would do
 ./install.sh               # apply
 ```
+
+### A second Mac, or a fresh reinstall
+
+Once you own more than one machine, the thing that matters is not installing fast
+once — it's being able to rebuild the same environment again.
+
+1. `./install.sh --dry-run` — see what this particular machine is missing.
+2. `./install.sh` — build the base environment.
+3. `./install.sh --doctor` later — see what drifted, then re-run to fill only the gaps.
+
+Anything already present is skipped, so re-running is always safe. Instead of
+remembering what you put on the old machine, you run the same command again.
 
 ## Why this kit
 
@@ -79,6 +142,8 @@ cd lazy-starter-kit
 
 > If this kit saved you a setup day, **a ⭐ star** helps a lot!
 
+<img src="./assets/readme/hero.svg" alt="CI runs install, verify and uninstall on six platforms (macOS, Windows, Ubuntu, Fedora, Arch, openSUSE) on every commit." width="100%" />
+
 ### Support tiers
 
 | Tier | Platforms | Promise |
@@ -89,6 +154,35 @@ cd lazy-starter-kit
 
 What semver protects (flags, step ids, markers, env vars): [VERSIONING.md](./VERSIONING.md).
 
+
+## Running a class or study group
+
+In a hands-on class the first thing that breaks is not prompting, it's setup: one
+person has a different Node version, one has no Git, one is opening a terminal for
+the first time. This is what cuts that time down.
+
+**Tell students before the session**
+
+1. Send them to the one page that matches their machine — macOS (this page) ·
+   [Linux](./linux/README.md) · [Windows](./windows/README.md).
+2. Have them run `--dry-run` (`-DryRun` on Windows) first. Seeing the plan removes
+   most of the anxiety about "what is this script doing to my laptop".
+3. Budget **5–20 minutes**. Do it before the session, not during it.
+4. Ask for a screenshot of `--doctor` afterwards. It shows per tool what is missing
+   (✗) and what is installed but off PATH (!) — you can triage before anyone arrives.
+
+**What actually comes up on the day**
+
+| Situation | What to say |
+| --- | --- |
+| "The install stopped halfway." | Run it again. Everything already done is skipped. |
+| "Command not found." | Close the terminal completely and open a new one. |
+| "It's a work laptop, I have no admin rights." | Windows installs per-user and lists admin-only items at the end; `-Profile work` keeps it light. Linux without sudo skips system packages only. |
+| "One specific tool is missing." | Re-run that step alone: `--only <step>` (`-Only <step>` on Windows). |
+| "Can I undo this afterwards?" | Yes — [Uninstall](#uninstall). Say so up front; it lowers resistance. |
+
+> You will not make every laptop identical. You can get every student to the point
+> where `claude` or `codex` starts from the same line.
 
 ## Linux & Windows
 
