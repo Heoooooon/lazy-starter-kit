@@ -250,7 +250,9 @@ jobs:
         shell: pwsh
         run: |
           $fail = 0
-          @(Get-ChildItem -Path windows -Recurse -Include *.ps1) + @(Get-Item tests/windows-safe-remove.ps1) | ForEach-Object {
+          @(Get-ChildItem -Path windows,gui/windows -Recurse -Include *.ps1) + @(
+            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1
+          ) | ForEach-Object {
             $tokens = $null; $errors = $null
             $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
             if ($errors.Count -gt 0) {
@@ -265,6 +267,7 @@ jobs:
         run: |
           Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
           $res = Invoke-ScriptAnalyzer -Path windows -Recurse -Severity Warning,Error
+          $res += Invoke-ScriptAnalyzer -Path gui/windows -Recurse -Severity Warning,Error
           $res | Format-Table -AutoSize
           if ($res | Where-Object { $_.Severity -eq 'Error' }) { exit 1 }
 
@@ -273,6 +276,10 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: beginner installer entrypoints
+        run: tests/install-entrypoints.sh
+      - name: release signing contract
+        run: tests/release-signing.sh
       # HERMES=1 keeps the opt-in Hermes wiring in the preview logs (dry-run
       # only prints; nothing is executed).
       - run: HERMES=1 ./install.sh --dry-run
@@ -353,6 +360,10 @@ jobs:
       - name: safe recursive delete regression (Windows PowerShell 5.1)
         shell: powershell
         run: .\tests\windows-safe-remove.ps1
+
+      - name: beginner installer entrypoints
+        shell: powershell
+        run: .\tests\windows-install-entrypoints.ps1
 
       - name: safe recursive delete regression (PowerShell 7)
         shell: pwsh

@@ -124,6 +124,25 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 
 ## 먼저, 내 컴퓨터부터 고르세요
 
+### 터미널이 어렵다면: 다운로드하고 더블클릭
+
+명령어를 복사할 필요 없는 설치 파일도 제공합니다. 아래에서 내 컴퓨터용
+파일을 내려받아 압축을 풀고 실행하세요.
+
+| 내 컴퓨터 | GUI 설치 앱 (추천) | 빠른 더블클릭 설치 |
+| --- | --- | --- |
+| **Mac** | [GUI 앱 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip) → 압축 풀기 → **Lazy Starter Kit Installer** 실행 | [간단 실행기 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-double-click.zip) → 압축 풀기 → **Install-lazy-starter-kit** 더블클릭 |
+| **Windows** | [GUI 앱 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip) → 압축 풀기 → **Lazy Starter Kit Installer** 더블클릭 | [간단 실행기 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip) → 압축 풀기 → **Install-lazy-starter-kit** 더블클릭 |
+
+- **GUI 앱**에서는 설치 범위와 미리보기 여부를 고르고 진행 로그를 볼 수 있습니다.
+- **빠른 설치**는 선택 화면 없이 기존 설치기를 바로 시작합니다.
+- 설치 엔진은 아래의 한 줄 명령과 완전히 같습니다. 별도의 설치 로직을 숨겨 두지 않습니다.
+
+> 현재 GitHub 배포본은 운영체제 코드 서명 전입니다. Mac에서 차단되면 앱을
+> **Control-클릭 → 열기**, Windows에서 경고가 뜨면 **추가 정보 → 실행**을
+> 선택해야 할 수 있습니다. 정식 배포에는 Apple 공증과 Windows 코드 서명을
+> 적용하는 것이 다음 단계입니다.
+
 | 내 컴퓨터 | 여기로 |
 | --- | --- |
 | <img src="./docs/icons/windows.svg" width="16" height="16" alt="Windows 로고"> **Windows** (회사 PC 대부분) | [→ Windows 설치](#-windows-설치-제일-자세히) |

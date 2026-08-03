@@ -93,6 +93,24 @@ The first bottleneck in a class is never prompting — it's everyone's basic set
 
 ## Quick start
 
+### No terminal required: download and double-click
+
+Choose the native GUI for a guided install, or the small double-click launcher
+to start the existing installer immediately:
+
+| Platform | GUI installer (recommended) | Quick launcher |
+|---|---|---|
+| **macOS** | [Download GUI](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip) | [Download launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-double-click.zip) |
+| **Windows** | [Download GUI](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip) | [Download launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip) |
+
+Extract the ZIP, then double-click the included installer. Both paths delegate
+to the same `install.sh` / `install.ps1` engine documented below.
+
+> Release artifacts are not code-signed yet. On macOS, Control-click the app and
+> choose **Open** if Gatekeeper blocks it. On Windows, choose **More info → Run
+> anyway** if SmartScreen appears. Apple notarization and Windows signing are
+> the remaining production-distribution step.
+
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
 ```

@@ -18,6 +18,16 @@ _winget packages · runtimes · PowerShell profile · containers · and AI codin
 
 ## Quick start
 
+### Prefer a normal app?
+
+- [Download the guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip)
+- [Download the small double-click launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip)
+
+Extract the ZIP and double-click the included `.cmd` file. The GUI offers the
+same full/minimal/work profiles and dry-run preview as the PowerShell installer.
+Both downloads run this repository's `install.ps1`; they do not maintain a
+second installation implementation.
+
 Open **PowerShell** (Windows PowerShell 5.1 or PowerShell 7) and run:
 
 ```powershell
