@@ -106,10 +106,10 @@ to start the existing installer immediately:
 Extract the ZIP, then double-click the included installer. Both paths delegate
 to the same `install.sh` / `install.ps1` engine documented below.
 
-> Release artifacts are not code-signed yet. On macOS, Control-click the app and
-> choose **Open** if Gatekeeper blocks it. On Windows, choose **More info → Run
-> anyway** if SmartScreen appears. Apple notarization and Windows signing are
-> the remaining production-distribution step.
+> **The macOS GUI app ships with Apple Developer ID signing and notarization.**
+> If macOS blocks the quick launcher, Control-click it and choose **Open**.
+> Windows artifacts are not code-signed yet; choose **More info → Run anyway**
+> if SmartScreen appears.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
