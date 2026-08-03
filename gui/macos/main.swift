@@ -155,7 +155,8 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
       let data = handle.availableData
       guard !data.isEmpty else { return }
       let text = String(decoding: data, as: UTF8.self)
-      Task { @MainActor in self?.appendLog(text) }
+      guard let controller = self else { return }
+      Task { @MainActor in controller.appendLog(text) }
     }
     process.terminationHandler = { [weak self] completed in
       output.fileHandleForReading.readabilityHandler = nil
