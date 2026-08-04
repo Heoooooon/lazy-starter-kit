@@ -32,6 +32,20 @@ launcher_output="$(
   || fail "macOS launcher did not preserve installer arguments"
 printf 'ok   macOS double-click launcher delegates arguments\n'
 
+# Given a normal AppKit launch, when the window installs its content hierarchy,
+# then the stack must be constrained to a persistent root view. Making the
+# stack itself the content view creates self-referential constraints and a
+# blank window until a test-only forced layout happens.
+macos_source="$(<"$ROOT/gui/macos/main.swift")"
+[[ "$macos_source" != *"window.contentView = content"* ]] \
+  || fail "macOS GUI constrains its content stack to itself and launches blank"
+[[ "$macos_source" != *"window.contentView = root"* ]] \
+  || fail "macOS GUI replaces its sized content view with a zero-frame root"
+[[ "$macos_source" == *"root.addSubview(content)"* ]] \
+  || fail "macOS GUI does not attach its content stack to a persistent root view"
+[[ "$macos_source" == *"log.textColor = .textColor"* ]] \
+  || fail "macOS GUI log text does not adapt to dark and light appearances"
+
 # Given the GUI source, when its build script runs, then it creates a native
 # application bundle whose binary exposes a deterministic self-test contract.
 DIST="$TMP/dist"

@@ -72,6 +72,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     log.isEditable = false
     log.isSelectable = true
     log.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+    log.textColor = .textColor
     log.backgroundColor = NSColor.textBackgroundColor
     log.textContainerInset = NSSize(width: 10, height: 10)
     log.string = """
@@ -97,13 +98,14 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     content.spacing = 14
     content.edgeInsets = NSEdgeInsets(top: 28, left: 30, bottom: 28, right: 30)
     content.translatesAutoresizingMaskIntoConstraints = false
-    window.contentView = content
+    let root = window.contentView!
+    root.addSubview(content)
     scroll.translatesAutoresizingMaskIntoConstraints = false
     NSLayoutConstraint.activate([
-      content.leadingAnchor.constraint(equalTo: window.contentView!.leadingAnchor),
-      content.trailingAnchor.constraint(equalTo: window.contentView!.trailingAnchor),
-      content.topAnchor.constraint(equalTo: window.contentView!.topAnchor),
-      content.bottomAnchor.constraint(equalTo: window.contentView!.bottomAnchor),
+      content.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+      content.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+      content.topAnchor.constraint(equalTo: root.topAnchor),
+      content.bottomAnchor.constraint(equalTo: root.bottomAnchor),
       subtitle.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -60),
       controls.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -60),
       scroll.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -60),
