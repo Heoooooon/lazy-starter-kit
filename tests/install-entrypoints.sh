@@ -45,6 +45,8 @@ macos_source="$(<"$ROOT/gui/macos/main.swift")"
   || fail "macOS GUI does not attach its content stack to a persistent root view"
 [[ "$macos_source" == *"log.textColor = .textColor"* ]] \
   || fail "macOS GUI log text does not adapt to dark and light appearances"
+[[ "$macos_source" == *".foregroundColor: NSColor.textColor"* ]] \
+  || fail "macOS GUI appended logs do not carry an adaptive foreground color"
 
 # Given the GUI source, when its build script runs, then it creates a native
 # application bundle whose binary exposes a deterministic self-test contract.

@@ -184,7 +184,11 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   }
 
   @MainActor private func appendLog(_ text: String) {
-    log.textStorage?.append(NSAttributedString(string: text))
+    let attributes: [NSAttributedString.Key: Any] = [
+      .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
+      .foregroundColor: NSColor.textColor,
+    ]
+    log.textStorage?.append(NSAttributedString(string: text, attributes: attributes))
     log.scrollToEndOfDocument(nil)
   }
 
