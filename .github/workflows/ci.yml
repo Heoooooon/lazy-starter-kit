@@ -33,6 +33,8 @@ jobs:
         run: node --check scripts/ai/shell-command-guard.js && node --check scripts/ai/install-shell-guard.js
       - name: existing Homebrew state regression
         run: tests/macos-existing-home.sh
+      - name: Homebrew installer TTY regression
+        run: tests/homebrew-installer.sh
       - name: existing ZDOTDIR regression
         run: tests/zdotdir-existing-home.sh
       - name: recursive deletion boundary regression

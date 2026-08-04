@@ -116,7 +116,9 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/ins
 ```
 
 On a brand-new Mac with no `git`, this triggers the Xcode Command Line Tools install
-first — re-run the same command once they finish.
+first — re-run the same command once they finish. If Homebrew is also missing, its
+official installer stays connected to your terminal and may ask for your macOS
+administrator password once; lazy-starter-kit does not run a separate `sudo` command.
 
 Prefer to read before you run (recommended):
 
@@ -279,8 +281,15 @@ The scripts **never call `sudo` themselves.** Elevated access is needed in exact
 two places, and only on a truly fresh machine:
 
 - **Homebrew install** — the official installer prompts for your Mac password once
-  (`prereqs` step, only when brew is missing).
+  (`prereqs` step, only when brew is missing). This also works through the
+  `curl | bash` one-liner because the installer reads confirmation and password
+  input directly from `/dev/tty`.
 - **Xcode Command Line Tools** — a GUI dialog you click "Install" on (only when missing).
+
+`--yes` intentionally remains fully non-interactive. On a fresh Mac where
+Homebrew still needs administrator authentication, run the normal interactive
+command above; use `--yes` only after Homebrew is present or sudo authentication
+has already been prepared.
 
 Everything else runs in **user space, no sudo**: mise → `~/.local`, rustup →
 `~/.rustup`, bun → `~/.bun`, Homebrew packages (after setup), and all dotfiles in
