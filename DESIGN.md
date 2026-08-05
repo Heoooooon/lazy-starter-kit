@@ -50,7 +50,7 @@ All application colors must resolve through semantic/dynamic `NSColor` values.
 | `warning` | system orange | system orange | non-fatal attention |
 | `failure` | system red | system red | errors |
 
-Never use pure black for log text. Dynamic foreground attributes are required for appended attributed strings.
+Never use pure black for log text. The selectable multi-line log field uses the native dynamic `labelColor`.
 
 ## 4. Typography
 
@@ -109,7 +109,7 @@ Uses `circle.fill`, `checkmark.circle.fill`, `xmark.circle.fill`, or `arrow.down
 
 ### Log surface
 
-Header uses `terminal.fill`, title `실행 로그`, and a trailing `⌘A로 선택 · 복사 가능` hint. Empty state includes plain-language guidance. During execution, appended strings carry explicit adaptive text, monospaced-font, and paragraph-style attributes.
+Header uses `terminal.fill`, title `실행 로그`, and a trailing `⌘A로 선택 · 복사 가능` hint. A separate native label presents the plain-language empty state and hides when execution begins. During execution, output is appended to a selectable multi-line `NSTextField` with dynamic label color and a monospaced system font.
 
 ## 7. Accessibility and Interaction
 

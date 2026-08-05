@@ -19,30 +19,6 @@ private func selfTest() {
 }
 
 @MainActor
-private final class AdaptiveLogTextView: NSTextView {
-  override func viewDidMoveToWindow() {
-    super.viewDidMoveToWindow()
-    refreshTextColor()
-  }
-
-  override func viewDidChangeEffectiveAppearance() {
-    super.viewDidChangeEffectiveAppearance()
-    refreshTextColor()
-  }
-
-  private func refreshTextColor() {
-    guard let storage = textStorage, storage.length > 0 else { return }
-    effectiveAppearance.performAsCurrentDrawingAppearance {
-      storage.addAttribute(
-        .foregroundColor,
-        value: NSColor.textColor,
-        range: NSRange(location: 0, length: storage.length)
-      )
-    }
-  }
-}
-
-@MainActor
 private final class InstallerController: NSObject, NSApplicationDelegate {
   private let window = NSWindow(
     contentRect: NSRect(x: 0, y: 0, width: 760, height: 680),
@@ -55,7 +31,8 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   private let installButton = NSButton(title: "미리보기 시작", target: nil, action: nil)
   private let statusIcon = NSImageView()
   private let status = NSTextField(labelWithString: "준비됨")
-  private let log = AdaptiveLogTextView()
+  private let log = NSTextField()
+  private let logScroll = NSScrollView()
   private let logEmptyState = NSTextField(
     wrappingLabelWithString:
       "준비가 되었습니다.\n\n설치 구성을 확인한 뒤 미리보기를 시작하세요.\n실행되는 명령과 변경 예정 항목이 여기에 표시됩니다."
@@ -163,8 +140,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     setupHint.textColor = .tertiaryLabelColor
     let setupContent = NSStackView(views: [profileHeader, controls, setupHint])
     setupContent.orientation = .vertical
-    setupContent.alignment = .width
+    setupContent.alignment = .leading
     setupContent.spacing = 11
+    NSLayoutConstraint.activate([
+      controls.widthAnchor.constraint(equalTo: setupContent.widthAnchor),
+      setupHint.widthAnchor.constraint(equalTo: setupContent.widthAnchor),
+    ])
     let setupBox = makeCard(containing: setupContent, inset: 18)
 
     status.font = .systemFont(ofSize: 13, weight: .medium)
@@ -195,35 +176,52 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
 
     log.isEditable = false
     log.isSelectable = true
+    log.isBezeled = false
+    log.drawsBackground = false
+    log.usesSingleLineMode = false
+    log.lineBreakMode = .byCharWrapping
+    log.maximumNumberOfLines = 0
+    log.cell?.wraps = true
+    log.cell?.isScrollable = false
     log.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
-    log.textColor = .textColor
-    log.backgroundColor = Brand.surfaceStrong
-    log.defaultParagraphStyle = logParagraphStyle()
-    log.textContainerInset = NSSize(width: 14, height: 13)
-    log.string = ""
+    log.textColor = .labelColor
+    log.stringValue = ""
+    log.translatesAutoresizingMaskIntoConstraints = false
     logEmptyState.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
     logEmptyState.textColor = .labelColor
     logEmptyState.isHidden = false
     logEmptyState.translatesAutoresizingMaskIntoConstraints = false
 
-    let scroll = NSScrollView()
-    scroll.documentView = log
-    scroll.hasVerticalScroller = true
-    scroll.borderType = .noBorder
-    scroll.drawsBackground = true
-    scroll.backgroundColor = Brand.surfaceStrong
-    scroll.wantsLayer = true
-    scroll.layer?.cornerRadius = 10
-    scroll.layer?.masksToBounds = true
-    scroll.translatesAutoresizingMaskIntoConstraints = false
+    let logDocument = NSView()
+    logDocument.translatesAutoresizingMaskIntoConstraints = false
+    logDocument.addSubview(log)
+    logScroll.documentView = logDocument
+    logScroll.hasVerticalScroller = true
+    logScroll.borderType = .noBorder
+    logScroll.drawsBackground = true
+    logScroll.backgroundColor = Brand.surfaceStrong
+    logScroll.wantsLayer = true
+    logScroll.layer?.cornerRadius = 10
+    logScroll.layer?.masksToBounds = true
+    logScroll.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+      logDocument.widthAnchor.constraint(equalTo: logScroll.contentView.widthAnchor),
+      logDocument.heightAnchor.constraint(
+        greaterThanOrEqualTo: logScroll.contentView.heightAnchor
+      ),
+      log.leadingAnchor.constraint(equalTo: logDocument.leadingAnchor, constant: 14),
+      log.trailingAnchor.constraint(equalTo: logDocument.trailingAnchor, constant: -14),
+      log.topAnchor.constraint(equalTo: logDocument.topAnchor, constant: 13),
+      log.bottomAnchor.constraint(equalTo: logDocument.bottomAnchor, constant: -13),
+    ])
     let logViewport = NSView()
-    logViewport.addSubview(scroll)
+    logViewport.addSubview(logScroll)
     logViewport.addSubview(logEmptyState)
     NSLayoutConstraint.activate([
-      scroll.leadingAnchor.constraint(equalTo: logViewport.leadingAnchor),
-      scroll.trailingAnchor.constraint(equalTo: logViewport.trailingAnchor),
-      scroll.topAnchor.constraint(equalTo: logViewport.topAnchor),
-      scroll.bottomAnchor.constraint(equalTo: logViewport.bottomAnchor),
+      logScroll.leadingAnchor.constraint(equalTo: logViewport.leadingAnchor),
+      logScroll.trailingAnchor.constraint(equalTo: logViewport.trailingAnchor),
+      logScroll.topAnchor.constraint(equalTo: logViewport.topAnchor),
+      logScroll.bottomAnchor.constraint(equalTo: logViewport.bottomAnchor),
       logEmptyState.leadingAnchor.constraint(equalTo: logViewport.leadingAnchor, constant: 18),
       logEmptyState.trailingAnchor.constraint(
         lessThanOrEqualTo: logViewport.trailingAnchor,
@@ -254,8 +252,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     logSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     let logContent = NSStackView(views: [logHeader, logViewport])
     logContent.orientation = .vertical
-    logContent.alignment = .width
+    logContent.alignment = .leading
     logContent.spacing = 10
+    NSLayoutConstraint.activate([
+      logHeader.widthAnchor.constraint(equalTo: logContent.widthAnchor),
+      logViewport.widthAnchor.constraint(equalTo: logContent.widthAnchor),
+    ])
     let logBox = makeCard(containing: logContent, inset: 14)
 
     let content = NSStackView(views: [header, setupBox, statusStrip, logBox])
@@ -336,12 +338,6 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     statusIcon.setAccessibilityLabel(message)
   }
 
-  private func logParagraphStyle() -> NSParagraphStyle {
-    let paragraph = NSMutableParagraphStyle()
-    paragraph.lineSpacing = 3
-    return paragraph
-  }
-
   @objc private func startInstall() {
     guard task == nil else { return }
     installButton.isEnabled = false
@@ -349,7 +345,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     dryRun.isEnabled = false
     setStatus("설치 파일을 내려받는 중…", style: .running)
     logEmptyState.isHidden = true
-    log.string = ""
+    log.stringValue = ""
 
     let selectedProfile = profiles[profile.indexOfSelectedItem]
     let preview = dryRun.state == .on
@@ -417,18 +413,18 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   }
 
   @MainActor private func appendLog(_ text: String) {
-    log.textStorage?.append(
-      NSAttributedString(string: text, attributes: logAttributes())
-    )
-    log.scrollToEndOfDocument(nil)
+    log.stringValue.append(text)
+    log.invalidateIntrinsicContentSize()
+    DispatchQueue.main.async { [weak self] in
+      self?.scrollLogToBottom()
+    }
   }
 
-  private func logAttributes() -> [NSAttributedString.Key: Any] {
-    [
-      .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
-      .foregroundColor: NSColor.textColor,
-      .paragraphStyle: logParagraphStyle(),
-    ]
+  private func scrollLogToBottom() {
+    log.superview?.layoutSubtreeIfNeeded()
+    logScroll.layoutSubtreeIfNeeded()
+    logScroll.contentView.scroll(to: .zero)
+    logScroll.reflectScrolledClipView(logScroll.contentView)
   }
 
   nonisolated private func finish(code: Int32, message: String) {

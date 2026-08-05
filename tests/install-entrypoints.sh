@@ -44,12 +44,24 @@ brand_source="$(<"$ROOT/gui/macos/Brand.swift")"
   || fail "macOS GUI replaces its sized content view with a zero-frame root"
 [[ "$macos_source" == *"root.addSubview(content)"* ]] \
   || fail "macOS GUI does not attach its content stack to a persistent root view"
-[[ "$macos_source" == *"log.textColor = .textColor"* ]] \
+[[ "$macos_source" == *"log.textColor = .labelColor"* ]] \
   || fail "macOS GUI log text does not adapt to dark and light appearances"
-[[ "$macos_source" == *".foregroundColor: NSColor.textColor"* ]] \
-  || fail "macOS GUI appended logs do not carry an adaptive foreground color"
-[[ "$macos_source" == *"override func viewDidChangeEffectiveAppearance()"* ]] \
-  || fail "macOS GUI log does not refresh when its effective appearance changes"
+[[ "$macos_source" != *"NSTextView"* ]] \
+  || fail "macOS GUI still uses the notarization-sensitive NSTextView log"
+[[ "$macos_source" == *"private let log = NSTextField()"* ]] \
+  || fail "macOS GUI does not use a native multi-line text field for logs"
+[[ "$macos_source" == *"log.isSelectable = true"* ]] \
+  || fail "macOS GUI replacement log does not support selection and copy"
+[[ "$macos_source" == *"log.stringValue.append(text)"* ]] \
+  || fail "macOS GUI does not append execution output through the text field contract"
+[[ "$macos_source" == *"self?.scrollLogToBottom()"* ]] \
+  || fail "macOS GUI does not scroll the replacement log after layout"
+[[ "$macos_source" == *"logScroll.contentView.scroll(to: .zero)"* ]] \
+  || fail "macOS GUI does not account for the log document coordinate direction"
+[[ "$macos_source" == *"controls.widthAnchor.constraint(equalTo: setupContent.widthAnchor)"* ]] \
+  || fail "macOS GUI setup controls do not fill their card width"
+[[ "$macos_source" == *"logViewport.widthAnchor.constraint(equalTo: logContent.widthAnchor)"* ]] \
+  || fail "macOS GUI replacement log does not fill its card width"
 [[ "$macos_source" == *"private let logEmptyState = NSTextField("* ]] \
   || fail "macOS GUI does not separate its initial guidance from execution logs"
 [[ "$macos_source" == *"logEmptyState.isHidden = true"* ]] \
