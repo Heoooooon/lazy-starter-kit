@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">lazy-starter-kit — One line. Ready to build.</title>
+  <desc id="desc">A unified visual for the signed GUI and safe command-line development environment installer.</desc>
+  <defs>
+    <linearGradient id="bg" x1="120" y1="30" x2="1470" y2="870" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111D29"/>
+      <stop offset=".5" stop-color="#090E16"/>
+      <stop offset="1" stop-color="#05080E"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0" cy="0" r="1" gradientTransform="translate(1170 150) rotate(110) scale(520 760)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6B9CFF" stop-opacity=".22"/>
+      <stop offset=".45" stop-color="#56E6BF" stop-opacity=".08"/>
+      <stop offset="1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="iconTile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#193247"/>
+      <stop offset="1" stop-color="#07101B"/>
+    </linearGradient>
+    <linearGradient id="window" x1="830" y1="155" x2="1390" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#16212D"/>
+      <stop offset="1" stop-color="#0A1018"/>
+    </linearGradient>
+    <pattern id="grid" width="56" height="56" patternUnits="userSpaceOnUse">
+      <path d="M56 0H0V56" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="28" stdDeviation="36" flood-color="#000" flood-opacity=".48"/>
+    </filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#56E6BF" flood-opacity=".42"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" rx="40" fill="url(#bg)"/>
+  <rect width="1600" height="900" rx="40" fill="url(#aura)"/>
+  <rect width="1600" height="900" rx="40" fill="url(#grid)"/>
+  <path d="M80 100V58H122" fill="none" stroke="#56E6BF" stroke-width="2" opacity=".7"/>
+  <path d="M1520 800V842H1478" fill="none" stroke="#6B9CFF" stroke-width="2" opacity=".7"/>
+
+  <g transform="translate(112 108)">
+    <rect width="112" height="112" rx="28" fill="url(#iconTile)" stroke="#FFFFFF" stroke-opacity=".14" stroke-width="2" filter="url(#shadow)"/>
+    <circle cx="31" cy="84" r="3.5" fill="#6B9CFF"/>
+    <circle cx="44" cy="84" r="3.5" fill="#56E6BF"/>
+    <circle cx="57" cy="84" r="3.5" fill="#FFFFFF" fill-opacity=".42"/>
+    <path d="M32 68L55 50L32 32" fill="none" stroke="#56E6BF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+    <path d="M65 32H84" fill="none" stroke="#6B9CFF" stroke-width="9" stroke-linecap="round"/>
+  </g>
+
+  <text x="248" y="147" fill="#56E6BF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="700" letter-spacing="3">LAZY STARTER KIT</text>
+  <text x="248" y="192" fill="#A8B4C3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="500">SIGNED GUI · SAFE CLI</text>
+
+  <text x="112" y="362" fill="#F4F7FB" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="76" font-weight="760" letter-spacing="-3">One line.</text>
+  <text x="112" y="446" fill="#F4F7FB" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="76" font-weight="760" letter-spacing="-3">Ready to build.</text>
+  <text x="116" y="510" fill="#A8B4C3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="27" font-weight="450">새 컴퓨터에서 AI 코딩까지, 안전하고 반복 가능하게.</text>
+
+  <g transform="translate(112 565)" font-family="ui-monospace, 'SFMono-Regular', Menlo, monospace" font-size="18" font-weight="600">
+    <rect width="118" height="42" rx="21" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="24" y="27" fill="#D9E2EC">macOS</text>
+    <rect x="132" width="110" height="42" rx="21" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="158" y="27" fill="#D9E2EC">Linux</text>
+    <rect x="256" width="132" height="42" rx="21" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="280" y="27" fill="#D9E2EC">Windows</text>
+  </g>
+
+  <g transform="translate(112 662)">
+    <rect width="582" height="92" rx="20" fill="#05080E" stroke="#293646" stroke-width="2"/>
+    <circle cx="42" cy="46" r="6" fill="#56E6BF"/>
+    <text x="66" y="54" fill="#DFE7F1" font-family="ui-monospace, 'SFMono-Regular', Menlo, monospace" font-size="22">curl -fsSL …/install.sh | bash</text>
+  </g>
+
+  <g transform="translate(800 118)" filter="url(#shadow)">
+    <rect width="690" height="664" rx="30" fill="url(#window)" stroke="#FFFFFF" stroke-opacity=".13" stroke-width="2"/>
+    <circle cx="30" cy="28" r="6" fill="#FF5F57"/>
+    <circle cx="50" cy="28" r="6" fill="#FEBC2E"/>
+    <circle cx="70" cy="28" r="6" fill="#28C840"/>
+    <text x="345" y="35" text-anchor="middle" fill="#C6CED8" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="600">Lazy Starter Kit Installer</text>
+
+    <g transform="translate(34 76)">
+      <rect width="58" height="58" rx="15" fill="url(#iconTile)" stroke="#FFFFFF" stroke-opacity=".14"/>
+      <path d="M17 39L29 29L17 19" fill="none" stroke="#56E6BF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M35 19H45" fill="none" stroke="#6B9CFF" stroke-width="5" stroke-linecap="round"/>
+      <text x="76" y="21" fill="#8F9BAB" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">LAZY STARTER KIT</text>
+      <text x="76" y="51" fill="#F3F6FA" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="26" font-weight="720">한 줄이면, 바로 시작.</text>
+    </g>
+
+    <g transform="translate(34 160)">
+      <rect width="622" height="132" rx="16" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".10"/>
+      <text x="20" y="31" fill="#C3CCD7" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="650">설치 구성</text>
+      <rect x="20" y="50" width="190" height="48" rx="10" fill="#FFFFFF" fill-opacity=".075" stroke="#FFFFFF" stroke-opacity=".10"/>
+      <text x="38" y="81" fill="#F3F6FA" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="560">전체 설치</text>
+      <rect x="232" y="62" width="18" height="18" rx="5" fill="#6B9CFF"/>
+      <path d="M237 71L240 74L246 67" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="260" y="77" fill="#D5DDE7" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14">먼저 미리보기</text>
+      <rect x="445" y="50" width="157" height="48" rx="12" fill="#2867E8"/>
+      <text x="523" y="80" text-anchor="middle" fill="#FFF" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="700">미리보기 시작</text>
+    </g>
+
+    <g transform="translate(34 318)">
+      <circle cx="8" cy="10" r="5" fill="#56E6BF"/>
+      <text x="24" y="15" fill="#B9C4D1" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="550">설치할 준비가 되었습니다.</text>
+      <text x="622" y="15" text-anchor="end" fill="#7F8A98" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11">미리보기 기본 · 기존 설정 보존</text>
+    </g>
+
+    <g transform="translate(34 355)">
+      <rect width="622" height="274" rx="16" fill="#05080E" stroke="#FFFFFF" stroke-opacity=".10"/>
+      <text x="20" y="32" fill="#56E6BF" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="650">⌘_  실행 로그</text>
+      <line x1="20" y1="49" x2="602" y2="49" stroke="#FFFFFF" stroke-opacity=".08"/>
+      <g fill="#DCE4EE" font-family="ui-monospace, 'SFMono-Regular', Menlo, monospace" font-size="14">
+        <text x="20" y="83">✓ Homebrew and developer tools</text>
+        <text x="20" y="112">✓ Node · Python · Go · Rust</text>
+        <text x="20" y="141">✓ Shell · Git · containers</text>
+        <text x="20" y="170">• AI coding agents ready</text>
+      </g>
+      <rect x="20" y="208" width="258" height="38" rx="9" fill="#56E6BF" fill-opacity=".10" stroke="#56E6BF" stroke-opacity=".25"/>
+      <text x="39" y="232" fill="#79E9CB" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="650">미리보기가 끝났습니다.</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">lazy-starter-kit — One line. Ready to build.</title>
+  <desc id="desc">Social preview for the cross-platform development environment installer.</desc>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="30" x2="1210" y2="610" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132131"/>
+      <stop offset=".5" stop-color="#090F18"/>
+      <stop offset="1" stop-color="#05080E"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0" cy="0" r="1" gradientTransform="translate(980 95) rotate(120) scale(430 620)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6B9CFF" stop-opacity=".28"/>
+      <stop offset=".48" stop-color="#56E6BF" stop-opacity=".08"/>
+      <stop offset="1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#193247"/>
+      <stop offset="1" stop-color="#07101B"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%">
+      <feDropShadow dx="0" dy="28" stdDeviation="30" flood-color="#000" flood-opacity=".52"/>
+    </filter>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feDropShadow dx="0" dy="0" stdDeviation="13" flood-color="#56E6BF" flood-opacity=".42"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="640" rx="32" fill="url(#bg)"/>
+  <rect width="1280" height="640" rx="32" fill="url(#aura)"/>
+  <rect width="1280" height="640" rx="32" fill="url(#grid)"/>
+  <path d="M54 78V46H86" fill="none" stroke="#56E6BF" stroke-width="2" opacity=".72"/>
+  <path d="M1226 562V594H1194" fill="none" stroke="#6B9CFF" stroke-width="2" opacity=".72"/>
+
+  <g transform="translate(86 150)">
+    <rect width="244" height="244" rx="58" fill="url(#tile)" stroke="#FFFFFF" stroke-opacity=".15" stroke-width="3" filter="url(#shadow)"/>
+    <circle cx="70" cy="184" r="6" fill="#6B9CFF"/>
+    <circle cx="95" cy="184" r="6" fill="#56E6BF"/>
+    <circle cx="120" cy="184" r="6" fill="#FFFFFF" fill-opacity=".42"/>
+    <path d="M72 149L119 111L72 73" fill="none" stroke="#56E6BF" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+    <path d="M139 73H181" fill="none" stroke="#6B9CFF" stroke-width="19" stroke-linecap="round"/>
+  </g>
+
+  <text x="398" y="191" fill="#56E6BF" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="18" font-weight="720" letter-spacing="3">LAZY STARTER KIT</text>
+  <text x="396" y="286" fill="#F4F7FB" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="64" font-weight="780" letter-spacing="-2.5">One line.</text>
+  <text x="396" y="358" fill="#F4F7FB" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="64" font-weight="780" letter-spacing="-2.5">Ready to build.</text>
+  <text x="400" y="414" fill="#A8B4C3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="24" font-weight="470">A signed GUI and safe CLI for a complete AI dev environment.</text>
+
+  <g transform="translate(400 466)" font-family="ui-monospace, 'SFMono-Regular', Menlo, monospace" font-size="17" font-weight="600">
+    <rect width="112" height="38" rx="19" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="22" y="25" fill="#D9E2EC">macOS</text>
+    <rect x="126" width="104" height="38" rx="19" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="151" y="25" fill="#D9E2EC">Linux</text>
+    <rect x="244" width="126" height="38" rx="19" fill="#FFFFFF" fill-opacity=".055" stroke="#FFFFFF" stroke-opacity=".11"/>
+    <text x="267" y="25" fill="#D9E2EC">Windows</text>
+  </g>
+
+  <g transform="translate(400 532)">
+    <rect width="700" height="62" rx="16" fill="#05080E" stroke="#2A3747" stroke-width="2"/>
+    <circle cx="31" cy="31" r="5" fill="#56E6BF"/>
+    <text x="53" y="38" fill="#DFE7F1" font-family="ui-monospace, 'SFMono-Regular', Menlo, monospace" font-size="18">curl -fsSL …/install.sh | bash</text>
+  </g>
+</svg>

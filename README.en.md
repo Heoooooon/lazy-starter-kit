@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/images/lsk-hero.webp" alt="lazy-starter-kit — different machines, one starting line." width="100%" />
+<img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit — One line. Ready to build." width="100%" />
 
 ### Different machines, one starting line.
 

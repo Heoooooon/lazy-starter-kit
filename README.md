@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/images/lsk-hero.webp" alt="lazy-starter-kit — 사람마다 다른 출발선을 한 줄로 맞춥니다." width="100%" />
+<img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit — 한 줄이면, 바로 시작." width="100%" />
 
 ### 사람마다 다른 출발선을 한 줄로 맞춥니다.
 

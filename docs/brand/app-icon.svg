@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Lazy Starter Kit app icon</title>
+  <desc id="desc">A mint command chevron and cobalt starting line on a rounded graphite tile.</desc>
+  <defs>
+    <linearGradient id="tile" x1="180" y1="120" x2="830" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#182B3B"/>
+      <stop offset="1" stop-color="#07101B"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="160" y1="110" x2="870" y2="890" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity=".22"/>
+      <stop offset=".55" stop-color="#7DA8FF" stop-opacity=".07"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity=".02"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="34" stdDeviation="32" flood-color="#000814" flood-opacity=".52"/>
+    </filter>
+    <filter id="mintGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feDropShadow dx="0" dy="0" stdDeviation="22" flood-color="#56E6BF" flood-opacity=".36"/>
+    </filter>
+  </defs>
+  <rect x="72" y="72" width="880" height="880" rx="205" fill="url(#tile)" filter="url(#shadow)"/>
+  <rect x="74" y="74" width="876" height="876" rx="203" fill="none" stroke="url(#edge)" stroke-width="14"/>
+  <circle cx="287" cy="748" r="23" fill="#6B9CFF" fill-opacity=".82"/>
+  <circle cx="389" cy="748" r="23" fill="#56E6BF" fill-opacity=".68"/>
+  <circle cx="491" cy="748" r="23" fill="#FFFFFF" fill-opacity=".38"/>
+  <path d="M304 615L495 461L304 307" fill="none" stroke="#56E6BF" stroke-width="78" stroke-linecap="round" stroke-linejoin="round" filter="url(#mintGlow)"/>
+  <path d="M566 307H733" fill="none" stroke="#6B9CFF" stroke-width="78" stroke-linecap="round"/>
+</svg>
