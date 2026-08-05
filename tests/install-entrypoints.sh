@@ -37,6 +37,7 @@ printf 'ok   macOS double-click launcher delegates arguments\n'
 # stack itself the content view creates self-referential constraints and a
 # blank window until a test-only forced layout happens.
 macos_source="$(<"$ROOT/gui/macos/main.swift")"
+brand_source="$(<"$ROOT/gui/macos/Brand.swift")"
 [[ "$macos_source" != *"window.contentView = content"* ]] \
   || fail "macOS GUI constrains its content stack to itself and launches blank"
 [[ "$macos_source" != *"window.contentView = root"* ]] \
@@ -47,6 +48,16 @@ macos_source="$(<"$ROOT/gui/macos/main.swift")"
   || fail "macOS GUI log text does not adapt to dark and light appearances"
 [[ "$macos_source" == *".foregroundColor: NSColor.textColor"* ]] \
   || fail "macOS GUI appended logs do not carry an adaptive foreground color"
+[[ "$macos_source" == *'systemSymbolName: "terminal.fill"'* ]] \
+  || fail "macOS GUI does not expose a recognizable log icon"
+[[ "$macos_source" == *'systemSymbolName: "checkmark.shield.fill"'* ]] \
+  || fail "macOS GUI does not expose its signed installer trust state"
+[[ "$macos_source" == *"NSVisualEffectView"* ]] \
+  || fail "macOS GUI does not use a native adaptive material surface"
+[[ "$brand_source" == *'NSColor(name: "BrandMint")'* ]] \
+  || fail "macOS GUI brand colors do not adapt to the current appearance"
+[[ "$brand_source" == *"if size > 32"* ]] \
+  || fail "macOS GUI icon does not simplify at small sizes"
 
 # Given the GUI source, when its build script runs, then it creates a native
 # application bundle whose binary exposes a deterministic self-test contract.
@@ -55,11 +66,30 @@ bash "$ROOT/gui/macos/build-app.sh" "$DIST"
 APP="$DIST/Lazy Starter Kit Installer.app"
 [[ -x "$APP/Contents/MacOS/LazyStarterKitInstaller" ]] \
   || fail "macOS GUI app executable was not built"
+[[ -f "$APP/Contents/Resources/AppIcon.icns" ]] \
+  || fail "macOS GUI bundle does not contain its application icon"
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$APP/Contents/Info.plist")" == "AppIcon" ]] \
+  || fail "macOS GUI bundle does not declare its application icon"
+iconutil -c iconset "$APP/Contents/Resources/AppIcon.icns" -o "$TMP/AppIcon.iconset"
+[[ "$(sips -g pixelWidth "$TMP/AppIcon.iconset/icon_16x16.png" | awk '/pixelWidth/ {print $2}')" == "16" ]] \
+  || fail "macOS GUI bundle does not contain a native 16 px icon representation"
 self_test="$("$APP/Contents/MacOS/LazyStarterKitInstaller" --self-test)"
 [[ "$self_test" == *'"profiles":["full","minimal","work"]'* ]] \
   || fail "macOS GUI self-test did not expose all supported profiles"
 [[ "$self_test" == *'"supportsDryRun":true'* ]] \
   || fail "macOS GUI self-test did not expose dry-run support"
+[[ "$self_test" == *'"hasApplicationIcon":true'* ]] \
+  || fail "macOS GUI self-test did not expose its icon contract"
+[[ "$self_test" == *'"interfaceVersion":2'* ]] \
+  || fail "macOS GUI self-test did not expose the redesigned interface version"
+[[ "$self_test" == *'"supportsAppearanceSnapshots":true'* ]] \
+  || fail "macOS GUI self-test did not expose light and dark appearance QA"
+MIN_SNAPSHOT="$TMP/minimum-window.png"
+"$APP/Contents/MacOS/LazyStarterKitInstaller" --snapshot-size "$MIN_SNAPSHOT" 700 613
+[[ "$(sips -g pixelWidth "$MIN_SNAPSHOT" | awk '/pixelWidth/ {print $2}')" == "700" ]] \
+  || fail "macOS GUI minimum-width snapshot was not rendered"
+[[ "$(sips -g pixelHeight "$MIN_SNAPSHOT" | awk '/pixelHeight/ {print $2}')" == "613" ]] \
+  || fail "macOS GUI minimum-height snapshot was not rendered"
 printf 'ok   macOS GUI app builds and reports its contract\n'
 
 # Given a harmless local payload, when the real GUI auto-starts for E2E QA,
