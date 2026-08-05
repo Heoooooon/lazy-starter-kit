@@ -48,10 +48,12 @@ brand_source="$(<"$ROOT/gui/macos/Brand.swift")"
   || fail "macOS GUI log text does not adapt to dark and light appearances"
 [[ "$macos_source" == *".foregroundColor: NSColor.textColor"* ]] \
   || fail "macOS GUI appended logs do not carry an adaptive foreground color"
-[[ "$macos_source" == *"log.textStorage?.setAttributedString("* ]] \
-  || fail "macOS GUI initial log text does not carry adaptive attributes"
 [[ "$macos_source" == *"override func viewDidChangeEffectiveAppearance()"* ]] \
   || fail "macOS GUI log does not refresh when its effective appearance changes"
+[[ "$macos_source" == *"private let logEmptyState = NSTextField("* ]] \
+  || fail "macOS GUI does not separate its initial guidance from execution logs"
+[[ "$macos_source" == *"logEmptyState.isHidden = true"* ]] \
+  || fail "macOS GUI does not hide initial guidance when execution begins"
 [[ "$macos_source" == *'systemSymbolName: "terminal.fill"'* ]] \
   || fail "macOS GUI does not expose a recognizable log icon"
 [[ "$macos_source" == *'systemSymbolName: "checkmark.shield.fill"'* ]] \

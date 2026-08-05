@@ -56,6 +56,10 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   private let statusIcon = NSImageView()
   private let status = NSTextField(labelWithString: "준비됨")
   private let log = AdaptiveLogTextView()
+  private let logEmptyState = NSTextField(
+    wrappingLabelWithString:
+      "준비가 되었습니다.\n\n설치 구성을 확인한 뒤 미리보기를 시작하세요.\n실행되는 명령과 변경 예정 항목이 여기에 표시됩니다."
+  )
   private var task: Process?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -196,15 +200,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     log.backgroundColor = Brand.surfaceStrong
     log.defaultParagraphStyle = logParagraphStyle()
     log.textContainerInset = NSSize(width: 14, height: 13)
-    let initialLogText = """
-      준비가 되었습니다.
+    log.string = ""
+    logEmptyState.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+    logEmptyState.textColor = .labelColor
+    logEmptyState.isHidden = false
+    logEmptyState.translatesAutoresizingMaskIntoConstraints = false
 
-      설치 구성을 확인한 뒤 미리보기를 시작하세요.
-      실행되는 명령과 변경 예정 항목이 여기에 표시됩니다.
-      """
-    log.textStorage?.setAttributedString(
-      NSAttributedString(string: initialLogText, attributes: logAttributes())
-    )
     let scroll = NSScrollView()
     scroll.documentView = log
     scroll.hasVerticalScroller = true
@@ -214,6 +215,23 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     scroll.wantsLayer = true
     scroll.layer?.cornerRadius = 10
     scroll.layer?.masksToBounds = true
+    scroll.translatesAutoresizingMaskIntoConstraints = false
+    let logViewport = NSView()
+    logViewport.addSubview(scroll)
+    logViewport.addSubview(logEmptyState)
+    NSLayoutConstraint.activate([
+      scroll.leadingAnchor.constraint(equalTo: logViewport.leadingAnchor),
+      scroll.trailingAnchor.constraint(equalTo: logViewport.trailingAnchor),
+      scroll.topAnchor.constraint(equalTo: logViewport.topAnchor),
+      scroll.bottomAnchor.constraint(equalTo: logViewport.bottomAnchor),
+      logEmptyState.leadingAnchor.constraint(equalTo: logViewport.leadingAnchor, constant: 18),
+      logEmptyState.trailingAnchor.constraint(
+        lessThanOrEqualTo: logViewport.trailingAnchor,
+        constant: -18
+      ),
+      logEmptyState.topAnchor.constraint(equalTo: logViewport.topAnchor, constant: 16),
+      logViewport.heightAnchor.constraint(greaterThanOrEqualToConstant: 170),
+    ])
 
     let logIcon = NSImageView(
       image: NSImage(
@@ -234,7 +252,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     logHeader.spacing = 7
     logSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
     logSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-    let logContent = NSStackView(views: [logHeader, scroll])
+    let logContent = NSStackView(views: [logHeader, logViewport])
     logContent.orientation = .vertical
     logContent.alignment = .width
     logContent.spacing = 10
@@ -268,7 +286,6 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
       setupBox.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
       statusStrip.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
       logBox.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
-      scroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 170),
     ])
     logBox.setContentHuggingPriority(.defaultLow, for: .vertical)
     setStatus("설치할 준비가 되었습니다.", style: .ready)
@@ -331,6 +348,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     profile.isEnabled = false
     dryRun.isEnabled = false
     setStatus("설치 파일을 내려받는 중…", style: .running)
+    logEmptyState.isHidden = true
     log.string = ""
 
     let selectedProfile = profiles[profile.indexOfSelectedItem]
