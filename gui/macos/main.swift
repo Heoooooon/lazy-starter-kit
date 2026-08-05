@@ -19,6 +19,30 @@ private func selfTest() {
 }
 
 @MainActor
+private final class AdaptiveLogTextView: NSTextView {
+  override func viewDidMoveToWindow() {
+    super.viewDidMoveToWindow()
+    refreshTextColor()
+  }
+
+  override func viewDidChangeEffectiveAppearance() {
+    super.viewDidChangeEffectiveAppearance()
+    refreshTextColor()
+  }
+
+  private func refreshTextColor() {
+    guard let storage = textStorage, storage.length > 0 else { return }
+    effectiveAppearance.performAsCurrentDrawingAppearance {
+      storage.addAttribute(
+        .foregroundColor,
+        value: NSColor.textColor,
+        range: NSRange(location: 0, length: storage.length)
+      )
+    }
+  }
+}
+
+@MainActor
 private final class InstallerController: NSObject, NSApplicationDelegate {
   private let window = NSWindow(
     contentRect: NSRect(x: 0, y: 0, width: 760, height: 680),
@@ -31,7 +55,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   private let installButton = NSButton(title: "미리보기 시작", target: nil, action: nil)
   private let statusIcon = NSImageView()
   private let status = NSTextField(labelWithString: "준비됨")
-  private let log = NSTextView()
+  private let log = AdaptiveLogTextView()
   private var task: Process?
 
   func applicationDidFinishLaunching(_ notification: Notification) {

@@ -50,6 +50,8 @@ brand_source="$(<"$ROOT/gui/macos/Brand.swift")"
   || fail "macOS GUI appended logs do not carry an adaptive foreground color"
 [[ "$macos_source" == *"log.textStorage?.setAttributedString("* ]] \
   || fail "macOS GUI initial log text does not carry adaptive attributes"
+[[ "$macos_source" == *"override func viewDidChangeEffectiveAppearance()"* ]] \
+  || fail "macOS GUI log does not refresh when its effective appearance changes"
 [[ "$macos_source" == *'systemSymbolName: "terminal.fill"'* ]] \
   || fail "macOS GUI does not expose a recognizable log icon"
 [[ "$macos_source" == *'systemSymbolName: "checkmark.shield.fill"'* ]] \
