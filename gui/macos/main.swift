@@ -172,12 +172,15 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
     log.backgroundColor = Brand.surfaceStrong
     log.defaultParagraphStyle = logParagraphStyle()
     log.textContainerInset = NSSize(width: 14, height: 13)
-    log.string = """
+    let initialLogText = """
       준비가 되었습니다.
 
       설치 구성을 확인한 뒤 미리보기를 시작하세요.
       실행되는 명령과 변경 예정 항목이 여기에 표시됩니다.
       """
+    log.textStorage?.setAttributedString(
+      NSAttributedString(string: initialLogText, attributes: logAttributes())
+    )
     let scroll = NSScrollView()
     scroll.documentView = log
     scroll.hasVerticalScroller = true
@@ -372,13 +375,18 @@ private final class InstallerController: NSObject, NSApplicationDelegate {
   }
 
   @MainActor private func appendLog(_ text: String) {
-    let attributes: [NSAttributedString.Key: Any] = [
+    log.textStorage?.append(
+      NSAttributedString(string: text, attributes: logAttributes())
+    )
+    log.scrollToEndOfDocument(nil)
+  }
+
+  private func logAttributes() -> [NSAttributedString.Key: Any] {
+    [
       .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .regular),
       .foregroundColor: NSColor.textColor,
       .paragraphStyle: logParagraphStyle(),
     ]
-    log.textStorage?.append(NSAttributedString(string: text, attributes: attributes))
-    log.scrollToEndOfDocument(nil)
   }
 
   nonisolated private func finish(code: Int32, message: String) {
