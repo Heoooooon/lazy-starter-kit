@@ -248,7 +248,8 @@ curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/ins
 ```
 
 - `git`이 없는 완전 새 맥이면 먼저 **Xcode Command Line Tools** 설치 창이 뜹니다. **"설치"**를 누르고, 끝나면 위 명령어를 **한 번 더** 실행하세요.
-- 중간에 **Mac 비밀번호**를 한 번 물을 수 있어요(Homebrew 설치 시). 정상입니다.
+- 중간에 **Mac 비밀번호**를 한 번 물을 수 있어요(Homebrew 설치 시). 한 줄 설치에서도 공식 설치 프로그램의 입력을 `/dev/tty`에 연결하므로 정상적으로 입력할 수 있고, lazy-starter-kit이 별도의 `sudo` 명령을 실행하지는 않습니다.
+- `--yes`는 암호도 묻지 않는 완전 비대화형 모드입니다. Homebrew가 없는 새 맥에서는 위의 기본 명령을 사용하고, `--yes`는 Homebrew가 이미 있거나 sudo 인증이 준비된 환경에서 사용하세요.
 
 ### 3단계 — 끝나면
 

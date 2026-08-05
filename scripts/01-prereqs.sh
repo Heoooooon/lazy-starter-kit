@@ -32,11 +32,60 @@ step_prereqs() {
     ok "Homebrew present ($(brew_prefix))"
   else
     info "Installing Homebrew…"
+
     if [[ "$DRY_RUN" == "1" ]]; then
-      info "[dry-run] /bin/bash -c \"\$(curl -fsSL .../Homebrew/install/HEAD/install.sh)\""
+      info '[dry-run] download and run the official Homebrew installer'
     else
-      NONINTERACTIVE=1 /bin/bash -c \
-        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      local brew_installer brew_status
+      brew_installer="$(mktemp)"
+      brew_status=0
+
+      # Download first and validate the minimum expected shape before running.
+      if ! curl -fsSL \
+        https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh \
+        -o "$brew_installer"; then
+        rm -f "$brew_installer"
+        die "Could not download the Homebrew installer."
+      fi
+
+      if [[ ! -s "$brew_installer" ]] ||
+         ! head -1 "$brew_installer" | grep -q '^#!/bin/bash'; then
+        rm -f "$brew_installer"
+        die "Downloaded Homebrew installer is invalid."
+      fi
+
+      if [[ "$ASSUME_YES" == "1" ]]; then
+        # Homebrew aborts if INTERACTIVE and NONINTERACTIVE are both inherited.
+        # Isolate the child environment without changing the caller's variables.
+        info "Installing Homebrew non-interactively…"
+        (
+          unset INTERACTIVE
+          export NONINTERACTIVE=1
+          /bin/bash "$brew_installer"
+        ) || brew_status=$?
+
+      elif ( : </dev/tty ) 2>/dev/null; then
+        # Homebrew also aborts on CI+INTERACTIVE. Clear both non-interactive
+        # signals in the child, and keep prompts attached to the real terminal
+        # even when lazy-starter-kit itself was started with `curl | bash`.
+        info "Homebrew may request your macOS administrator password."
+        (
+          unset CI NONINTERACTIVE
+          export INTERACTIVE=1
+          /bin/bash "$brew_installer" </dev/tty
+        ) || brew_status=$?
+
+      else
+        rm -f "$brew_installer"
+        die "Homebrew installation requires an interactive terminal. Run ./install.sh from Terminal."
+      fi
+
+      rm -f "$brew_installer"
+
+      if [[ "$brew_status" -ne 0 ]]; then
+        die "Homebrew installation failed with exit code $brew_status."
+      fi
+
       ok "Homebrew installed"
     fi
   fi
