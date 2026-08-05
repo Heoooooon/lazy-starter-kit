@@ -7,6 +7,13 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **macOS one-line installs can now complete Homebrew's administrator prompt.**
+  The prerequisites step validates the official installer before running it,
+  removes inherited `CI`/`NONINTERACTIVE` conflicts from interactive launches,
+  and attaches prompts to `/dev/tty`. `--yes` remains prompt-free and removes
+  an inherited `INTERACTIVE` flag before launching Homebrew.
+
 ## [0.9.0] - 2026-07-29
 
 ### Added
