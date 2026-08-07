@@ -7,6 +7,32 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-08-07
+
+### Added
+- **The native macOS installer now supports component-level setup.** Users can
+  start from the full, minimal, or work preset and independently include
+  language runtimes, Docker, and AI agents while keeping required core tools.
+- **First-time prerequisites have a credential-safe Terminal handoff.** The
+  GUI preserves the selected components in an executable, self-cleaning command
+  while macOS or Terminal owns every administrator approval.
+
+### Changed
+- **The installer is reusable instead of one-shot.** Preview, completion, and
+  recoverable failure states restore the controls so another configuration can
+  be applied from the same app.
+- **Homebrew packages follow the GUI selection.** Core, runtime, and Docker
+  formulas are split into explicit Brewfiles instead of every profile applying
+  the full package set.
+
+### Fixed
+- **Standard users stop before the installer payload runs** and see a
+  plain-language explanation of the required macOS administrator account.
+- **Successful installs retain the final process output** and present the
+  required new-terminal action without crashing during log scrolling.
+- **Repeated Finder launches reuse one macOS app instance,** and the release
+  binary explicitly targets macOS 14.
+
 ## [0.9.0] - 2026-07-29
 
 ### Added
