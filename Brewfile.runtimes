@@ -1,0 +1,5 @@
+# Runtime managers used when the runtimes component is selected.
+brew "mise"
+brew "uv"
+brew "rustup"
+brew "bun"

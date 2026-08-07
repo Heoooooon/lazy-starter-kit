@@ -1,0 +1,16 @@
+# Core tools installed for every lazy-starter-kit configuration.
+brew "git"
+brew "gh"
+brew "jq"
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "bat"
+brew "tree"
+brew "ast-grep"
+brew "zoxide"
+brew "starship"
+
+cask "font-jetbrains-mono-nerd-font"
+tap "stablyai/orca", trusted: { cask: "orca" }
+cask "stablyai/orca/orca"

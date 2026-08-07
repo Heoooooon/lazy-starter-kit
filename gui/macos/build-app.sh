@@ -14,6 +14,7 @@ CONTENTS="$APP/Contents"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
 
 xcrun swiftc \
+  -target "$(uname -m)-apple-macosx14.0" \
   -framework AppKit \
   -framework Foundation \
   "$ROOT/gui/macos/Brand.swift" \
@@ -65,6 +66,7 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>LSMultipleInstancesProhibited</key><true/>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>NSHighResolutionCapable</key><true/>
 </dict>
