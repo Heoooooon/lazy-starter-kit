@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
-  <title id="title">Lazy Starter Kit app icon</title>
-  <desc id="desc">A mint command chevron and cobalt starting line on a rounded graphite tile.</desc>
+  <title id="title">CMORE Ready app icon</title>
+  <desc id="desc">A mint command chevron and cobalt ready line on a rounded graphite tile.</desc>
   <defs>
     <linearGradient id="tile" x1="180" y1="120" x2="830" y2="900" gradientUnits="userSpaceOnUse">
       <stop stop-color="#182B3B"/>

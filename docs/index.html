@@ -1,268 +1,1131 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>lazy-starter-kit — 한 줄이면, 바로 시작.</title>
-<meta name="description" content="서명된 GUI와 안전한 명령어 한 줄로 macOS, Linux, Windows에 완전한 AI 개발 환경을 준비하세요." />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="lazy-starter-kit — 한 줄이면, 바로 시작." />
-<meta property="og:description" content="A signed GUI and safe CLI for a complete AI development environment." />
-<meta property="og:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg" />
-<meta property="og:image:width" content="1280" />
-<meta property="og:image:height" content="640" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="lazy-starter-kit — One line. Ready to build." />
-<meta name="twitter:description" content="A signed GUI and safe CLI for a complete AI development environment." />
-<meta name="twitter:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg" />
-<link rel="icon" href="./brand/app-icon.svg" type="image/svg+xml" />
-<style>
-  :root {
-    --bg: #0c0e14;
-    --bg2: #11141d;
-    --card: #161a26;
-    --line: #232838;
-    --txt: #e6e9f0;
-    --dim: #8a93a8;
-    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-    --accent: #7c9cff;
-    --ok: #4ade80;
-    --warn: #fbbf24;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    background: radial-gradient(1200px 600px at 50% -10%, #1a2030 0%, var(--bg) 55%);
-    color: var(--txt);
-    line-height: 1.6;
-    padding: 0 20px 80px;
-  }
-  .wrap { max-width: 860px; margin: 0 auto; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CMORE Ready — 새 컴퓨터, 개발 준비 끝.</title>
+  <meta name="description" content="macOS, Windows, Linux의 개발 도구와 AI 코딩 환경을 오픈소스 설치 로직으로 한 번에 준비하세요.">
+  <link rel="canonical" href="https://cmore.dev/lazy-starter-kit/">
+  <meta name="theme-color" content="#070B12">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CMORE Ready">
+  <meta property="og:title" content="CMORE Ready — 새 컴퓨터, 개발 준비 끝.">
+  <meta property="og:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
+  <meta property="og:url" content="https://cmore.dev/lazy-starter-kit/">
+  <meta property="og:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CMORE Ready — 새 컴퓨터, 개발 준비 끝.">
+  <meta name="twitter:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
+  <meta name="twitter:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
+  <link rel="icon" href="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --canvas: #070b12;
+      --canvas-raised: #0d141e;
+      --surface: #111b27;
+      --surface-strong: #172433;
+      --line: rgba(255, 255, 255, 0.12);
+      --line-soft: rgba(255, 255, 255, 0.07);
+      --text: #f4f7fb;
+      --muted: #a8b4c3;
+      --mint: #56e6bf;
+      --cobalt: #6b9cff;
+      --warning: #f4c76b;
+      --display: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+      --content: 73.75rem;
+      --radius-sm: 0.75rem;
+      --radius-md: 1rem;
+      --radius-lg: 1.5rem;
+      --shadow-window: 0 2.5rem 6rem rgba(0, 8, 20, 0.48);
+    }
 
-  /* hero */
-  header { text-align: center; padding: 72px 0 40px; }
-  .badge {
-    display: inline-block; font-family: var(--mono); font-size: 12px;
-    color: var(--accent); border: 1px solid var(--line); border-radius: 999px;
-    padding: 4px 14px; margin-bottom: 22px; letter-spacing: .5px;
-  }
-  h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
-  h1 .mono { font-family: var(--mono); color: var(--accent); }
-  .tag { color: var(--dim); font-size: 17px; margin-top: 14px; }
-  .chain {
-    margin-top: 18px; font-family: var(--mono); font-size: 14px; color: var(--txt);
-  }
-  .chain b { color: var(--ok); }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
 
-  /* command box */
-  .cmd {
-    margin: 34px auto 0; max-width: 720px; background: #05070c;
-    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
-    display: flex; align-items: center; gap: 14px; text-align: left;
-  }
-  .cmd code { font-family: var(--mono); font-size: 13.5px; color: #cfe0ff; flex: 1; overflow-x: auto; white-space: nowrap; }
-  .cmd .pmt { color: var(--ok); }
-  .cmd button {
-    font-family: var(--mono); font-size: 12px; cursor: pointer; flex-shrink: 0;
-    background: var(--accent); color: #0b1020; border: 0; border-radius: 7px; padding: 7px 12px; font-weight: 700;
-  }
-  .cmd button:active { transform: translateY(1px); }
+    html {
+      scroll-behavior: smooth;
+      background: var(--canvas);
+    }
 
-  /* section heading */
-  .sec-title { margin: 64px 0 8px; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 78% 8%, rgba(107, 156, 255, 0.14), transparent 30rem),
+        radial-gradient(circle at 18% 30%, rgba(86, 230, 191, 0.06), transparent 28rem),
+        var(--canvas);
+      font-family: var(--display);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
 
-  /* timeline */
-  .timeline { position: relative; margin-top: 28px; padding-left: 56px; }
-  .timeline::before {
-    content: ""; position: absolute; left: 19px; top: 8px; bottom: 8px; width: 2px;
-    background: linear-gradient(180deg, var(--accent), var(--line));
-  }
-  .step { position: relative; margin-bottom: 26px; }
-  .step .num {
-    position: absolute; left: -56px; top: 0; width: 40px; height: 40px; border-radius: 50%;
-    background: var(--bg2); border: 2px solid var(--accent); color: var(--accent);
-    font-family: var(--mono); font-weight: 700; font-size: 15px;
-    display: flex; align-items: center; justify-content: center; z-index: 1;
-  }
-  .step .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px;
-    transition: border-color .15s;
-  }
-  .step .card:hover { border-color: var(--accent); }
-  .step h3 { font-size: 18px; display: flex; align-items: center; gap: 10px; }
-  .step h3 .id { font-family: var(--mono); font-size: 12px; color: var(--accent); background: #1c2233; padding: 2px 8px; border-radius: 6px; }
-  .step p { color: var(--dim); font-size: 14.5px; margin-top: 6px; }
-  .step .needs { font-size: 12px; color: var(--warn); font-family: var(--mono); margin-top: 8px; }
-  .tools { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 7px; }
-  .tools span {
-    font-family: var(--mono); font-size: 11.5px; color: var(--txt);
-    background: #0e1119; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
-  }
-  .final .num { border-color: var(--ok); color: var(--ok); }
-  .final .card { border-color: #214a30; background: linear-gradient(180deg, #12211a, var(--card)); }
-  .final h3 .id { color: var(--ok); background: #133024; }
+    a {
+      color: inherit;
+    }
 
-  /* flags */
-  .flags { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
-  .flag { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 13px 16px; }
-  .flag code { font-family: var(--mono); color: var(--accent); font-size: 13px; }
-  .flag span { display: block; color: var(--dim); font-size: 13px; margin-top: 4px; }
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  /* props */
-  .props { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-  .prop { flex: 1 1 200px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
-  .prop b { color: var(--ok); font-size: 14px; }
-  .prop p { color: var(--dim); font-size: 13px; margin-top: 3px; }
-  .prop p code { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+    button {
+      font: inherit;
+    }
 
-  footer { text-align: center; margin-top: 70px; color: var(--dim); font-size: 13px; }
-  footer a { color: var(--accent); text-decoration: none; }
-  @media (max-width: 560px) {
-    h1 { font-size: 30px; }
-    .flags { grid-template-columns: 1fr; }
-    .cmd code { font-size: 12px; }
-  }
-</style>
+    .skip-link {
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 20;
+      padding: 0.75rem 1rem;
+      color: var(--canvas);
+      background: var(--mint);
+      font-weight: 700;
+      transform: translateY(-120%);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    :focus-visible {
+      outline: 0.1875rem solid var(--mint);
+      outline-offset: 0.1875rem;
+    }
+
+    .shell {
+      width: min(calc(100% - 3rem), var(--content));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      display: flex;
+      min-height: 4.5rem;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 0.0625rem solid var(--line-soft);
+    }
+
+    .wordmark {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .wordmark span {
+      color: var(--mint);
+      font-weight: 650;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .nav a {
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 180ms ease;
+    }
+
+    .nav a:hover {
+      color: var(--text);
+    }
+
+    .nav .nav-action {
+      padding: 0.5rem 0.875rem;
+      color: var(--text);
+      border: 0.0625rem solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+
+    .nav .nav-action:hover {
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav .nav-action:active {
+      transform: translateY(0.0625rem);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(28rem, 7fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: center;
+      min-height: calc(100dvh - 4.5rem);
+      padding-block: clamp(4.5rem, 9vw, 7.5rem);
+    }
+
+    .eyebrow {
+      margin: 0 0 1.5rem;
+      color: var(--mint);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 11ch;
+      margin-bottom: 1.5rem;
+      font-size: clamp(3.25rem, 6.4vw, 6.25rem);
+      font-weight: 820;
+      letter-spacing: -0.068em;
+      line-height: 0.98;
+      text-wrap: balance;
+      word-break: keep-all;
+    }
+
+    h1 em {
+      color: var(--mint);
+      font-style: normal;
+    }
+
+    .hero-copy {
+      max-width: 34rem;
+      margin-bottom: 2rem;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+      line-height: 1.75;
+      text-wrap: pretty;
+      word-break: keep-all;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 3rem;
+      align-items: center;
+      justify-content: center;
+      padding-inline: 1.25rem;
+      border: 0.0625rem solid transparent;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      font-weight: 750;
+      text-decoration: none;
+      transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .button-primary {
+      color: #08111d;
+      background: var(--cobalt);
+      box-shadow: 0 0.75rem 2.5rem rgba(107, 156, 255, 0.22);
+    }
+
+    .button-primary:hover {
+      background: #83abff;
+      transform: translateY(-0.125rem);
+    }
+
+    .button-primary:active {
+      transform: translateY(0.0625rem);
+    }
+
+    .button-secondary {
+      color: var(--muted);
+      border-color: var(--line);
+      background: transparent;
+    }
+
+    .button-secondary:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .source-note {
+      margin: 1.25rem 0 0;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    .setup-window {
+      position: relative;
+      overflow: hidden;
+      border: 0.0625rem solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.07), transparent 34%),
+        var(--canvas-raised);
+      box-shadow: var(--shadow-window);
+    }
+
+    .setup-window::before {
+      position: absolute;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      background: radial-gradient(circle at 76% 0%, rgba(86, 230, 191, 0.09), transparent 40%);
+    }
+
+    .window-bar {
+      position: relative;
+      display: flex;
+      min-height: 3.25rem;
+      align-items: center;
+      gap: 0.5rem;
+      padding-inline: 1.25rem;
+      border-bottom: 0.0625rem solid var(--line-soft);
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .window-dot {
+      width: 0.625rem;
+      height: 0.625rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .window-title {
+      margin-left: 0.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 650;
+    }
+
+    .window-body {
+      position: relative;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    .app-heading {
+      display: grid;
+      grid-template-columns: 4rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .app-heading img {
+      display: block;
+      width: 4rem;
+      height: 4rem;
+      filter: drop-shadow(0 1rem 1.5rem rgba(0, 8, 20, 0.44));
+    }
+
+    .app-heading strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 1.25rem;
+      letter-spacing: -0.025em;
+    }
+
+    .app-heading span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8125rem;
+      word-break: keep-all;
+    }
+
+    .setup-choice {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+      border: 0.0625rem solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .setup-choice b {
+      display: block;
+      margin-bottom: 0.125rem;
+      font-size: 0.875rem;
+    }
+
+    .setup-choice span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .choice-status {
+      color: var(--mint);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    .progress {
+      display: block;
+      width: 100%;
+      height: 0.375rem;
+      margin-block: 1.5rem;
+      overflow: hidden;
+      appearance: none;
+      border: 0;
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .progress::-webkit-progress-bar {
+      border-radius: inherit;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .progress::-webkit-progress-value {
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cobalt), var(--mint));
+    }
+
+    .progress::-moz-progress-bar {
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cobalt), var(--mint));
+    }
+
+    .terminal {
+      min-height: 12.5rem;
+      padding: 1.25rem;
+      border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      background: #05080e;
+      color: #dfe7f1;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.8;
+      box-shadow: inset 0 0.0625rem 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .terminal p {
+      margin-bottom: 0.125rem;
+    }
+
+    .terminal .terminal-label {
+      margin-bottom: 0.625rem;
+      color: var(--muted);
+      font-size: 0.6875rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .terminal .done {
+      color: var(--mint);
+    }
+
+    .terminal .working {
+      color: var(--cobalt);
+    }
+
+    .proof-rail {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-block: 0;
+      padding-left: 0;
+      border-block: 0.0625rem solid var(--line);
+      list-style: none;
+    }
+
+    .proof {
+      padding: 1.5rem 2rem;
+    }
+
+    .proof + .proof {
+      border-left: 0.0625rem solid var(--line);
+    }
+
+    .proof strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--text);
+    }
+
+    .proof span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.8125rem;
+      word-break: keep-all;
+    }
+
+    section {
+      padding-block: clamp(5rem, 10vw, 8rem);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.35fr);
+      gap: clamp(3rem, 8vw, 8rem);
+      align-items: start;
+    }
+
+    .section-kicker {
+      margin-bottom: 1rem;
+      color: var(--mint);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 1.25rem;
+      font-size: clamp(2.25rem, 4.6vw, 4.25rem);
+      line-height: 1.08;
+      letter-spacing: -0.055em;
+      text-wrap: balance;
+      word-break: keep-all;
+    }
+
+    .section-intro {
+      max-width: 34rem;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 1.0625rem;
+      line-height: 1.8;
+      text-wrap: pretty;
+      word-break: keep-all;
+    }
+
+    .steps {
+      border-top: 0.0625rem solid var(--line);
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 3rem minmax(0, 1fr);
+      gap: 1.25rem;
+      padding-block: 2rem;
+      border-bottom: 0.0625rem solid var(--line);
+    }
+
+    .step-number {
+      color: var(--cobalt);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .step h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      letter-spacing: -0.025em;
+    }
+
+    .step p {
+      max-width: 38rem;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.9375rem;
+      word-break: keep-all;
+    }
+
+    .safety {
+      position: relative;
+      overflow: hidden;
+      border-block: 0.0625rem solid var(--line-soft);
+      background:
+        linear-gradient(135deg, rgba(107, 156, 255, 0.08), transparent 42%),
+        var(--canvas-raised);
+    }
+
+    .safety-list {
+      display: grid;
+      gap: 0;
+      border-top: 0.0625rem solid var(--line);
+    }
+
+    .safety-item {
+      display: grid;
+      grid-template-columns: 1.1fr 1.9fr;
+      gap: 1.5rem;
+      padding-block: 1.5rem;
+      border-bottom: 0.0625rem solid var(--line);
+    }
+
+    .safety-item strong {
+      font-size: 0.9375rem;
+    }
+
+    .safety-item span {
+      color: var(--muted);
+      font-size: 0.875rem;
+      word-break: keep-all;
+    }
+
+    .tool-band {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.625rem;
+      margin-top: 2.5rem;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .tool-band li {
+      padding: 0.5rem 0.75rem;
+      color: var(--muted);
+      border: 0.0625rem solid var(--line);
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.025);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+    }
+
+    .open-source {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+      gap: clamp(3rem, 8vw, 8rem);
+      align-items: end;
+    }
+
+    .open-source h2 {
+      max-width: 13ch;
+    }
+
+    .license-note {
+      padding-left: 1.5rem;
+      border-left: 0.125rem solid var(--mint);
+    }
+
+    .license-note strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .license-note p {
+      margin-bottom: 1rem;
+      color: var(--muted);
+      font-size: 0.875rem;
+      word-break: keep-all;
+    }
+
+    .license-note a {
+      color: var(--mint);
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-underline-offset: 0.25rem;
+    }
+
+    .start {
+      padding-top: 0;
+    }
+
+    .start-panel {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(2rem, 6vw, 4rem);
+      border: 0.0625rem solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at 84% 0%, rgba(86, 230, 191, 0.14), transparent 22rem),
+        var(--surface);
+      box-shadow: 0 2rem 5rem rgba(0, 8, 20, 0.3);
+    }
+
+    .start-panel h2 {
+      max-width: 14ch;
+      margin-bottom: 1rem;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+    }
+
+    .start-panel > p {
+      max-width: 34rem;
+      margin-bottom: 2rem;
+      color: var(--muted);
+      word-break: keep-all;
+    }
+
+    .download-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      border-block: 0.0625rem solid var(--line);
+      list-style: none;
+    }
+
+    .download-list li + li {
+      border-left: 0.0625rem solid var(--line);
+    }
+
+    .download-link {
+      display: block;
+      min-height: 9rem;
+      padding: 1.5rem;
+      text-decoration: none;
+      transition: background 180ms ease;
+    }
+
+    .download-link:hover {
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .download-link strong,
+    .download-link span {
+      display: block;
+    }
+
+    .download-link strong {
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .download-link span {
+      color: var(--muted);
+      font-size: 0.8125rem;
+      line-height: 1.65;
+      word-break: keep-all;
+    }
+
+    .download-link b {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--mint);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    footer {
+      padding-block: 2rem 3rem;
+      border-top: 0.0625rem solid var(--line-soft);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-underline-offset: 0.25rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    @media (max-width: 58rem) {
+      .hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .hero-copy {
+        max-width: 42rem;
+      }
+
+      .setup-window {
+        max-width: 43rem;
+      }
+
+      .section-grid,
+      .open-source {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+
+      .section-intro {
+        max-width: 42rem;
+      }
+
+      .license-note {
+        max-width: 34rem;
+      }
+    }
+
+    @media (max-width: 46rem) {
+      .shell {
+        width: min(calc(100% - 2rem), var(--content));
+      }
+
+      .nav > a:not(.nav-action) {
+        display: none;
+      }
+
+      .proof-rail {
+        grid-template-columns: 1fr;
+      }
+
+      .proof {
+        padding-inline: 0;
+      }
+
+      .proof + .proof {
+        border-top: 0.0625rem solid var(--line);
+        border-left: 0;
+      }
+
+      .safety-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 28rem) {
+      .topbar {
+        min-height: 4rem;
+      }
+
+      .wordmark {
+        font-size: 0.9375rem;
+      }
+
+      .nav {
+        gap: 0.75rem;
+      }
+
+      .nav .nav-action {
+        padding: 0.4375rem 0.6875rem;
+        font-size: 0.75rem;
+      }
+
+      .hero {
+        padding-block: 4rem;
+      }
+
+      h1 {
+        font-size: clamp(2.8rem, 15vw, 4rem);
+      }
+
+      .actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .window-body {
+        padding: 1.25rem;
+      }
+
+      .app-heading {
+        grid-template-columns: 3rem minmax(0, 1fr);
+      }
+
+      .app-heading img {
+        width: 3rem;
+        height: 3rem;
+      }
+
+      .setup-choice {
+        grid-template-columns: 1fr;
+      }
+
+      .terminal {
+        min-height: auto;
+        padding: 1rem;
+        font-size: 0.6875rem;
+      }
+
+      .download-list {
+        grid-template-columns: 1fr;
+      }
+
+      .download-list li + li {
+        border-top: 0.0625rem solid var(--line);
+        border-left: 0;
+      }
+
+      .download-link {
+        min-height: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
-  <header>
-    <div class="badge">macOS · Apple Silicon · MIT</div>
-    <h1>lazy-starter-kit</h1>
-    <p class="tag">새 맥북을 <b>아무것도 없는 상태</b>에서 명령어 한 줄로 완전한 개발 환경까지.</p>
-    <p class="chain">node &rarr; runtimes &rarr; shell &rarr; docker &rarr; <b>gajae-code</b> + <b>lazycodex</b></p>
-    <div class="cmd">
-      <span class="pmt">$</span>
-      <code id="curl">curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash</code>
-      <button onclick="copyCmd(this)">복사</button>
-    </div>
+  <header class="shell topbar">
+    <a class="wordmark" href="./" aria-label="CMORE Ready 홈">CMORE <span>Ready</span></a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="#how">작동 방식</a>
+      <a href="#safety">안전 설계</a>
+      <a href="#opensource">오픈소스</a>
+      <a class="nav-action" href="https://github.com/Heoooooon/lazy-starter-kit">GitHub</a>
+    </nav>
   </header>
 
-  <div class="sec-title">설치 순서 — 7단계 (의존성 순서대로)</div>
-
-  <div class="timeline">
-
-    <div class="step">
-      <div class="num">1</div>
-      <div class="card">
-        <h3><span class="id">prereqs</span> 기반 설치</h3>
-        <p>모든 것의 토대. Xcode Command Line Tools(컴파일러·git·헤더)와 Homebrew를 깔고, brew 환경을 활성 Zsh 설정 디렉터리의 <code>.zprofile</code>에 영구 등록합니다.</p>
-        <div class="tools"><span>Xcode CLT</span><span>Homebrew</span></div>
+  <main id="main">
+    <section class="shell hero" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">CMORE Ready · Cross-platform dev setup</p>
+        <h1 id="hero-title">새 컴퓨터, <em>개발 준비 끝.</em></h1>
+        <p class="hero-copy">
+          macOS, Windows, Linux에 필요한 개발 도구와 AI 코딩 환경을
+          기존 설정을 지우지 않고 한 번에 준비하세요.
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href="#start">무료로 시작</a>
+          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases">릴리스 보기</a>
+        </div>
+        <p class="source-note">by CMORE · Powered by lazy-starter-kit</p>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="num">2</div>
-      <div class="card">
-        <h3><span class="id">brew</span> CLI 패키지 (Brewfile)</h3>
-        <p>선언적 <code>Brewfile</code> 하나로 개발 도구를 일괄 설치. 이후 모든 단계가 여기서 깔린 도구에 의존합니다.</p>
-        <p class="needs">↳ 필요: prereqs (Homebrew)</p>
-        <div class="tools">
-          <span>gh</span><span>ripgrep</span><span>fd</span><span>fzf</span><span>bat</span><span>jq</span><span>tree</span><span>wget</span>
-          <span>mise</span><span>uv</span><span>rustup</span><span>bun</span><span>starship</span>
-          <span>colima</span><span>docker</span><span>compose</span><span>buildx</span><span>mole</span><span>Nerd Font</span>
+      <div class="setup-window" role="group" aria-label="CMORE Ready 설치 화면 예시">
+        <div class="window-bar" aria-hidden="true">
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
+          <span class="window-title">CMORE Ready · Preview</span>
+        </div>
+        <div class="window-body">
+          <div class="app-heading">
+            <img src="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" width="64" height="64" alt="">
+            <div>
+              <strong>설치 계획 미리보기</strong>
+              <span>실행 전에 확인하게 될 설치 흐름의 예시입니다.</span>
+            </div>
+          </div>
+          <div class="setup-choice">
+            <div>
+              <b>전체 개발 환경</b>
+              <span>런타임 · 셸 · 컨테이너 · AI 코딩 도구</span>
+            </div>
+            <div class="choice-status">5 / 7 steps</div>
+          </div>
+          <progress class="progress" aria-label="설치 계획 예시: 일곱 단계 중 다섯 단계" value="5" max="7">5 / 7</progress>
+          <div class="terminal">
+            <p class="terminal-label">Example plan</p>
+            <p><span class="done">01</span>&nbsp;&nbsp;기존 Git 설정 확인</p>
+            <p><span class="done">02</span>&nbsp;&nbsp;Node.js · Python · Go 준비</p>
+            <p><span class="done">03</span>&nbsp;&nbsp;셸 환경과 프롬프트 연결</p>
+            <p><span class="working">04</span>&nbsp;&nbsp;Docker와 AI 코딩 도구 확인</p>
+            <p>&nbsp;</p>
+            <p>실제 실행에서는 단계별 결과와 로그가 표시됩니다.</p>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="step">
-      <div class="num">3</div>
-      <div class="card">
-        <h3><span class="id">runtimes</span> 런타임 설치</h3>
-        <p>mise로 언어 런타임을, rustup으로 Rust를 설치. 프로젝트별 버전 전환이 가능해집니다.</p>
-        <p class="needs">↳ 필요: brew (mise, rustup)</p>
-        <div class="tools"><span>node @lts</span><span>python @latest</span><span>go @latest</span><span>rust stable</span><span>rust-analyzer</span></div>
+    <ul class="shell proof-rail" aria-label="핵심 검증 정보">
+      <li class="proof">
+        <strong>macOS · Windows · Linux</strong>
+        <span>한 프로젝트로 세 운영체제를 지원합니다.</span>
+      </li>
+      <li class="proof">
+        <strong>Preserve first</strong>
+        <span>관리 대상 셸·프로필 파일은 백업한 뒤 변경합니다.</span>
+      </li>
+      <li class="proof">
+        <strong>6 environments in CI</strong>
+        <span>설치부터 제거까지 자동으로 검증합니다.</span>
+      </li>
+    </ul>
+
+    <section class="shell section-grid" id="how" aria-labelledby="how-title">
+      <div>
+        <p class="section-kicker">How it works</p>
+        <h2 id="how-title">선택은 단순하게, 과정은 투명하게.</h2>
+        <p class="section-intro">
+          무엇을 바꾸는지 숨기지 않습니다. 먼저 미리 보고,
+          필요한 구성만 선택한 뒤, 실제 로그로 전 과정을 확인합니다.
+        </p>
       </div>
-    </div>
-
-    <div class="step">
-      <div class="num">4</div>
-      <div class="card">
-        <h3><span class="id">shell</span> 셸 환경</h3>
-        <p>oh-my-zsh + 플러그인, starship 프롬프트, Nerd Font를 연결. <code>ZDOTDIR</code>을 반영한 <code>.zshrc</code>에 마커 블록으로 주입해 재실행해도 중복되지 않습니다.</p>
-        <p class="needs">↳ 필요: brew (starship/fzf), runtimes (mise)</p>
-        <div class="tools"><span>oh-my-zsh</span><span>git · npm · node · macos</span><span>autosuggestions</span><span>syntax-highlighting</span><span>starship.toml</span><span>orca (Nerd Font)</span></div>
+      <div class="steps">
+        <article class="step">
+          <span class="step-number">01</span>
+          <div>
+            <h3>내 운영체제에서 시작</h3>
+            <p>다운로드한 설치 앱 또는 플랫폼별 안내에서 같은 설치 흐름을 시작합니다.</p>
+          </div>
+        </article>
+        <article class="step">
+          <span class="step-number">02</span>
+          <div>
+            <h3>구성을 고르고 미리보기</h3>
+            <p>전체·최소·회사 PC용 프로필을 고르고, 실제 변경 전에 작업 목록을 확인합니다.</p>
+          </div>
+        </article>
+        <article class="step">
+          <span class="step-number">03</span>
+          <div>
+            <h3>설치하고 바로 검증</h3>
+            <p>필요한 도구를 공식 배포처에서 설치하고 버전·경로·설정 상태까지 확인합니다.</p>
+          </div>
+        </article>
       </div>
-    </div>
+    </section>
 
-    <div class="step">
-      <div class="num">5</div>
-      <div class="card">
-        <h3><span class="id">docker</span> 컨테이너</h3>
-        <p>Docker Desktop 없이 Colima로 컨테이너 런타임 구성. <code>docker compose</code>/<code>buildx</code> 플러그인을 연결합니다.</p>
-        <p class="needs">↳ 필요: brew (colima, docker)</p>
-        <div class="tools"><span>Colima</span><span>docker CLI</span><span>compose</span><span>buildx</span></div>
+    <section class="safety" id="safety" aria-labelledby="safety-title">
+      <div class="shell section-grid">
+        <div>
+          <p class="section-kicker">Safety by design</p>
+          <h2 id="safety-title">빠른 것보다, 되돌릴 수 있는 것이 먼저.</h2>
+          <p class="section-intro">
+            새 컴퓨터뿐 아니라 이미 사용 중인 컴퓨터에서도 실행할 수 있도록
+            보존·검증·복구를 설치 과정의 일부로 만들었습니다.
+          </p>
+        </div>
+        <div class="safety-list">
+          <div class="safety-item">
+            <strong>기존 설정 보존</strong>
+            <span>기존 도구와 설정을 먼저 감지하고, 관리 대상 셸·프로필 파일은 변경 전에 백업합니다.</span>
+          </div>
+          <div class="safety-item">
+            <strong>Dry Run</strong>
+            <span>컴퓨터를 바꾸기 전에 실행할 작업과 대상 경로를 먼저 확인할 수 있습니다.</span>
+          </div>
+          <div class="safety-item">
+            <strong>반복 실행 가능</strong>
+            <span>같은 설치를 다시 실행해도 설정 블록이 중복되거나 손상되지 않습니다.</span>
+          </div>
+          <div class="safety-item">
+            <strong>제거와 수동 복구</strong>
+            <span>키트가 관리하는 설정을 정리하고 백업은 수동 복구용으로 남깁니다. Homebrew·Git 정보·폰트 같은 외부 상태는 유지합니다.</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="step">
-      <div class="num">6</div>
-      <div class="card">
-        <h3><span class="id">git</span> Git &amp; GitHub</h3>
-        <p>git 신원(GitHub noreply 이메일 자동 도출), HTTPS 자격증명 도우미, 합리적 기본값을 설정. 기존 값은 덮어쓰지 않습니다.</p>
-        <p class="needs">↳ 필요: brew (gh)</p>
-        <div class="tools"><span>user.name/email</span><span>gh auth</span><span>credential helper</span><span>defaults</span></div>
+    <section class="shell" aria-labelledby="tools-title">
+      <div class="section-grid">
+        <div>
+          <p class="section-kicker">One coherent setup</p>
+          <h2 id="tools-title">도구를 모으는 데서 끝나지 않습니다.</h2>
+        </div>
+        <div>
+          <p class="section-intro">
+            런타임, 셸, 컨테이너, Git, AI 코딩 도구가 서로 맞는 경로와 순서로
+            동작하도록 연결하고 설치 결과를 검증합니다.
+          </p>
+          <ul class="tool-band" aria-label="지원 도구">
+            <li>Git</li>
+            <li>Homebrew</li>
+            <li>mise</li>
+            <li>Node.js</li>
+            <li>Python</li>
+            <li>Go</li>
+            <li>Rust</li>
+            <li>starship</li>
+            <li>Docker</li>
+            <li>Claude Code</li>
+            <li>Codex</li>
+            <li>gajae-code</li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="step final">
-      <div class="num">7</div>
-      <div class="card">
-        <h3><span class="id">agents</span> AI 코딩 에이전트 — 최종 단계</h3>
-        <p>체인의 정점. node/bun 위에 AI 에이전트를 얹습니다. <b>gajae-code</b>는 bun 전역, <b>codex</b>는 npm 전역, <b>lazycodex</b>는 npx로 codex 위에 OmO 하니스를, <b>Hermes Agent</b>(Nous Research)는 공식 설치 스크립트로 (<code>HERMES=0</code>으로 스킵 가능).</p>
-        <p class="needs">↳ 필요: runtimes (node/npm), brew (bun)</p>
-        <div class="tools"><span>gajae-code (gjc)</span><span>codex</span><span>lazycodex (OmO)</span><span>Hermes Agent</span></div>
+    <section class="shell open-source" id="opensource" aria-labelledby="opensource-title">
+      <div>
+        <p class="section-kicker">Open source core</p>
+        <h2 id="opensource-title">믿으라는 대신, 직접 확인할 수 있게.</h2>
+        <p class="section-intro">
+          CMORE Ready의 설치 로직은 MIT 라이선스의
+          <strong>lazy-starter-kit</strong>으로 공개되어 있습니다.
+          어떤 명령이 실행되고 어떤 파일이 바뀌는지 누구나 검토할 수 있습니다.
+        </p>
       </div>
-    </div>
+      <aside class="license-note" aria-label="오픈소스 정보">
+        <strong>Powered by lazy-starter-kit</strong>
+        <p>CMORE Ready는 Apple, Microsoft 및 표시된 제3자 도구와 제휴하거나 보증받은 제품이 아닙니다.</p>
+        <a href="https://github.com/Heoooooon/lazy-starter-kit">소스 코드 확인하기</a>
+      </aside>
+    </section>
 
-  </div>
-
-  <div class="sec-title">실행 옵션</div>
-  <div class="flags">
-    <div class="flag"><code>--dry-run</code><span>아무것도 바꾸지 않고 무엇을 할지만 출력</span></div>
-    <div class="flag"><code>--yes</code><span>비대화형 — 기본값으로 자동 진행</span></div>
-    <div class="flag"><code>--only a,b</code><span>지정한 단계만 실행</span></div>
-    <div class="flag"><code>--skip a,b</code><span>지정한 단계만 건너뜀</span></div>
-    <div class="flag"><code>--no-agents</code><span>agents 단계 제외</span></div>
-    <div class="flag"><code>--list</code><span>단계 id 목록 출력</span></div>
-  </div>
-
-  <div class="sec-title">설계 원칙</div>
-  <div class="props">
-    <div class="prop"><b>멱등성</b><p>몇 번을 돌려도 안전. 설정 파일은 마커 블록으로 교체되어 중복·손상이 없습니다.</p></div>
-    <div class="prop"><b>bash 3.2 호환</b><p>맥 기본 셸로 동작. 갓 산 맥에서 추가 설치 없이 바로 실행됩니다.</p></div>
-    <div class="prop"><b>비파괴적</b><p>기존 파일·설정은 보존. 빈 값만 채우고, 사용자 것은 덮어쓰지 않습니다.</p></div>
-  </div>
-
-  <div class="sec-title">권한 (sudo)</div>
-  <div class="props">
-    <div class="prop"><b>Homebrew 설치</b><p>맥 비밀번호 1회 — 공식 installer가 물음 (brew 없을 때만).</p></div>
-    <div class="prop"><b>Xcode CLT</b><p>GUI "설치" 클릭 (CLT 없을 때만).</p></div>
-    <div class="prop"><b>그 외 전부</b><p>user 공간, sudo 없음 — mise·rustup·bun·dotfiles 모두 홈 디렉터리. 스크립트는 sudo를 직접 부르지 않음.</p></div>
-  </div>
-
-  <div class="sec-title">이미 도구가 깔린 맥에서</div>
-  <div class="props">
-    <div class="prop"><b>비파괴적</b><p>brew·oh-my-zsh·gjc·codex는 있으면 스킵. git 신원은 비었을 때만 설정 (덮어쓰지 않음).</p></div>
-    <div class="prop"><b>node 가림 주의</b><p>기존 node(.pkg/nvm/brew)는 안 지워지고 mise node가 PATH로 가립니다. 감지 시 경고 출력 — <code>which -a node</code>로 확인.</p></div>
-    <div class="prop"><b>.zshrc 중복</b><p>손으로 편집한 줄이 있으면 키트 블록이 추가돼 중복 실행(무해). 한 곳으로 정리 권장.</p></div>
-  </div>
+    <section class="shell start" id="start" aria-labelledby="start-title">
+      <div class="start-panel">
+        <p class="section-kicker">Start free</p>
+        <h2 id="start-title">오늘, 같은 출발선에서 시작하세요.</h2>
+        <p>
+          운영체제를 고르면 최신 공개 릴리스 또는 플랫폼별 설치 안내로 이동합니다.
+          실행 전에 릴리스 내용과 소스 코드를 먼저 확인할 수 있습니다.
+        </p>
+        <ul class="download-list" aria-label="운영체제별 시작 방법">
+          <li>
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">
+              <strong>macOS</strong>
+              <span>버전과 릴리스 내용을 확인한 뒤 GUI 앱을 받습니다.</span>
+              <b>릴리스에서 받기</b>
+            </a>
+          </li>
+          <li>
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">
+              <strong>Windows</strong>
+              <span>버전과 릴리스 내용을 확인한 뒤 GUI 앱을 받습니다.</span>
+              <b>릴리스에서 받기</b>
+            </a>
+          </li>
+          <li>
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/linux/README.md">
+              <strong>Linux</strong>
+              <span>배포판별 설치와 Dry Run 안내를 확인합니다.</span>
+              <b>가이드 보기</b>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
 
   <footer>
-    <p><a href="https://github.com/Heoooooon/lazy-starter-kit">github.com/Heoooooon/lazy-starter-kit</a> · MIT License</p>
+    <div class="shell footer-inner">
+      <span>CMORE Ready · Powered by lazy-starter-kit</span>
+      <div class="footer-links">
+        <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/LICENSE">MIT License</a>
+        <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/Heoooooon/lazy-starter-kit/releases">Releases</a>
+        <a href="https://github.com/Heoooooon/lazy-starter-kit">GitHub</a>
+      </div>
+    </div>
   </footer>
 
-</div>
-
-<script>
-  function copyCmd(btn) {
-    var t = document.getElementById('curl').innerText;
-    navigator.clipboard.writeText(t).then(function () {
-      var o = btn.innerText; btn.innerText = '복사됨 ✓';
-      setTimeout(function () { btn.innerText = o; }, 1400);
-    });
-  }
-</script>
 </body>
 </html>
