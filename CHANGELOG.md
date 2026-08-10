@@ -7,6 +7,46 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- **The one-liner installs the newest release tag instead of `main`.** A fresh
+  machine now gets a ref that CI verified end-to-end across six platforms,
+  rather than whatever landed on `main` minutes earlier — a push no longer
+  reaches new users before it is released. The chosen ref is printed at startup
+  (`==> Using v0.9.0`). `STARTER_KIT_BRANCH` still pins an explicit ref and now
+  also accepts `main` to opt back into the development branch.
+- **The Hermes installer is downloaded and checked before it runs.** It was the
+  only external installer still piped straight into `bash`; it now uses the same
+  non-empty + shebang guard as Claude Code, oh-my-zsh and the Docker installer.
+
+### Changed
+- **Antigravity CLI is no longer installed by `install.sh`.** It has its own
+  Google account flow and a small free tier, so it joins Grok Build as a
+  documented manual one-liner instead of a kit-managed agent. The agents step
+  now installs exactly one set — Claude Code, gajae-code, codex, lazycodex —
+  plus the opt-in Hermes Agent on macOS/Linux.
+
+### Removed
+- **`ANTIGRAVITY=1` no longer does anything.** The env var is gone from all
+  three platforms and from the [VERSIONING.md](./VERSIONING.md) contract table.
+  Install `agy` with the one-liner in the README instead. Both uninstallers
+  still remove a manually installed `agy`, so teardown is unchanged.
+
+### Fixed
+- **A failed bootstrap refresh no longer installs from a stale checkout in
+  silence.** `git pull --ff-only … || true` swallowed every error; the bootstrap
+  now fetches the target ref, checks out, and warns loudly with the checkout
+  path when either step fails.
+- **`--update` works on tag checkouts.** Bootstrap clones are detached at a
+  release tag, where `git pull --ff-only` cannot work. `--update` now moves
+  detached checkouts to the newest tag and still fast-forwards branch checkouts
+  (manual clones), leaving developers on their branch.
+- **`--help` listed the wrong agents.** The header block printed by `--help`
+  still claimed `gajae-code + lazycodex` (macOS) and included Hermes as a
+  default (Linux); both now name the four agents that actually install.
+- **`VERSIONING.md` documented an env var that no longer existed.** The
+  contract table still listed `HERMES=0` (skip the Hermes agent) after v0.9.0
+  inverted it to `HERMES=1` (opt in). Corrected to the shipped behavior.
+
 ## [0.11.0] - 2026-08-07
 
 ### Added

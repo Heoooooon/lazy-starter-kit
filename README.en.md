@@ -226,7 +226,7 @@ stays at the repo root.
 | **Runtimes** | **mise** → node (LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
 | **Containers** | **Colima** + docker / compose / buildx (Docker Desktop not required) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`) and **Antigravity CLI** (`agy`) |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`) |
 
 ## Steps & flags
 
@@ -289,6 +289,8 @@ and first-launch Gatekeeper/permission prompts are normal (on use, not install).
 `gh auth login` is your GitHub account sign-in, not a system permission. Uninstall is
 also fully user-space (Homebrew itself is never removed).
 
+- **Installs come from a verified release**: the one-liner resolves the **newest release tag**, not `main` — a commit that just landed never reaches new users straight away. The run prints which ref it picked (`==> Using v0.9.0`), and `STARTER_KIT_BRANCH` pins any tag you want.
+- **A truncated download never executes**: the classic `curl | bash` hazard is a dropped connection leaving half a script to run. Here the piped part is only the short bootstrap that clones and hands off; the real install runs from files fetched whole. External installers (Claude Code, oh-my-zsh, Docker, Hermes) are downloaded and checked before they are executed, never piped straight into bash.
 - **Supply-chain honesty**: this kit downloads and runs the **official install scripts** from upstream projects (Homebrew, oh-my-zsh, Docker, Hermes, …) over **HTTPS**, and installs npm/bun packages at their **latest versions** — so you're trusting those upstreams. See [SECURITY.md](./SECURITY.md) for scope and reporting.
 
 ## Customize
@@ -343,7 +345,7 @@ Then paste this prompt:
 
 A few minutes later, double-click `index.html` — that's your first AI-built result.
 Prefer Codex? Run `codex` and sign in with your ChatGPT account.
-Want Grok? After the kit, follow [Grok manual install](#grok-build-xai--manual-install), then run `grok` and sign in at grok.com.
+Want Grok or Antigravity? After the kit, run one line from [Manual install](#manual-install-grok--antigravity).
 For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
 
 ## Notes on the AI agents
@@ -357,14 +359,19 @@ For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmor
 - **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
 - **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
 - **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
-- **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`, Google) is **opt-in only** — never installed by default: `ANTIGRAVITY=1 ./install.sh` runs the official installer into `~/.local/bin/agy` (`$env:ANTIGRAVITY='1'` on Windows). Gemini CLI's closed-source successor with a small free tier; uninstall removes the binary.
 - **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
 - **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (`hermes`, Nous Research) is **opt-in only** — never installed by default: `HERMES=1 ./install.sh` runs the official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns). After install, run `hermes setup --portal`, then `hermes`.
-- **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit yet — install manually after the kit (see below).
+- **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit — it has its own subscription flow, so it is a manual one-liner (see below).
+- **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`, Google) is **not** installed by the kit — it has its own account flow and a small free tier, so it is a manual one-liner (see below). Gemini CLI's closed-source successor; uninstall still removes the binary if you installed it yourself.
 
-### Grok Build (xAI) — manual install
+### Manual install: Grok · Antigravity
 
-> Not yet part of the `install.sh` / `install.ps1` agents step. After the kit finishes, run one of the official one-liners:
+> Neither is part of the `install.sh` / `install.ps1` agents step — each has its
+> own account and subscription flow, so only the people who want them run a line.
+> Teardown is handled either way: the kit's uninstall scripts remove both even
+> when you installed them yourself.
+
+#### Grok Build (xAI)
 
 **macOS / Linux**
 ```sh
@@ -387,6 +394,29 @@ grok             # first run opens the browser for grok.com login
 - **API key auth** (CI / no browser): `export XAI_API_KEY="xai-..."` then `grok`.
 - **Update**: `grok update`
 - Binary usually lands in `~/.grok/bin` (Windows: `%USERPROFILE%\.grok\bin`). If `grok` is not found, open a new terminal or add that path to your PATH.
+
+#### Antigravity CLI (Google)
+
+**macOS / Linux**
+```sh
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://antigravity.google/cli/install.ps1 | iex
+```
+
+Verify → launch:
+
+```sh
+agy --version    # verify install
+agy              # first run signs you in with a Google account
+```
+
+- **The free tier is small** — heavy use needs a paid plan.
+- Gemini CLI's **closed-source** successor.
+- Binary lands in `~/.local/bin/agy` (Windows: `%LOCALAPPDATA%\agy\bin`).
 
 ## Extend your agents (tool ecosystem)
 
@@ -425,11 +455,13 @@ Safe by design:
 Released versions are tagged (`vX.Y.Z`) and follow [SemVer](https://semver.org/);
 see [CHANGELOG.md](./CHANGELOG.md). Check your copy with `./install.sh --version`.
 
-Pin the installer to a release instead of `main`:
+The one-liner installs the newest release tag. Pin a specific one — or ride `main` — with:
 
 ```sh
-STARTER_KIT_BRANCH=v0.5.0 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.5.0/install.sh)"
+STARTER_KIT_BRANCH=v0.9.0 \
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
+STARTER_KIT_BRANCH=main \
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
 ```
 
 ## Credits

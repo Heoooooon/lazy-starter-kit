@@ -47,7 +47,7 @@ end-to-end (install → verify → uninstall) in CI on every change.
 | **Runtimes** | **mise** → node (LTS), python, go, **ast-grep** · **rustup** → rust + rust-analyzer · **uv** · **bun** |
 | **Containers** | **Docker Engine** + compose/buildx (official `get.docker.com`, opt-in) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`, `HERMES=1`) and **Antigravity CLI** (`agy`, `ANTIGRAVITY=1`) |
+| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`, `HERMES=1`). Grok and Antigravity are manual one-liners — see the [main README](../README.en.md#manual-install-grok--antigravity). |
 
 ## Steps & flags
 

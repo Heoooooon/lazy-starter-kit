@@ -33,7 +33,7 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 - [설치가 끝난 뒤에도](#설치가-끝난-뒤에도)
 - [첫 프롬프트까지 5분](#첫-프롬프트까지-5분)
 - [무엇이 깔리나](#무엇이-깔리나)
-- [AI 코딩, 여기서 더 확장하세요 (도구 생태계)](#ai-코딩-여기서-더-확장하세요-도구-생태계) — [Grok 수동 설치](#grok-build-xai--수동-설치)
+- [AI 코딩, 여기서 더 확장하세요 (도구 생태계)](#ai-코딩-여기서-더-확장하세요-도구-생태계) — [Grok · Antigravity 수동 설치](#수동-설치-grok--antigravity)
 - [설치해도 안전한가요?](#설치해도-안전한가요)
 - [지우고 싶어요 (제거)](#지우고-싶어요-제거)
 - [자주 묻는 질문 (FAQ)](#자주-묻는-질문-faq)
@@ -363,7 +363,7 @@ claude
 몇 분 뒤 `index.html`이 생기고, 더블클릭하면 **AI와 만든 첫 결과물**이 브라우저에서 돌아갑니다.
 
 - Claude 대신 Codex를 쓰려면: `codex` 실행 후 ChatGPT 계정으로 로그인.
-- Grok을 쓰려면: 킷 설치 후 [Grok 수동 설치](#grok-build-xai--수동-설치) → `grok` 실행 후 grok.com 로그인.
+- Grok·Antigravity를 쓰려면: 킷 설치 후 [수동 설치](#수동-설치-grok--antigravity) 한 줄을 실행하세요.
 - 개념 정리·다음 프로젝트·도구 확장은 **[cmore.dev](https://cmore.dev/)**에 순서대로 정리돼 있어요.
 
 ---
@@ -379,7 +379,7 @@ claude
 | **런타임** | **mise** → Node(LTS)·Python·Go · **rustup** → Rust + rust-analyzer · **uv** · **bun** |
 | **컨테이너** | macOS=Colima, Linux=Docker Engine(선택), Windows=Docker Desktop(선택·라이선스 주의) 또는 WSL2 |
 | **Git/GitHub** | 계정 신원(이메일), HTTPS 자격증명, 합리적 기본값 |
-| **AI 에이전트** | **Claude Code**(`claude`), **gajae-code**(`gjc`), **codex**, **lazycodex**(OmO) (+ 옵션으로 Hermes·Antigravity) |
+| **AI 에이전트** | **Claude Code**(`claude`), **gajae-code**(`gjc`), **codex**, **lazycodex**(OmO) (+ 옵션으로 Hermes) |
 | **WSL2** (Windows, 베타) | WSL2 + Ubuntu 활성화 후 그 안에 Linux 킷 자동 설치 (`-Only wsl`) |
 
 > 세부 목록·OS별 차이는 각 OS 상세 문서에 있어요.
@@ -392,23 +392,27 @@ claude
 
 > **→ [cmore.dev 도구 생태계](https://cmore.dev/lazy-starter-kit/ecosystem/)** 분야별(문서·행정·법률·게임·디자인·코딩 에이전트 등) 도구를, 직접 써보고 쓴 **에디터 리뷰 + 솔직한 한계**와 함께 모았습니다(대부분 오픈소스, 일부는 무료로 쓰는 공식 도구). 설치 명령까지 바로 복사할 수 있어요.
 
-킷이 기본으로 깔아주는 에이전트는 이렇습니다:
+킷과 함께 쓰는 에이전트는 이렇습니다. 앞의 넷은 **자동으로 깔리고**, 나머지 셋은 필요한 사람만 켜거나 따로 설치합니다.
 
-| 에이전트 | 한 줄 소개 |
-| --- | --- |
-| **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) | 내 프로젝트 안에서 직접 코드를 읽고 고치는 Anthropic 에이전트 |
-| **[Codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`codex`) | 터미널에서 도는 OpenAI 코딩 에이전트 |
-| **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`) | 구글 코딩 에이전트(Gemini CLI 후속) — **옵션**: `ANTIGRAVITY=1 ./install.sh`로만 설치 (무료 티어 작음) |
-| **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) | 인터뷰·검토된 계획·검증까지 갖춘 자율 코딩 러너 |
-| **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** (OmO) | 복잡한 코드베이스를 위한 Codex 하네스 |
-| **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 — **옵션**: `HERMES=1 ./install.sh`로만 설치 |
-| **[Grok Build](https://x.ai/cli)** (`grok`) | xAI 코딩 에이전트 — **킷 자동 설치 미포함**, 아래 수동 설치 |
+| 에이전트 | 한 줄 소개 | 설치 |
+| --- | --- | --- |
+| **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) | 내 프로젝트 안에서 직접 코드를 읽고 고치는 Anthropic 에이전트 | 자동 |
+| **[Codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`codex`) | 터미널에서 도는 OpenAI 코딩 에이전트 | 자동 |
+| **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) | 인터뷰·검토된 계획·검증까지 갖춘 자율 코딩 러너 | 자동 |
+| **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** (OmO) | 복잡한 코드베이스를 위한 Codex 하네스 | 자동 |
+| **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (`hermes`, macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 | `HERMES=1 ./install.sh` |
+| **[Grok Build](https://x.ai/cli)** (`grok`) | xAI 코딩 에이전트 | [수동 한 줄](#수동-설치-grok--antigravity) |
+| **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`) | 구글 코딩 에이전트(Gemini CLI 후속) | [수동 한 줄](#수동-설치-grok--antigravity) |
 
 에이전트 이름을 누르면 각 도구의 **자세한 에디터 리뷰·설치법**으로 바로 갑니다.
 
-### Grok Build (xAI) — 수동 설치
+### 수동 설치: Grok · Antigravity
 
-> 아직 `install.sh` / `install.ps1` 에이전트 단계에 **포함되지 않습니다.** 키트 설치 후 아래 한 줄만 따로 실행하세요.
+> 이 둘은 `install.sh` / `install.ps1` 에이전트 단계에 **포함되지 않습니다.** 각자 계정·구독 흐름이 따로 있어서, 필요한 사람만 킷 설치 후 아래 한 줄을 실행하는 방식입니다.
+>
+> 제거는 신경 안 써도 돼요. 직접 깐 경우에도 킷의 제거 스크립트가 같이 정리합니다.
+
+#### Grok Build (xAI)
 
 **macOS / Linux**
 
@@ -434,6 +438,31 @@ grok             # 첫 실행 시 브라우저에서 grok.com 로그인
 - **업데이트**: `grok update`
 - 바이너리는 보통 `~/.grok/bin`(Windows: `%USERPROFILE%\.grok\bin`)에 깔립니다. PATH에 안 잡히면 **터미널을 새로 열거나** 해당 경로를 PATH에 추가하세요.
 
+#### Antigravity CLI (Google)
+
+**macOS / Linux**
+
+```bash
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+```
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://antigravity.google/cli/install.ps1 | iex
+```
+
+설치 확인 → 실행:
+
+```bash
+agy --version    # 설치 확인
+agy              # 첫 실행 시 구글 계정 로그인
+```
+
+- **무료 티어가 작습니다.** 많이 쓰려면 유료 플랜이 필요해요.
+- Gemini CLI의 후속이고 **클로즈드 소스**입니다.
+- 바이너리는 `~/.local/bin/agy`(Windows: `%LOCALAPPDATA%\agy\bin`)에 깔립니다.
+
 ---
 
 ## 설치해도 안전한가요?
@@ -448,6 +477,8 @@ grok             # 첫 실행 시 브라우저에서 grok.com 로그인
 - **AI의 `rm -rf` 차단**: `agents` 단계가 Codex·Claude Code의 `PreToolUse` 훅을 설치해 재귀 `rm`을 실행 전에 거부하고, 현재 Git 작업공간의 엄격한 하위 경로만 받는 `lazy-safe-rm`을 제공합니다. Codex가 처음 훅 검토를 요청하면 승인해야 활성화됩니다.
 - **데이터 삭제 범위**: 설치는 사용자 데이터를 지우지 않습니다. 제거는 기존 확인 절차에 더해 위 경계 검증을 통과한 키트 관리 디렉터리만 정리합니다.
 - **되돌리기 제공**: 아래 [제거](#지우고-싶어요-제거)로 깔끔히 원복.
+- **검증된 릴리스에서만 설치**: 한 줄 명령어는 개발 중인 `main`이 아니라 **가장 최근 릴리스 태그**를 받아옵니다. 방금 올라간 커밋이 곧바로 새 사용자에게 나가지 않아요. 어떤 버전을 쓰는지 실행 즉시 `==> Using v0.9.0`으로 표시하고, `STARTER_KIT_BRANCH`로 원하는 태그에 고정할 수도 있습니다.
+- **잘린 다운로드는 실행되지 않음**: `curl | bash`의 고전적 위험은 전송이 끊겨 스크립트가 반쪽만 실행되는 것입니다. 이 킷에서 파이프로 실행되는 부분은 **git clone 후 넘겨주는 짧은 부트스트랩**뿐이고, 실제 설치는 통째로 받은 파일에서 돌아갑니다. 외부 설치 스크립트(Claude Code·oh-my-zsh·Docker·Hermes)도 **받아서 검사한 뒤에만** 실행합니다.
 - **공급망(supply chain) 정직 고지**: 이 키트는 Homebrew·oh-my-zsh·Docker·Hermes 등 **업스트림 프로젝트의 공식 설치 스크립트를 HTTPS로** 내려받아 실행하고, npm/bun 패키지는 **최신 버전으로** 설치합니다. 즉 그 업스트림들을 신뢰하는 셈이니, 걱정되면 각 프로젝트를 먼저 확인하세요. 보안 범위·신고는 [SECURITY.md](SECURITY.md) 참고.
 
 > 정말 걱정되면 **먼저 `--dry-run`(맥/리눅스) 또는 `-DryRun`(윈도우)**으로 "무엇을 할지"만 확인하세요. 남의/회사 메인 PC라면 **여분 PC나 가상머신(VM)에서 먼저** 테스트하는 걸 권합니다. AI 훅은 지원되는 셸 도구 호출을 막는 추가 방어층이며 끄거나 우회 가능한 절대 보안 경계는 아닙니다. Codex는 `workspace-write` 샌드박스를 함께 쓰는 것을 권장합니다.
@@ -512,10 +543,14 @@ Windows는 가능한 건 **사용자 범위로 설치**하고, 관리자가 필�
 **Q. 수업이나 스터디에서 여러 명한테 쓰려면요?**
 [수업 전 설치 안내](#수업-전-설치-안내-강사용) 섹션을 보세요. 사전 안내 순서와 당일 대응표를 정리해 뒀습니다.
 
-**Q. 특정 버전으로 고정해서 설치하려면?**
+**Q. 어떤 버전이 깔리나요?**
+한 줄 명령어는 **가장 최근 릴리스 태그**를 받아옵니다. 개발 중인 `main`이 아니라, CI가 6개 플랫폼에서 설치→검증→제거를 통과시킨 버전이에요. 실행하면 `==> Using v0.9.0`처럼 어떤 버전을 쓰는지 먼저 알려줍니다.
+
+특정 버전으로 고정하거나, 반대로 개발 중인 `main`을 쓰고 싶다면:
 
 ```bash
-STARTER_KIT_BRANCH=v0.9.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/v0.9.0/install.sh)"
+STARTER_KIT_BRANCH=v0.9.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
+STARTER_KIT_BRANCH=main   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
 ```
 
 **Q. 여기 없는 질문은 어디서 물어보나요?**
