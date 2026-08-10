@@ -95,7 +95,7 @@ step_agents() {
   # Official installer: clones NousResearch/hermes-agent, self-manages Python/
   # Node/Chromium, links `hermes` into ~/.local/bin (already on PATH, exported
   # at the top of this step). Heavy + external, so it's never installed by
-  # default — enable with: HERMES=1 ./install.sh (same pattern as Antigravity).
+  # default — enable with: HERMES=1 ./install.sh.
   if [[ "${HERMES:-0}" != "1" ]]; then
     info "Skipping Hermes Agent (opt-in; enable with HERMES=1)"
   elif have hermes; then
@@ -104,32 +104,25 @@ step_agents() {
     info "[dry-run] curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup"
   else
     info "Installing Hermes Agent (Nous Research)…"
-    curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup \
-      || warn "Hermes installer did not complete (re-run later: curl … | bash)"
+    # Download first, then verify it's a real script (non-empty + shebang)
+    # before executing — same guard as Claude Code above; a truncated or empty
+    # download must never reach bash.
+    local hm_tmp; hm_tmp="$(mktemp)"
+    if curl -fsSL https://hermes-agent.nousresearch.com/install.sh -o "$hm_tmp" \
+       && [[ -s "$hm_tmp" ]] && head -1 "$hm_tmp" | grep -q '^#!'; then
+      bash "$hm_tmp" --skip-setup \
+        || warn "Hermes installer did not complete (re-run later: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup)"
+    else
+      warn "Hermes installer download failed or was not a script — skipped (re-run later: curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup)"
+    fi
+    rm -f "$hm_tmp"
     info "Hermes: configure with 'hermes setup --portal', then start with 'hermes'."
   fi
 
-  # --- Antigravity CLI (Google, OPT-IN only) ------------------------------
-  # Gemini CLI's closed-source successor (`agy`) with a small free tier, so
-  # it's never installed by default — enable with: ANTIGRAVITY=1 ./install.sh
-  # Official installer drops the binary into ~/.local/bin/agy. Same
-  # download-then-verify pattern as Claude Code (never bash a bad download).
-  if [[ "${ANTIGRAVITY:-0}" == "1" ]]; then
-    if have agy; then
-      ok "Antigravity CLI present ($(agy --version 2>/dev/null | head -1))"
-    elif [[ "$DRY_RUN" == "1" ]]; then
-      info "[dry-run] curl -fsSL https://antigravity.google/cli/install.sh | bash"
-    else
-      info "Installing Antigravity CLI (Google)…"
-      local agy_tmp; agy_tmp="$(mktemp)"
-      if curl -fsSL https://antigravity.google/cli/install.sh -o "$agy_tmp" \
-         && [[ -s "$agy_tmp" ]] && head -1 "$agy_tmp" | grep -q '^#!'; then
-        bash "$agy_tmp" \
-          || warn "Antigravity install did not complete — re-run later: curl -fsSL https://antigravity.google/cli/install.sh | bash"
-      else
-        warn "Antigravity install did not complete — re-run later: curl -fsSL https://antigravity.google/cli/install.sh | bash"
-      fi
-      rm -f "$agy_tmp"
-    fi
-  fi
+  # --- Antigravity CLI (Google) — not installed by the kit -----------------
+  # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
+  # own account flow, so it is a manual one-liner documented in the README
+  # next to Grok Build:  curl -fsSL https://antigravity.google/cli/install.sh | bash
+  # uninstall.sh still removes ~/.local/bin/agy when present, so a manually
+  # installed copy is torn down with the rest of the kit.
 }

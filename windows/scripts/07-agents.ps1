@@ -107,26 +107,10 @@ function Step-Agents {
   Write-Info "Hermes Agent: no native Windows installer -- install it inside WSL2:"
   Write-Info "  wsl bash -c 'curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash -s -- --skip-setup'"
 
-  # --- Antigravity CLI (Google, OPT-IN only) -------------------------------
-  # Gemini CLI's closed-source successor (`agy`) with a small free tier, so
-  # it's never installed by default -- enable with: $env:ANTIGRAVITY='1'
-  # before running install. Installs to %LOCALAPPDATA%\agy\bin. Same
-  # fetch-then-verify pattern as Claude Code.
-  if ($env:ANTIGRAVITY -eq '1') {
-    if (Test-HasCommand agy) {
-      Write-Ok "Antigravity CLI present ($(Invoke-NativeSilently 'agy' @('--version') | Select-Object -First 1))"
-    } elseif ($script:DryRun) {
-      Write-Info "[dry-run] irm https://antigravity.google/cli/install.ps1 | iex"
-    } else {
-      Write-Info "Installing Antigravity CLI (Google)..."
-      try {
-        $agyInstaller = Invoke-RestMethod -Uri 'https://antigravity.google/cli/install.ps1'
-        if ([string]::IsNullOrWhiteSpace($agyInstaller)) { throw "installer download was empty" }
-        & ([scriptblock]::Create($agyInstaller))
-        Update-SessionPath
-      } catch {
-        Write-Warn "Antigravity install did not complete -- re-run later: irm https://antigravity.google/cli/install.ps1 | iex"
-      }
-    }
-  }
+  # --- Antigravity CLI (Google) -- not installed by the kit ----------------
+  # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
+  # own account flow, so it is a manual one-liner documented in the README
+  # next to Grok Build:  irm https://antigravity.google/cli/install.ps1 | iex
+  # uninstall.ps1 still removes %LOCALAPPDATA%\agy when present, so a manually
+  # installed copy is torn down with the rest of the kit.
 }

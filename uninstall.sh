@@ -123,7 +123,8 @@ undo_agents() {
     info "Hermes Agent not installed"
   fi
 
-  # Antigravity CLI (opt-in install: ANTIGRAVITY=1) — remove the agy binary
+  # Antigravity CLI (manual install, not installed by the kit) — remove the
+  # agy binary if the user installed it themselves
   if [[ -e "$HOME/.local/bin/agy" ]]; then
     run rm -f "$HOME/.local/bin/agy"
     ok "Antigravity CLI removed"
