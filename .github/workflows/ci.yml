@@ -37,6 +37,8 @@ jobs:
         run: tests/zdotdir-existing-home.sh
       - name: recursive deletion boundary regression
         run: tests/safe-recursive-delete.sh
+      - name: detached update failure regression
+        run: tests/update-kit.sh
       - name: AI shell guard regression
         run: tests/ai-shell-guard.sh
 

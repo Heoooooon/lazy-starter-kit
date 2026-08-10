@@ -34,8 +34,9 @@
   Diagnose the current setup (tools, runtimes, profile/starship config) and exit.
   Changes nothing; exits 1 if anything is missing, else 0.
 .PARAMETER Update
-  git pull --ff-only the kit checkout, then continue the install with the
-  remaining switches (e.g. -Update -Only agents). Requires a git checkout.
+  Update the kit checkout, then continue the install with the remaining
+  switches (e.g. -Update -Only agents). Branch checkouts fast-forward; detached
+  release checkouts move to the newest release tag. Requires a git checkout.
 
 .EXAMPLE
   irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
@@ -78,7 +79,11 @@ $script:RunFromFile = [bool]$PSCommandPath
 
 $HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'https://github.com/Heoooooon/lazy-starter-kit.git' }
-$RepoBranch = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { 'main' }
+# STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or 'main' to ride
+# the development branch). Left unset, the bootstrap resolves the newest release
+# tag instead of main -- a fresh machine should get a ref CI actually verified
+# end-to-end, not whatever landed on main minutes ago.
+$RepoBranch = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { $null }
 $CloneDir   = if ($env:STARTER_KIT_DIR)    { $env:STARTER_KIT_DIR }    else { Join-Path $HomeDir '.lazy-starter-kit' }
 
 # ---------------------------------------------------------------------------
@@ -107,12 +112,37 @@ function Resolve-Root {
       if ($script:RunFromFile) { exit 1 } else { throw "git is required -- install it and re-run (see options above)." }
     }
   }
+  if (-not $RepoBranch) { $script:RepoBranch = Get-KitLatestRef }
+  Write-Host "==> Using $RepoBranch" -ForegroundColor Blue
   if (Test-Path (Join-Path $CloneDir '.git')) {
-    git -C $CloneDir pull --ff-only origin $RepoBranch | Out-Null
+    # Fetch the exact ref, then detach onto it -- works for both tags and
+    # branches, unlike `pull --ff-only`. A failure is reported instead of
+    # silently installing from a stale checkout.
+    git -C $CloneDir fetch --depth 1 origin $RepoBranch | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Write-Host "==> WARNING: could not fetch $RepoBranch -- installing from the existing checkout in $CloneDir" -ForegroundColor Yellow
+    } else {
+      git -C $CloneDir checkout --quiet --detach FETCH_HEAD | Out-Null
+      if ($LASTEXITCODE -ne 0) {
+        Write-Host "==> WARNING: could not check out $RepoBranch (local changes?) -- installing from the existing checkout in $CloneDir" -ForegroundColor Yellow
+      }
+    }
   } else {
-    git clone --branch $RepoBranch --depth 1 $RepoUrl $CloneDir | Out-Null
+    # -c advice.detachedHead=false: tag checkouts are detached by design;
+    # the 15-line git lecture only alarms first-time users.
+    git clone -c advice.detachedHead=false --branch $RepoBranch --depth 1 $RepoUrl $CloneDir | Out-Null
   }
   return (Join-Path $CloneDir 'windows')
+}
+
+# Get-KitLatestRef -- newest vX.Y.Z tag on the remote; 'main' when a repo has no
+# release tags yet (forks, first-ever run before v0.1.0).
+function Get-KitLatestRef {
+  try {
+    $line = (git ls-remote --tags --refs --sort=-v:refname $RepoUrl 'v*' 2>$null | Select-Object -First 1)
+    if ($line -and $line -match 'refs/tags/(.+)$') { return $Matches[1] }
+  } catch {}
+  return 'main'
 }
 
 $Root = Resolve-Root
@@ -162,12 +192,33 @@ if ($Update) {
     Stop-Kit "-Update needs a git checkout, but '$checkoutRoot' isn't one. Re-clone the kit (or drop -Update)."
   }
   $oldVersion = $KitVersion
-  Write-Step "Update: git -C '$checkoutRoot' pull --ff-only"
+  # On a branch (manual clone / dev checkout) fast-forward it and leave the user
+  # where they put themselves. Detached means the bootstrap pinned a release tag,
+  # so "update" means move to the newest release (or to STARTER_KIT_BRANCH).
   # Invoke-NativeSilently: git writes progress to stderr, which under EAP=Stop on
   # WinPS 5.1 would abort the run; we only probe $LASTEXITCODE here.
-  Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'pull', '--ff-only') | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    Stop-Kit "git pull --ff-only failed (exit $LASTEXITCODE). Resolve local changes or divergence, then re-run."
+  Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'symbolic-ref', '-q', 'HEAD') | Out-Null
+  if ($LASTEXITCODE -eq 0) {
+    Write-Step "Update: git -C '$checkoutRoot' pull --ff-only"
+    Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'pull', '--ff-only') | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Stop-Kit "git pull --ff-only failed (exit $LASTEXITCODE). Resolve local changes or divergence, then re-run."
+    }
+  } else {
+    $ref = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { $null }
+    if (-not $ref) {
+      $line = (Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'ls-remote', '--tags', '--refs', '--sort=-v:refname', 'origin', 'v*') | Select-Object -First 1)
+      if ($line -and $line -match 'refs/tags/(.+)$') { $ref = $Matches[1] } else { $ref = 'main' }
+    }
+    Write-Step "Update: checking out $ref"
+    Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'fetch', '--depth', '1', 'origin', $ref) | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Stop-Kit "git fetch of '$ref' failed (exit $LASTEXITCODE). Check your network, then re-run."
+    }
+    Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'checkout', '--quiet', '--detach', 'FETCH_HEAD') | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      Stop-Kit "could not check out '$ref' (local changes?). Resolve them in '$checkoutRoot', then re-run."
+    }
   }
   $newVersion = if (Test-Path $versionFile) { (Get-Content $versionFile -Raw).Trim() } else { 'dev' }
   if ($oldVersion -eq $newVersion) { Write-Ok "already up to date ($newVersion)" }

@@ -429,13 +429,31 @@ _doctor_exists() {
 # so stale step files never run. Touches nothing but the git checkout.
 # ---------------------------------------------------------------------------
 update_kit() {
-  local repo="$1" old new
+  local repo="$1" old new ref
   [[ -d "$repo/.git" ]] || die "not a git checkout — re-run the curl installer or git pull manually"
   old="$(cat "$repo/VERSION" 2>/dev/null || echo dev)"
   step "Updating lazy-starter-kit"
-  git -C "$repo" fetch --quiet || die "git fetch failed — check your network and try again"
-  git -C "$repo" pull --ff-only \
-    || die "git pull --ff-only failed (diverged history or local changes) — resolve manually: git -C \"$repo\" pull"
+  if git -C "$repo" symbolic-ref -q HEAD >/dev/null 2>&1; then
+    # On a branch (a manual `git clone` or a dev checkout) — fast-forward it and
+    # leave the user where they put themselves.
+    git -C "$repo" fetch --quiet || die "git fetch failed — check your network and try again"
+    git -C "$repo" pull --ff-only \
+      || die "git pull --ff-only failed (diverged history or local changes) — resolve manually: git -C \"$repo\" pull"
+  else
+    # Detached — the bootstrap pins releases by tag, so update means "move to
+    # the newest release" (or to STARTER_KIT_BRANCH when the user pinned one).
+    ref="${STARTER_KIT_BRANCH:-}"
+    if [[ -z "$ref" ]]; then
+      ref="$(git -C "$repo" ls-remote --tags --refs --sort=-v:refname origin 'v*' 2>/dev/null \
+             | head -1 | sed 's#.*refs/tags/##')" || ref=""
+      [[ -n "$ref" ]] || ref=main
+    fi
+    info "target ref: $ref"
+    git -C "$repo" fetch --quiet --depth 1 origin "$ref" \
+      || die "git fetch of '$ref' failed — check your network and try again"
+    git -C "$repo" checkout --quiet --detach FETCH_HEAD \
+      || die "could not check out '$ref' (local changes?) — resolve manually in $repo"
+  fi
   new="$(cat "$repo/VERSION" 2>/dev/null || echo dev)"
   if [[ "$old" == "$new" ]]; then
     ok "already up to date ($new)"

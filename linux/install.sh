@@ -2,7 +2,7 @@
 #
 # lazy-starter-kit — install a complete Linux dev environment from scratch.
 # From a fresh box → build tools, CLI, runtimes, shell, Docker, AI agents
-# (gajae-code + codex + lazycodex + Hermes).
+# (Claude Code + gajae-code + codex + lazycodex).
 #
 # Usage:
 #   ./install.sh [options]
@@ -29,8 +29,21 @@
 set -euo pipefail
 
 REPO_URL="${STARTER_KIT_REPO:-https://github.com/Heoooooon/lazy-starter-kit.git}"
-REPO_BRANCH="${STARTER_KIT_BRANCH:-main}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
+# STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or "main" to ride
+# the development branch). Left unset, the bootstrap resolves the newest release
+# tag instead of main — a fresh machine should get a ref CI actually verified
+# end-to-end, not whatever landed on main minutes ago.
+REPO_BRANCH="${STARTER_KIT_BRANCH:-}"
+
+# kit_latest_ref — newest vX.Y.Z tag on the remote; "main" when a repo has no
+# release tags yet (forks, first-ever run before v0.1.0).
+kit_latest_ref() {
+  local tag
+  tag="$(git ls-remote --tags --refs --sort=-v:refname "$REPO_URL" 'v*' 2>/dev/null \
+         | head -1 | sed 's#.*refs/tags/##')"
+  if [[ -n "$tag" ]]; then echo "$tag"; else echo main; fi
+}
 
 # ---------------------------------------------------------------------------
 # Resolve the repo root (the linux/ dir), or bootstrap by cloning (curl | bash).
@@ -49,10 +62,21 @@ resolve_root() {
     echo "==> git not found. Install git first (e.g. sudo apt-get install -y git), then re-run." >&2
     exit 1
   fi
+  [[ -n "$REPO_BRANCH" ]] || REPO_BRANCH="$(kit_latest_ref)"
+  echo "==> Using ${REPO_BRANCH}" >&2
   if [[ -d "$CLONE_DIR/.git" ]]; then
-    git -C "$CLONE_DIR" pull --ff-only origin "$REPO_BRANCH" >&2 || true
+    # Fetch the exact ref, then detach onto it — works for both tags and
+    # branches, unlike `pull --ff-only`. A failure here is reported instead of
+    # silently installing from a stale checkout.
+    if ! git -C "$CLONE_DIR" fetch --depth 1 origin "$REPO_BRANCH" >&2; then
+      echo "==> WARNING: could not fetch $REPO_BRANCH — installing from the existing checkout in $CLONE_DIR" >&2
+    elif ! git -C "$CLONE_DIR" checkout --quiet --detach FETCH_HEAD; then
+      echo "==> WARNING: could not check out $REPO_BRANCH (local changes?) — installing from the existing checkout in $CLONE_DIR" >&2
+    fi
   else
-    git clone --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$CLONE_DIR" >&2
+    # -c advice.detachedHead=false: tag checkouts are detached by design;
+    # the 15-line git lecture only alarms first-time users.
+    git clone -c advice.detachedHead=false --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$CLONE_DIR" >&2
   fi
   echo "$CLONE_DIR/linux"
 }
