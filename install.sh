@@ -32,6 +32,12 @@ CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 # tag instead of main — a fresh machine should get a ref CI actually verified
 # end-to-end, not whatever landed on main minutes ago.
 REPO_BRANCH="${STARTER_KIT_BRANCH:-}"
+REPO_COMMIT="${STARTER_KIT_COMMIT:-}"
+EPHEMERAL_ROOT="${STARTER_KIT_EPHEMERAL_ROOT:-}"
+if [[ -n "$REPO_COMMIT" && ! "$REPO_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "Invalid STARTER_KIT_COMMIT: expected a full 40-character commit SHA." >&2
+  exit 1
+fi
 
 # kit_latest_ref — newest vX.Y.Z tag on the remote; "main" when a repo has no
 # release tags yet (forks, first-ever run before v0.1.0).
@@ -55,6 +61,12 @@ resolve_root() {
   fi
   # Running piped from curl: clone (or update) and hand off.
   echo "==> Bootstrapping lazy-starter-kit into $CLONE_DIR" >&2
+  if [[ -n "$EPHEMERAL_ROOT" ]]; then
+    [[ "$EPHEMERAL_ROOT" == "$CLONE_DIR" ]] \
+      || { echo "STARTER_KIT_EPHEMERAL_ROOT must match STARTER_KIT_DIR." >&2; exit 1; }
+    [[ ! -e "$CLONE_DIR" ]] \
+      || { echo "Ephemeral checkout path already exists; refusing to trust it." >&2; exit 1; }
+  fi
   if ! command -v git >/dev/null 2>&1; then
     echo "==> git not found; triggering Xcode Command Line Tools install…" >&2
     xcode-select --install 2>/dev/null || true
@@ -64,23 +76,44 @@ resolve_root() {
   [[ -n "$REPO_BRANCH" ]] || REPO_BRANCH="$(kit_latest_ref)"
   echo "==> Using ${REPO_BRANCH}" >&2
   if [[ -d "$CLONE_DIR/.git" ]]; then
-    # Fetch the exact ref, then detach onto it — works for both tags and
-    # branches, unlike `pull --ff-only`. A failure here is reported instead of
-    # silently installing from a stale checkout.
-    if ! git -C "$CLONE_DIR" fetch --depth 1 origin "$REPO_BRANCH" >&2; then
-      echo "==> WARNING: could not fetch $REPO_BRANCH — installing from the existing checkout in $CLONE_DIR" >&2
-    elif ! git -C "$CLONE_DIR" checkout --quiet --detach FETCH_HEAD; then
-      echo "==> WARNING: could not check out $REPO_BRANCH (local changes?) — installing from the existing checkout in $CLONE_DIR" >&2
+    if [[ -n "$(git -C "$CLONE_DIR" status --porcelain --untracked-files=normal)" ]]; then
+      echo "Existing checkout has local changes; refusing to run: $CLONE_DIR" >&2
+      exit 1
     fi
+    git -C "$CLONE_DIR" fetch --force --depth 1 origin "$REPO_BRANCH" >&2 \
+      || { echo "Could not fetch $REPO_BRANCH; refusing to use a stale checkout." >&2; exit 1; }
+    fetched_commit="$(git -C "$CLONE_DIR" rev-parse 'FETCH_HEAD^{commit}')"
+    if [[ -n "$REPO_COMMIT" && "$fetched_commit" != "$REPO_COMMIT" ]]; then
+      echo "Fetched commit $fetched_commit does not match pinned commit $REPO_COMMIT." >&2
+      exit 1
+    fi
+    git -C "$CLONE_DIR" checkout --quiet --detach "$fetched_commit" \
+      || { echo "Could not check out verified commit $fetched_commit." >&2; exit 1; }
   else
     # -c advice.detachedHead=false: tag checkouts are detached by design;
     # the 15-line git lecture only alarms first-time users.
     git clone -c advice.detachedHead=false --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" "$CLONE_DIR" >&2
   fi
+  resolved_commit="$(git -C "$CLONE_DIR" rev-parse 'HEAD^{commit}')"
+  if [[ -n "$REPO_COMMIT" && "$resolved_commit" != "$REPO_COMMIT" ]]; then
+    echo "Checkout commit $resolved_commit does not match pinned commit $REPO_COMMIT." >&2
+    exit 1
+  fi
   echo "$CLONE_DIR"
 }
 
 ROOT="$(resolve_root)"
+if [[ -n "$EPHEMERAL_ROOT" && "$ROOT" == "$EPHEMERAL_ROOT" ]]; then
+  # shellcheck source=lib/common.sh
+  source "$ROOT/lib/common.sh"
+  cleanup_ephemeral_root() {
+    local previous_dry_run="$DRY_RUN"
+    DRY_RUN=0
+    safe_rm_rf_under "$(dirname "$ROOT")" "$ROOT"
+    DRY_RUN="$previous_dry_run"
+  }
+  trap cleanup_ephemeral_root EXIT
+fi
 # Resolve this script's own absolute path (empty when piped from curl).
 SELF=""
 if [[ -n "${BASH_SOURCE[0]:-}" ]]; then

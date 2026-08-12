@@ -75,7 +75,8 @@ $ErrorActionPreference = 'Stop'
 # terminal -- wiping the "Next steps" output on success and the error on failure.
 # We `return`/`throw` instead in that mode, and keep exit codes for real file runs
 # (CI relies on them). $PSCommandPath is the running file's path, empty under iex.
-$script:RunFromFile = [bool]$PSCommandPath
+$script:RunFromFile =
+  [bool]$PSCommandPath -and $env:STARTER_KIT_HANDOFF_CHILD -ne '1'
 
 $HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'https://github.com/Heoooooon/lazy-starter-kit.git' }
@@ -84,7 +85,16 @@ $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'h
 # tag instead of main -- a fresh machine should get a ref CI actually verified
 # end-to-end, not whatever landed on main minutes ago.
 $RepoBranch = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { $null }
+$RepoCommit = if ($env:STARTER_KIT_COMMIT) { $env:STARTER_KIT_COMMIT } else { $null }
 $CloneDir   = if ($env:STARTER_KIT_DIR)    { $env:STARTER_KIT_DIR }    else { Join-Path $HomeDir '.lazy-starter-kit' }
+$EphemeralRoot = if ($env:STARTER_KIT_EPHEMERAL_ROOT) {
+  $env:STARTER_KIT_EPHEMERAL_ROOT
+} else {
+  $null
+}
+if ($RepoCommit -and $RepoCommit -notmatch '^[0-9a-f]{40}$') {
+  throw 'STARTER_KIT_COMMIT must be a full 40-character commit SHA.'
+}
 
 # ---------------------------------------------------------------------------
 # Resolve the repo root (the windows\ dir), or bootstrap by cloning.
@@ -95,6 +105,14 @@ function Resolve-Root {
   if ($dir -and (Test-Path (Join-Path $dir 'scripts\lib.ps1'))) { return $dir }
 
   Write-Host "==> Bootstrapping lazy-starter-kit into $CloneDir" -ForegroundColor Blue
+  if ($EphemeralRoot) {
+    if ($EphemeralRoot -ne $CloneDir) {
+      throw 'STARTER_KIT_EPHEMERAL_ROOT must match STARTER_KIT_DIR.'
+    }
+    if (Test-Path -LiteralPath $CloneDir) {
+      throw 'Ephemeral checkout path already exists; refusing to trust it.'
+    }
+  }
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     # A piped one-liner (irm | iex) needs git to clone the kit. On a fresh
     # machine, install it via winget, then refresh PATH for this session.
@@ -115,22 +133,40 @@ function Resolve-Root {
   if (-not $RepoBranch) { $script:RepoBranch = Get-KitLatestRef }
   Write-Host "==> Using $RepoBranch" -ForegroundColor Blue
   if (Test-Path (Join-Path $CloneDir '.git')) {
-    # Fetch the exact ref, then detach onto it -- works for both tags and
-    # branches, unlike `pull --ff-only`. A failure is reported instead of
-    # silently installing from a stale checkout.
-    git -C $CloneDir fetch --depth 1 origin $RepoBranch | Out-Null
+    $dirty = @(git -C $CloneDir status --porcelain --untracked-files=normal)
     if ($LASTEXITCODE -ne 0) {
-      Write-Host "==> WARNING: could not fetch $RepoBranch -- installing from the existing checkout in $CloneDir" -ForegroundColor Yellow
-    } else {
-      git -C $CloneDir checkout --quiet --detach FETCH_HEAD | Out-Null
-      if ($LASTEXITCODE -ne 0) {
-        Write-Host "==> WARNING: could not check out $RepoBranch (local changes?) -- installing from the existing checkout in $CloneDir" -ForegroundColor Yellow
-      }
+      throw "Could not inspect existing checkout: $CloneDir"
+    }
+    if ($dirty.Count -gt 0) {
+      throw "Existing checkout has local changes; refusing to run: $CloneDir"
+    }
+    git -C $CloneDir fetch --force --depth 1 origin $RepoBranch | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "Could not fetch $RepoBranch; refusing to use a stale checkout."
+    }
+    $fetchedCommit = (git -C $CloneDir rev-parse 'FETCH_HEAD^{commit}' | Select-Object -First 1).Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $fetchedCommit) {
+      throw "Could not resolve fetched commit for $RepoBranch."
+    }
+    if ($RepoCommit -and $fetchedCommit -ne $RepoCommit) {
+      throw "Fetched commit $fetchedCommit does not match pinned commit $RepoCommit."
+    }
+    git -C $CloneDir checkout --quiet --detach $fetchedCommit | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "Could not check out verified commit $fetchedCommit."
     }
   } else {
     # -c advice.detachedHead=false: tag checkouts are detached by design;
     # the 15-line git lecture only alarms first-time users.
     git clone -c advice.detachedHead=false --branch $RepoBranch --depth 1 $RepoUrl $CloneDir | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "Could not clone $RepoUrl at $RepoBranch." }
+  }
+  $resolvedCommit = (git -C $CloneDir rev-parse 'HEAD^{commit}' | Select-Object -First 1).Trim()
+  if ($LASTEXITCODE -ne 0 -or -not $resolvedCommit) {
+    throw "Could not resolve checkout commit in $CloneDir."
+  }
+  if ($RepoCommit -and $resolvedCommit -ne $RepoCommit) {
+    throw "Checkout commit $resolvedCommit does not match pinned commit $RepoCommit."
   }
   return (Join-Path $CloneDir 'windows')
 }
@@ -154,6 +190,28 @@ $target = Join-Path $Root 'install.ps1'
 if ((-not $self) -or ($self -ne $target)) {
   if (Test-Path $target) {
     if ($script:RunFromFile) {
+      if ($EphemeralRoot) {
+        $handoffError = $null
+        $handoffExit = 0
+        $env:STARTER_KIT_HANDOFF_CHILD = '1'
+        try {
+          $global:LASTEXITCODE = 0
+          & $target @PSBoundParameters
+          if ($null -ne $LASTEXITCODE) {
+            $handoffExit = [int]$LASTEXITCODE
+          }
+        } catch {
+          $handoffError = $_
+        } finally {
+          Remove-Item Env:STARTER_KIT_HANDOFF_CHILD -ErrorAction SilentlyContinue
+          . (Join-Path $Root 'scripts\lib.ps1')
+          Remove-KitTree `
+            -AllowedRoot (Split-Path -Parent $EphemeralRoot) `
+            -Path $EphemeralRoot
+        }
+        if ($handoffError) { throw $handoffError }
+        exit $handoffExit
+      }
       & $target @PSBoundParameters
       exit $LASTEXITCODE
     }
@@ -359,7 +417,12 @@ function Invoke-Doctor {
 if ($Help)    { Get-Help $target -Detailed;                    if ($script:RunFromFile) { exit 0 } else { return } }
 if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; if ($script:RunFromFile) { exit 0 } else { return } }
 if ($Version) { Write-Output "lazy-starter-kit $KitVersion";    if ($script:RunFromFile) { exit 0 } else { return } }
-if ($Doctor)  { $code = Invoke-Doctor;                         if ($script:RunFromFile) { exit $code } else { return } }
+if ($Doctor)  {
+  $code = Invoke-Doctor
+  if ($script:RunFromFile) { exit $code }
+  $global:LASTEXITCODE = $code
+  return
+}
 
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 

@@ -8,6 +8,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Security
+- **Released GUIs and double-click packages execute an authenticated bootstrap.**
+  macOS and Windows packages now include the reviewed installer, pin the exact
+  release commit (not only a movable tag), verify the bundled payload before
+  execution, and publish archive checksums. Release builds reject URL override
+  hooks and overwrite inherited repository/ref settings with the official
+  repository contract.
+- **GUI bootstrap checkout drift now fails closed.** The macOS and Windows GUI
+  entry points use an isolated checkout and verify its full commit before any
+  installer code runs; stale or locally modified code is never a fallback.
 - **The one-liner installs the newest release tag instead of `main`.** A fresh
   machine now gets a ref that CI verified end-to-end across six platforms,
   rather than whatever landed on `main` minutes earlier — a push no longer
@@ -19,6 +28,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   non-empty + shebang guard as Claude Code, oh-my-zsh and the Docker installer.
 
 ### Changed
+- **The native GUI exposes its real version and update path.** macOS and Windows
+  show the packaged version with a link to GitHub Releases. Existing GUI users
+  update by downloading the new release archive; there is no in-app updater.
+- **Preview and install actions stay synchronized.** Changing the preview
+  checkbox immediately updates the primary action on both platforms.
+- **Active installs can be cancelled safely.** macOS owns a dedicated process
+  group with bounded output draining; both platforms terminate the full
+  installer tree and clean temporary artifacts before quitting.
+- **macOS GUI releases are universal binaries** for Apple Silicon and Intel.
 - **Antigravity CLI is no longer installed by `install.sh`.** It has its own
   Google account flow and a small free tier, so it joins Grok Build as a
   documented manual one-liner instead of a kit-managed agent. The agents step
@@ -34,8 +52,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 ### Fixed
 - **A failed bootstrap refresh no longer installs from a stale checkout in
   silence.** `git pull --ff-only … || true` swallowed every error; the bootstrap
-  now fetches the target ref, checks out, and warns loudly with the checkout
-  path when either step fails.
+  now aborts unless the target ref, pinned commit, clean tree, and checkout all
+  verify.
+- **Minimal-profile details no longer claim Docker packages are included.**
+  GUI summary copy is derived from the selected component steps.
 - **`--update` works on tag checkouts.** Bootstrap clones are detached at a
   release tag, where `git pull --ff-only` cannot work. `--update` now moves
   detached checkouts to the newest tag and still fast-forwards branch checkouts

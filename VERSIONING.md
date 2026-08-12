@@ -14,7 +14,7 @@ Breaking any of these requires a **major** version bump:
 | **Step / group ids** | install steps (`prereqs`, `brew`/`packages`, `runtimes`, `shell`, `docker`, `git`, `agents`, `wsl`) and uninstall groups — the values accepted by `--only`/`--skip` |
 | **Profile names** | `full`, `minimal`, `work` |
 | **Managed-block markers** | `# >>> lazy-starter-kit:<tag> >>>` … `# <<< lazy-starter-kit:<tag> <<<` in `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, PowerShell profiles — tools and users may key on these |
-| **Environment variables** | `STARTER_KIT_BRANCH` (pin an explicit ref; unset installs the newest release tag), `HERMES=1` (opt in to the Hermes agent, macOS/Linux), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
+| **Environment variables** | `STARTER_KIT_BRANCH` (pin an explicit ref; unset installs the newest release tag), `STARTER_KIT_COMMIT` (require that ref to resolve to one full 40-character commit SHA), `HERMES=1` (opt in to the Hermes agent, macOS/Linux), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
 | **Exit codes** | `0` success / `1` failure; `--doctor` exits `0` when nothing is missing (PATH-only warnings don't fail) and `1` when something is — CI enforces this contract |
 | **Backup behavior** | the one-time `.bak` backup before the first managed edit of a config file |
 

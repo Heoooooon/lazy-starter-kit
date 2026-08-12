@@ -18,6 +18,21 @@ enum Brand {
       ? NSColor(calibratedRed: 0.055, green: 0.075, blue: 0.10, alpha: 1)
       : NSColor(calibratedRed: 0.96, green: 0.97, blue: 0.98, alpha: 1)
   }
+  static let statusBlue = NSColor(name: "BrandStatusBlue") { appearance in
+    appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+      ? NSColor(calibratedRed: 0.42, green: 0.61, blue: 1.00, alpha: 1)
+      : NSColor(calibratedRed: 0.00, green: 0.28, blue: 0.72, alpha: 1)
+  }
+  static let statusGreen = NSColor(name: "BrandStatusGreen") { appearance in
+    appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+      ? NSColor(calibratedRed: 0.34, green: 0.90, blue: 0.75, alpha: 1)
+      : NSColor(calibratedRed: 0.00, green: 0.42, blue: 0.32, alpha: 1)
+  }
+  static let statusRed = NSColor(name: "BrandStatusRed") { appearance in
+    appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+      ? NSColor(calibratedRed: 1.00, green: 0.54, blue: 0.50, alpha: 1)
+      : NSColor(calibratedRed: 0.71, green: 0.14, blue: 0.09, alpha: 1)
+  }
 
   static func symbol(
     _ name: String,

@@ -53,6 +53,9 @@ All application colors must resolve through semantic/dynamic `NSColor` values.
 | `muted` | secondary label | secondary label | supporting copy |
 | `mint` | `#00A985` | `#56E6BF` | brand and success |
 | `cobalt` | `#2867E8` | `#6B9CFF` | primary action |
+| `statusBlue` | `#0047B8` | `#6B9CFF` | running status |
+| `statusGreen` | `#006B52` | `#56E6BF` | success status |
+| `statusRed` | `#B52317` | `#FF8A80` | failure status |
 | `warning` | system orange | system orange | non-fatal attention |
 | `failure` | system red | system red | errors |
 
@@ -70,14 +73,14 @@ Never use pure black for log text. The selectable multi-line log field uses the 
 
 ## 5. Spacing and Layout
 
-- Window content: 760 × 720 pt, minimum window frame 700 × 742 pt.
+- Window content: 760 × 800 pt, minimum window frame 700 × 742 pt.
 - Outer inset: 28 pt horizontal, 24 pt vertical.
 - Major vertical rhythm: 20 pt.
 - Header: 64 pt icon beside title/subtitle; 16 pt gap.
 - Setup surface: 18 pt inset, 14 pt corner radius.
 - Control row: profile selector expands; preview checkbox remains intrinsic; primary button remains at least 132 × 36 pt.
-- Status strip: 36 pt minimum, icon + status + trust note.
-- Log surface: fills remaining height, 300 pt or taller at the standard window size, and may compress to 170 pt at the minimum window size; 14 pt text inset.
+- Status strip: 36 pt minimum, icon + status + trust note + update link.
+- Log surface: fills remaining height, 250 pt or taller at the standard window size, and may compress to 170 pt at the minimum window size; 14 pt text inset.
 
 The content uses constraints only. Resizing must expand the log surface without stretching controls.
 
@@ -123,6 +126,20 @@ Prominent native push button with `arrow.down.circle.fill`. Copy progresses:
 First-time prerequisite setup uses `Terminal 다시 열기`; standard-user and recoverable failures use `다시 확인`.
 
 Default-button keyboard behavior remains Return.
+
+An active run adds a contextual secondary action (`미리보기 취소` or
+`설치 취소`). The close control is disabled
+while work is active; choosing Quit cancels the complete installer process tree,
+waits for cleanup, and only then terminates the app. Cancellation restores every
+setup control and reports a neutral mode-specific cancellation state.
+
+### Version and updates
+
+The status strip shows the real release version and a `새 버전 확인 ↗` link to
+GitHub Releases. Development builds are labeled `개발 빌드`. Release apps bundle
+their reviewed bootstrap and pin both `STARTER_KIT_BRANCH` and
+`STARTER_KIT_COMMIT` to their own immutable release; they never download
+mutable `main` before those pins are active.
 
 ### Status strip
 

@@ -13,13 +13,77 @@ CONTENTS="$APP/Contents"
 [[ ! -e "$APP" ]] || safe_rm_rf_under "$OUT" "$APP"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
 
-xcrun swiftc \
-  -target "$(uname -m)-apple-macosx14.0" \
-  -framework AppKit \
-  -framework Foundation \
-  "$ROOT/gui/macos/Brand.swift" \
-  "$ROOT/gui/macos/main.swift" \
-  -o "$CONTENTS/MacOS/LazyStarterKitInstaller"
+RELEASE_REF="${STARTER_KIT_RELEASE_REF:-}"
+if [[ -z "$RELEASE_REF" ]]; then
+  RELEASE_REF="$(git -C "$ROOT" describe --tags --exact-match HEAD 2>/dev/null || true)"
+  [[ "$RELEASE_REF" == v* ]] || RELEASE_REF=main
+fi
+if [[ "$RELEASE_REF" == "main" ]]; then
+  APP_VERSION=dev
+  BUNDLE_VERSION=0
+elif [[ "$RELEASE_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  APP_VERSION="${RELEASE_REF#v}"
+  BUNDLE_VERSION="$APP_VERSION"
+else
+  die "STARTER_KIT_RELEASE_REF must be main or a vMAJOR.MINOR.PATCH tag"
+fi
+DEVELOPER_MODE="${STARTER_KIT_DEVELOPER_MODE:-0}"
+[[ "$DEVELOPER_MODE" == "0" || "$DEVELOPER_MODE" == "1" ]] \
+  || die "STARTER_KIT_DEVELOPER_MODE must be 0 or 1"
+if [[ "$DEVELOPER_MODE" == "1" ]]; then
+  RELEASE_COMMIT="$(
+    git -C "$ROOT" rev-parse --verify "${RELEASE_REF}^{commit}" 2>/dev/null \
+      || git -C "$ROOT" rev-parse --verify 'HEAD^{commit}'
+  )"
+else
+  RELEASE_COMMIT="$(git -C "$ROOT" rev-parse --verify "${RELEASE_REF}^{commit}")"
+fi
+[[ "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]] \
+  || die "Could not resolve an immutable release commit"
+if [[ "$RELEASE_REF" != "main" ]]; then
+  [[ "v$(<"$ROOT/VERSION")" == "$RELEASE_REF" ]] \
+    || die "VERSION does not match STARTER_KIT_RELEASE_REF"
+fi
+
+BOOTSTRAP="$CONTENTS/Resources/install.sh"
+cp "$ROOT/install.sh" "$BOOTSTRAP"
+chmod 644 "$BOOTSTRAP"
+BOOTSTRAP_SHA256="$(shasum -a 256 "$BOOTSTRAP" | awk '{print $1}')"
+
+BUILD_INFO="$OUT/.LazyStarterKitBuildInfo.swift"
+printf '%s\n' \
+  'import Foundation' \
+  '' \
+  'enum BuildInfo {' \
+  "  static let appVersion = \"$APP_VERSION\"" \
+  "  static let developerMode = $([[ "$DEVELOPER_MODE" == "1" ]] && printf true || printf false)" \
+  "  static let releaseCommit = \"$RELEASE_COMMIT\"" \
+  "  static let releaseRef = \"$RELEASE_REF\"" \
+  "  static let installerSHA256 = \"$BOOTSTRAP_SHA256\"" \
+  '}' > "$BUILD_INFO"
+cleanup_build_info() {
+  rm -f "$BUILD_INFO" "$OUT/.LazyStarterKitInstaller-arm64" "$OUT/.LazyStarterKitInstaller-x86_64"
+}
+trap cleanup_build_info EXIT
+
+for arch in arm64 x86_64; do
+  xcrun swiftc \
+    -target "$arch-apple-macosx14.0" \
+    -framework AppKit \
+    -framework CryptoKit \
+    -framework Foundation \
+    "$BUILD_INFO" \
+    "$ROOT/gui/macos/Brand.swift" \
+    "$ROOT/gui/macos/InstallerProcessSession.swift" \
+    "$ROOT/gui/macos/main.swift" \
+    -o "$OUT/.LazyStarterKitInstaller-$arch"
+done
+xcrun lipo -create \
+  "$OUT/.LazyStarterKitInstaller-arm64" \
+  "$OUT/.LazyStarterKitInstaller-x86_64" \
+  -output "$CONTENTS/MacOS/LazyStarterKitInstaller"
+cleanup_build_info
+trap - EXIT
 
 ICONSET="$OUT/LazyStarterKit.iconset"
 [[ ! -e "$ICONSET" ]] || safe_rm_rf_under "$OUT" "$ICONSET"
@@ -52,7 +116,7 @@ iconutil -c icns "$ICONSET" -o "$CONTENTS/Resources/AppIcon.icns"
 cleanup_iconset
 trap - EXIT
 
-cat > "$CONTENTS/Info.plist" <<'PLIST'
+cat > "$CONTENTS/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -65,7 +129,8 @@ cat > "$CONTENTS/Info.plist" <<'PLIST'
   <key>CFBundleName</key><string>Lazy Starter Kit Installer</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
-  <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>CFBundleShortVersionString</key><string>$APP_VERSION</string>
+  <key>CFBundleVersion</key><string>$BUNDLE_VERSION</string>
   <key>LSMultipleInstancesProhibited</key><true/>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>NSHighResolutionCapable</key><true/>

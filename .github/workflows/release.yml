@@ -25,7 +25,9 @@ jobs:
     needs: create-release
     runs-on: macos-14
     permissions:
+      attestations: write
       contents: write
+      id-token: write
     env:
       SIGNING_IDENTITY: "Developer ID Application: CMORE (XC844652SJ)"
       MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -81,6 +83,8 @@ jobs:
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
           echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
       - name: build, sign, notarize, and package GUI app
+        env:
+          STARTER_KIT_RELEASE_REF: ${{ github.ref_name }}
         run: |
           bash gui/macos/build-app.sh dist
           codesign \
@@ -114,9 +118,27 @@ jobs:
         run: |
           mkdir macos-double-click
           cp Install-lazy-starter-kit.command macos-double-click/
+          cp install.sh VERSION macos-double-click/
+          git rev-parse HEAD > macos-double-click/RELEASE_COMMIT
+          bootstrap_hash="$(shasum -a 256 install.sh | awk '{print $1}')"
+          perl -0pi -e "s/__BOOTSTRAP_SHA256__/$bootstrap_hash/g" \
+            macos-double-click/Install-lazy-starter-kit.command
+          if grep -q '__BOOTSTRAP_SHA256__' \
+            macos-double-click/Install-lazy-starter-kit.command; then
+            echo "macOS launcher digest placeholder was not replaced" >&2
+            exit 1
+          fi
           ditto -c -k --keepParent \
             macos-double-click \
             "lazy-starter-kit-macos-double-click.zip"
+          shasum -a 256 lazy-starter-kit-macos-double-click.zip \
+            > lazy-starter-kit-macos-double-click.zip.sha256
+      - name: attest macOS release archives
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: |
+            lazy-starter-kit-macos-gui.zip
+            lazy-starter-kit-macos-double-click.zip
       - name: upload macOS assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,6 +146,7 @@ jobs:
           gh release upload "$GITHUB_REF_NAME" \
             lazy-starter-kit-macos-gui.zip \
             lazy-starter-kit-macos-double-click.zip \
+            lazy-starter-kit-macos-double-click.zip.sha256 \
             --repo "$GITHUB_REPOSITORY"
       - name: remove temporary signing credentials
         if: always()
@@ -141,16 +164,90 @@ jobs:
     needs: create-release
     runs-on: windows-latest
     permissions:
+      attestations: write
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: package GUI and double-click launchers
         shell: powershell
         run: |
-          Compress-Archive -Path gui\windows\installer.ps1,gui\windows\Lazy-Starter-Kit-Installer.cmd `
+          $version = (Get-Content VERSION -Raw).Trim()
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            throw "VERSION $version does not match release tag $env:GITHUB_REF_NAME"
+          }
+          New-Item -ItemType Directory -Path windows-gui | Out-Null
+          $commit = (git rev-parse HEAD).Trim()
+          if ($commit -notmatch '^[0-9a-f]{40}$') {
+            throw "Could not resolve release commit"
+          }
+          $bootstrapHash =
+            (Get-FileHash windows\install.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
+          $guiText = [System.IO.File]::ReadAllText(
+            (Join-Path $PWD 'gui\windows\installer.ps1'),
+            [System.Text.Encoding]::UTF8
+          ).Replace(
+            '__BOOTSTRAP_SHA256__',
+            $bootstrapHash
+          )
+          if ($guiText -match '__BOOTSTRAP_SHA256__') {
+            throw 'Windows GUI digest placeholder was not replaced'
+          }
+          [System.IO.File]::WriteAllText(
+            (Join-Path $PWD 'windows-gui\installer.ps1'),
+            $guiText,
+            (New-Object System.Text.UTF8Encoding($true))
+          )
+          Copy-Item gui\windows\Lazy-Starter-Kit-Installer.cmd windows-gui\
+          Copy-Item gui\windows\cleanup-installer-clone.ps1 `
+            windows-gui\cleanup-installer-clone.ps1
+          Copy-Item windows\install.ps1 windows-gui\bootstrap-install.ps1
+          Copy-Item windows\scripts\lib.ps1 windows-gui\cleanup-lib.ps1
+          Copy-Item VERSION windows-gui\
+          $commit | Set-Content windows-gui\RELEASE_COMMIT -Encoding ASCII
+          Compress-Archive -Path windows-gui\* `
             -DestinationPath lazy-starter-kit-windows-gui.zip
-          Compress-Archive -Path windows\Install-lazy-starter-kit.cmd `
+          $zipHash =
+            (Get-FileHash lazy-starter-kit-windows-gui.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText(
+            (Join-Path $PWD 'lazy-starter-kit-windows-gui.zip.sha256'),
+            "$zipHash  lazy-starter-kit-windows-gui.zip`n",
+            [System.Text.Encoding]::ASCII
+          )
+          New-Item -ItemType Directory -Path windows-double-click | Out-Null
+          $launcher = [System.IO.File]::ReadAllText(
+            (Join-Path $PWD 'windows\Install-lazy-starter-kit.cmd'),
+            [System.Text.Encoding]::UTF8
+          ).Replace(
+            '__BOOTSTRAP_SHA256__',
+            $bootstrapHash
+          )
+          if ($launcher -match '__BOOTSTRAP_SHA256__') {
+            throw 'Windows launcher digest placeholder was not replaced'
+          }
+          [System.IO.File]::WriteAllText(
+            (Join-Path $PWD 'windows-double-click\Install-lazy-starter-kit.cmd'),
+            $launcher,
+            (New-Object System.Text.UTF8Encoding($false))
+          )
+          Copy-Item windows\install.ps1 windows-double-click\bootstrap-install.ps1
+          Copy-Item VERSION windows-double-click\
+          $commit | Set-Content windows-double-click\RELEASE_COMMIT -Encoding ASCII
+          Compress-Archive -Path windows-double-click\* `
             -DestinationPath lazy-starter-kit-windows-double-click.zip
+          $launcherZipHash =
+            (Get-FileHash lazy-starter-kit-windows-double-click.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText(
+            (Join-Path $PWD 'lazy-starter-kit-windows-double-click.zip.sha256'),
+            "$launcherZipHash  lazy-starter-kit-windows-double-click.zip`n",
+            [System.Text.Encoding]::ASCII
+          )
+      - name: attest Windows release archives
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+        with:
+          subject-path: |
+            lazy-starter-kit-windows-gui.zip
+            lazy-starter-kit-windows-double-click.zip
       - name: upload Windows assets
         shell: powershell
         env:
@@ -158,5 +255,7 @@ jobs:
         run: |
           gh release upload $env:GITHUB_REF_NAME `
             lazy-starter-kit-windows-gui.zip `
+            lazy-starter-kit-windows-gui.zip.sha256 `
             lazy-starter-kit-windows-double-click.zip `
+            lazy-starter-kit-windows-double-click.zip.sha256 `
             --repo $env:GITHUB_REPOSITORY
