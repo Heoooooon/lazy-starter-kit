@@ -220,9 +220,25 @@ exit 23
   $env:STARTER_KIT_EPHEMERAL_ROOT = $HandoffCloneDir
   $env:STARTER_KIT_BRANCH = 'handoff-test'
   Remove-Item Env:STARTER_KIT_COMMIT -ErrorAction SilentlyContinue
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $BootstrapScript -List *> $null
-  if ($LASTEXITCODE -ne 23) {
-    throw "Windows ephemeral hand-off returned $LASTEXITCODE instead of 23"
+  $handoffStdoutPath = Join-Path $BootstrapTestDir 'handoff.stdout'
+  $handoffStderrPath = Join-Path $BootstrapTestDir 'handoff.stderr'
+  $handoffProcess = Start-Process `
+    -FilePath 'powershell.exe' `
+    -ArgumentList @(
+      '-NoProfile',
+      '-ExecutionPolicy', 'Bypass',
+      '-File', $BootstrapScript,
+      '-List'
+    ) `
+    -RedirectStandardOutput $handoffStdoutPath `
+    -RedirectStandardError $handoffStderrPath `
+    -Wait `
+    -PassThru
+  if ($handoffProcess.ExitCode -ne 23) {
+    $handoffStderr = Get-Content $handoffStderrPath -Raw
+    throw "Windows ephemeral hand-off returned $(
+      $handoffProcess.ExitCode
+    ) instead of 23: $handoffStderr"
   }
   if (Test-Path -LiteralPath $HandoffCloneDir) {
     throw 'Windows ephemeral hand-off did not remove its checkout'
