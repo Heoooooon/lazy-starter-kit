@@ -142,7 +142,10 @@ try {
   $env:STARTER_KIT_DIR = $CheckoutDir
   $env:STARTER_KIT_BRANCH = $BootstrapRef
   $env:STARTER_KIT_COMMIT = '0000000000000000000000000000000000000000'
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
   & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $BootstrapScript -List *> $null
+  $ErrorActionPreference = $previousErrorActionPreference
   if ($LASTEXITCODE -eq 0) {
     throw 'Windows bootstrap accepted a ref that did not match its pinned commit'
   }
