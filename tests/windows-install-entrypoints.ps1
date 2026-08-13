@@ -141,22 +141,34 @@ try {
   $env:STARTER_KIT_REPO = $Root
   $env:STARTER_KIT_DIR = $CheckoutDir
   $env:STARTER_KIT_BRANCH = $BootstrapRef
-  $env:STARTER_KIT_COMMIT = '0000000000000000000000000000000000000000'
-  $previousErrorActionPreference = $ErrorActionPreference
-  $ErrorActionPreference = 'Continue'
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $BootstrapScript -List *> $null
-  $ErrorActionPreference = $previousErrorActionPreference
-  if ($LASTEXITCODE -eq 0) {
+  function Invoke-BootstrapList([string]$Commit) {
+    $env:STARTER_KIT_COMMIT = $Commit
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+      $ErrorActionPreference = 'Continue'
+      & powershell.exe `
+        -NoProfile `
+        -ExecutionPolicy Bypass `
+        -File $BootstrapScript `
+        -List *> $null
+      return $LASTEXITCODE
+    } finally {
+      $ErrorActionPreference = $previousErrorActionPreference
+    }
+  }
+
+  $bootstrapExit = Invoke-BootstrapList `
+    '0000000000000000000000000000000000000000'
+  if ($bootstrapExit -eq 0) {
     throw 'Windows bootstrap accepted a ref that did not match its pinned commit'
   }
-  $env:STARTER_KIT_COMMIT = $PinnedCommit
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $BootstrapScript -List *> $null
-  if ($LASTEXITCODE -ne 0) {
+  $bootstrapExit = Invoke-BootstrapList $PinnedCommit
+  if ($bootstrapExit -ne 0) {
     throw 'Windows bootstrap rejected its exact pinned commit'
   }
   Set-Content (Join-Path $CheckoutDir 'untracked-change') 'local change'
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $BootstrapScript -List *> $null
-  if ($LASTEXITCODE -eq 0) {
+  $bootstrapExit = Invoke-BootstrapList $PinnedCommit
+  if ($bootstrapExit -eq 0) {
     throw 'Windows bootstrap executed from a dirty checkout'
   }
 
