@@ -143,17 +143,25 @@ try {
   $env:STARTER_KIT_BRANCH = $BootstrapRef
   function Invoke-BootstrapList([string]$Commit) {
     $env:STARTER_KIT_COMMIT = $Commit
-    $previousErrorActionPreference = $ErrorActionPreference
+    $stdoutPath = Join-Path $BootstrapTestDir 'bootstrap.stdout'
+    $stderrPath = Join-Path $BootstrapTestDir 'bootstrap.stderr'
+    Remove-Item $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     try {
-      $ErrorActionPreference = 'Continue'
-      & powershell.exe `
-        -NoProfile `
-        -ExecutionPolicy Bypass `
-        -File $BootstrapScript `
-        -List *> $null
-      return $LASTEXITCODE
+      $process = Start-Process `
+        -FilePath 'powershell.exe' `
+        -ArgumentList @(
+          '-NoProfile',
+          '-ExecutionPolicy', 'Bypass',
+          '-File', $BootstrapScript,
+          '-List'
+        ) `
+        -RedirectStandardOutput $stdoutPath `
+        -RedirectStandardError $stderrPath `
+        -Wait `
+        -PassThru
+      return $process.ExitCode
     } finally {
-      $ErrorActionPreference = $previousErrorActionPreference
+      Remove-Item $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
   }
 
