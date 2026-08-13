@@ -159,24 +159,38 @@ try {
         -RedirectStandardError $stderrPath `
         -Wait `
         -PassThru
-      return $process.ExitCode
+      return [PSCustomObject]@{
+        ExitCode = $process.ExitCode
+        Stdout = if (Test-Path $stdoutPath) {
+          Get-Content $stdoutPath -Raw
+        } else {
+          ''
+        }
+        Stderr = if (Test-Path $stderrPath) {
+          Get-Content $stderrPath -Raw
+        } else {
+          ''
+        }
+      }
     } finally {
       Remove-Item $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
   }
 
-  $bootstrapExit = Invoke-BootstrapList `
+  $bootstrapResult = Invoke-BootstrapList `
     '0000000000000000000000000000000000000000'
-  if ($bootstrapExit -eq 0) {
+  if ($bootstrapResult.ExitCode -eq 0) {
     throw 'Windows bootstrap accepted a ref that did not match its pinned commit'
   }
-  $bootstrapExit = Invoke-BootstrapList $PinnedCommit
-  if ($bootstrapExit -ne 0) {
-    throw 'Windows bootstrap rejected its exact pinned commit'
+  $bootstrapResult = Invoke-BootstrapList $PinnedCommit
+  if ($bootstrapResult.ExitCode -ne 0) {
+    throw "Windows bootstrap rejected its exact pinned commit: $(
+      $bootstrapResult.Stderr
+    )"
   }
   Set-Content (Join-Path $CheckoutDir 'untracked-change') 'local change'
-  $bootstrapExit = Invoke-BootstrapList $PinnedCommit
-  if ($bootstrapExit -eq 0) {
+  $bootstrapResult = Invoke-BootstrapList $PinnedCommit
+  if ($bootstrapResult.ExitCode -eq 0) {
     throw 'Windows bootstrap executed from a dirty checkout'
   }
 
