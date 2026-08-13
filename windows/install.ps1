@@ -144,10 +144,13 @@ function Resolve-Root {
     if ($LASTEXITCODE -ne 0) {
       throw "Could not fetch $RepoBranch; refusing to use a stale checkout."
     }
-    $fetchedCommit = (git -C $CloneDir rev-parse 'FETCH_HEAD^{commit}' | Select-Object -First 1).Trim()
-    if ($LASTEXITCODE -ne 0 -or -not $fetchedCommit) {
+    $fetchedOutput = @(git -C $CloneDir rev-parse 'FETCH_HEAD^{commit}')
+    $fetchedExit = $LASTEXITCODE
+    $fetchedCommit = $fetchedOutput | Select-Object -First 1
+    if ($fetchedExit -ne 0 -or -not $fetchedCommit) {
       throw "Could not resolve fetched commit for $RepoBranch."
     }
+    $fetchedCommit = $fetchedCommit.Trim()
     if ($RepoCommit -and $fetchedCommit -ne $RepoCommit) {
       throw "Fetched commit $fetchedCommit does not match pinned commit $RepoCommit."
     }
@@ -161,10 +164,13 @@ function Resolve-Root {
     git clone -c advice.detachedHead=false --branch $RepoBranch --depth 1 $RepoUrl $CloneDir | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "Could not clone $RepoUrl at $RepoBranch." }
   }
-  $resolvedCommit = (git -C $CloneDir rev-parse 'HEAD^{commit}' | Select-Object -First 1).Trim()
-  if ($LASTEXITCODE -ne 0 -or -not $resolvedCommit) {
+  $resolvedOutput = @(git -C $CloneDir rev-parse 'HEAD^{commit}')
+  $resolvedExit = $LASTEXITCODE
+  $resolvedCommit = $resolvedOutput | Select-Object -First 1
+  if ($resolvedExit -ne 0 -or -not $resolvedCommit) {
     throw "Could not resolve checkout commit in $CloneDir."
   }
+  $resolvedCommit = $resolvedCommit.Trim()
   if ($RepoCommit -and $resolvedCommit -ne $RepoCommit) {
     throw "Checkout commit $resolvedCommit does not match pinned commit $RepoCommit."
   }
