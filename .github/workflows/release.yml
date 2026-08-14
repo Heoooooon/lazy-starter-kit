@@ -9,16 +9,72 @@ permissions:
   contents: read
 
 jobs:
+  verify-ci:
+    name: verify tagged commit passed CI
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: verify version matches tag
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          test "v$version" = "$GITHUB_REF_NAME" || {
+            echo "::error::VERSION $version does not match release tag $GITHUB_REF_NAME"
+            exit 1
+          }
+      - name: require successful CI for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Waiting for ci.yml on $GITHUB_SHA"
+          for attempt in $(seq 1 60); do
+            row="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" --event push --limit 20 --json databaseId,status,conclusion,createdAt --jq 'sort_by(.createdAt) | reverse | .[0] | if . == null then "" else "\(.databaseId)|\(.status)|\(.conclusion // \"\")" end')"
+            if [[ -z "$row" ]]; then
+              echo "CI run not visible yet (attempt $attempt/60)"
+              sleep 10
+              continue
+            fi
+            IFS='|' read -r run_id status conclusion <<< "$row"
+            echo "CI run $run_id: status=$status conclusion=${conclusion:-pending}"
+            if [[ "$status" == "completed" ]]; then
+              [[ "$conclusion" == "success" ]] || {
+                echo "::error::Refusing release: CI run $run_id concluded '$conclusion'"
+                exit 1
+              }
+              echo "CI gate passed: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for a successful ci.yml run for $GITHUB_SHA"
+          exit 1
+
   create-release:
-    name: create GitHub release
+    name: create draft GitHub release
+    needs: verify-ci
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: create release with auto-generated notes
+      - name: create or reuse draft release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes --verify-tag
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft >/dev/null 2>&1; then
+            is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
+            [[ "$is_draft" == "true" ]] || {
+              echo "::error::Release $GITHUB_REF_NAME is already public; refusing to rebuild it"
+              exit 1
+            }
+            echo "Reusing existing draft release $GITHUB_REF_NAME"
+          else
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes --verify-tag --draft
+          fi
 
   macos-installers:
     name: package macOS beginner installers
@@ -39,15 +95,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: import Developer ID certificate
         run: |
-          for name in \
-            MACOS_CERTIFICATE_P12_BASE64 \
-            MACOS_CERTIFICATE_PASSWORD \
-            ASC_API_KEY_P8_BASE64 \
-            ASC_API_KEY_ID \
-            ASC_API_ISSUER_ID; do
+          for name in MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD ASC_API_KEY_P8_BASE64 ASC_API_KEY_ID ASC_API_ISSUER_ID; do
             test -n "${!name:-}" || { echo "::error::$name is not configured"; exit 1; }
           done
-
           CERTIFICATE_PATH="$RUNNER_TEMP/developer-id.p12"
           API_KEY_PATH="$RUNNER_TEMP/AuthKey_${ASC_API_KEY_ID}.p8"
           KEYCHAIN_PATH="$RUNNER_TEMP/lazy-starter-kit-signing.keychain-db"
@@ -55,29 +105,14 @@ jobs:
           printf '%s' "$MACOS_CERTIFICATE_P12_BASE64" | base64 -D > "$CERTIFICATE_PATH"
           printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 -D > "$API_KEY_PATH"
           chmod 600 "$CERTIFICATE_PATH" "$API_KEY_PATH"
-
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security import "$CERTIFICATE_PATH" \
-            -k "$KEYCHAIN_PATH" \
-            -P "$MACOS_CERTIFICATE_PASSWORD" \
-            -T /usr/bin/codesign \
-            -T /usr/bin/security
-          security set-key-partition-list \
-            -S apple-tool:,apple: \
-            -s \
-            -k "$KEYCHAIN_PASSWORD" \
-            "$KEYCHAIN_PATH"
-          security list-keychains -d user -s \
-            "$KEYCHAIN_PATH" \
-            "$HOME/Library/Keychains/login.keychain-db"
+          security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" "$HOME/Library/Keychains/login.keychain-db"
           identities="$(security find-identity -v -p codesigning "$KEYCHAIN_PATH")"
-          case "$identities" in
-            *"$SIGNING_IDENTITY"*) ;;
-            *) echo "::error::Developer ID identity was not imported"; exit 1 ;;
-          esac
-
+          case "$identities" in *"$SIGNING_IDENTITY"*) ;; *) echo "::error::Developer ID identity was not imported"; exit 1 ;; esac
           echo "CERTIFICATE_PATH=$CERTIFICATE_PATH" >> "$GITHUB_ENV"
           echo "API_KEY_PATH=$API_KEY_PATH" >> "$GITHUB_ENV"
           echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
@@ -87,33 +122,14 @@ jobs:
           STARTER_KIT_RELEASE_REF: ${{ github.ref_name }}
         run: |
           bash gui/macos/build-app.sh dist
-          codesign \
-            --force \
-            --deep \
-            --options runtime \
-            --timestamp \
-            --sign "$SIGNING_IDENTITY" \
-            "dist/Lazy Starter Kit Installer.app"
-          codesign --verify --deep --strict --verbose=2 \
-            "dist/Lazy Starter Kit Installer.app"
-
-          ditto -c -k --keepParent \
-            "dist/Lazy Starter Kit Installer.app" \
-            "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip"
-          xcrun notarytool submit \
-            "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip" \
-            --key "$API_KEY_PATH" \
-            --key-id "$ASC_API_KEY_ID" \
-            --issuer "$ASC_API_ISSUER_ID" \
-            --wait
+          codesign --force --deep --options runtime --timestamp --sign "$SIGNING_IDENTITY" "dist/Lazy Starter Kit Installer.app"
+          codesign --verify --deep --strict --verbose=2 "dist/Lazy Starter Kit Installer.app"
+          ditto -c -k --keepParent "dist/Lazy Starter Kit Installer.app" "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip" --key "$API_KEY_PATH" --key-id "$ASC_API_KEY_ID" --issuer "$ASC_API_ISSUER_ID" --wait
           xcrun stapler staple "dist/Lazy Starter Kit Installer.app"
           xcrun stapler validate "dist/Lazy Starter Kit Installer.app"
-          spctl --assess --type execute --verbose=4 \
-            "dist/Lazy Starter Kit Installer.app"
-
-          ditto -c -k --keepParent \
-            "dist/Lazy Starter Kit Installer.app" \
-            "lazy-starter-kit-macos-gui.zip"
+          spctl --assess --type execute --verbose=4 "dist/Lazy Starter Kit Installer.app"
+          ditto -c -k --keepParent "dist/Lazy Starter Kit Installer.app" "lazy-starter-kit-macos-gui.zip"
       - name: package double-click launcher
         run: |
           mkdir macos-double-click
@@ -121,43 +137,25 @@ jobs:
           cp install.sh VERSION macos-double-click/
           git rev-parse HEAD > macos-double-click/RELEASE_COMMIT
           bootstrap_hash="$(shasum -a 256 install.sh | awk '{print $1}')"
-          perl -0pi -e "s/__BOOTSTRAP_SHA256__/$bootstrap_hash/g" \
-            macos-double-click/Install-lazy-starter-kit.command
-          if grep -q '__BOOTSTRAP_SHA256__' \
-            macos-double-click/Install-lazy-starter-kit.command; then
-            echo "macOS launcher digest placeholder was not replaced" >&2
-            exit 1
-          fi
-          ditto -c -k --keepParent \
-            macos-double-click \
-            "lazy-starter-kit-macos-double-click.zip"
-          shasum -a 256 lazy-starter-kit-macos-double-click.zip \
-            > lazy-starter-kit-macos-double-click.zip.sha256
+          perl -0pi -e "s/__BOOTSTRAP_SHA256__/$bootstrap_hash/g" macos-double-click/Install-lazy-starter-kit.command
+          grep -q '__BOOTSTRAP_SHA256__' macos-double-click/Install-lazy-starter-kit.command && { echo "macOS launcher digest placeholder was not replaced" >&2; exit 1; } || true
+          ditto -c -k --keepParent macos-double-click "lazy-starter-kit-macos-double-click.zip"
+          shasum -a 256 lazy-starter-kit-macos-double-click.zip > lazy-starter-kit-macos-double-click.zip.sha256
       - name: attest macOS release archives
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: |
             lazy-starter-kit-macos-gui.zip
             lazy-starter-kit-macos-double-click.zip
-      - name: upload macOS assets
+      - name: upload macOS assets to draft
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "$GITHUB_REF_NAME" \
-            lazy-starter-kit-macos-gui.zip \
-            lazy-starter-kit-macos-double-click.zip \
-            lazy-starter-kit-macos-double-click.zip.sha256 \
-            --repo "$GITHUB_REPOSITORY"
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" lazy-starter-kit-macos-gui.zip lazy-starter-kit-macos-double-click.zip lazy-starter-kit-macos-double-click.zip.sha256 --clobber --repo "$GITHUB_REPOSITORY"
       - name: remove temporary signing credentials
         if: always()
         run: |
-          if [[ -n "${KEYCHAIN_PATH:-}" && -f "$KEYCHAIN_PATH" ]]; then
-            security delete-keychain "$KEYCHAIN_PATH"
-          fi
-          rm -f \
-            "${CERTIFICATE_PATH:-}" \
-            "${API_KEY_PATH:-}" \
-            "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip"
+          if [[ -n "${KEYCHAIN_PATH:-}" && -f "$KEYCHAIN_PATH" ]]; then security delete-keychain "$KEYCHAIN_PATH"; fi
+          rm -f "${CERTIFICATE_PATH:-}" "${API_KEY_PATH:-}" "$RUNNER_TEMP/lazy-starter-kit-notary-upload.zip"
 
   windows-installers:
     name: package Windows beginner installers
@@ -173,89 +171,57 @@ jobs:
         shell: powershell
         run: |
           $version = (Get-Content VERSION -Raw).Trim()
-          if ("v$version" -ne $env:GITHUB_REF_NAME) {
-            throw "VERSION $version does not match release tag $env:GITHUB_REF_NAME"
-          }
+          if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "VERSION $version does not match release tag $env:GITHUB_REF_NAME" }
           New-Item -ItemType Directory -Path windows-gui | Out-Null
           $commit = (git rev-parse HEAD).Trim()
-          if ($commit -notmatch '^[0-9a-f]{40}$') {
-            throw "Could not resolve release commit"
-          }
-          $bootstrapHash =
-            (Get-FileHash windows\install.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
-          $guiText = [System.IO.File]::ReadAllText(
-            (Join-Path $PWD 'gui\windows\installer.ps1'),
-            [System.Text.Encoding]::UTF8
-          ).Replace(
-            '__BOOTSTRAP_SHA256__',
-            $bootstrapHash
-          )
-          if ($guiText -match '__BOOTSTRAP_SHA256__') {
-            throw 'Windows GUI digest placeholder was not replaced'
-          }
-          [System.IO.File]::WriteAllText(
-            (Join-Path $PWD 'windows-gui\installer.ps1'),
-            $guiText,
-            (New-Object System.Text.UTF8Encoding($true))
-          )
+          if ($commit -notmatch '^[0-9a-f]{40}$') { throw "Could not resolve release commit" }
+          $bootstrapHash = (Get-FileHash windows\install.ps1 -Algorithm SHA256).Hash.ToLowerInvariant()
+          $guiText = [System.IO.File]::ReadAllText((Join-Path $PWD 'gui\windows\installer.ps1'), [System.Text.Encoding]::UTF8).Replace('__BOOTSTRAP_SHA256__', $bootstrapHash)
+          if ($guiText -match '__BOOTSTRAP_SHA256__') { throw 'Windows GUI digest placeholder was not replaced' }
+          [System.IO.File]::WriteAllText((Join-Path $PWD 'windows-gui\installer.ps1'), $guiText, (New-Object System.Text.UTF8Encoding($true)))
           Copy-Item gui\windows\Lazy-Starter-Kit-Installer.cmd windows-gui\
-          Copy-Item gui\windows\cleanup-installer-clone.ps1 `
-            windows-gui\cleanup-installer-clone.ps1
+          Copy-Item gui\windows\cleanup-installer-clone.ps1 windows-gui\cleanup-installer-clone.ps1
           Copy-Item windows\install.ps1 windows-gui\bootstrap-install.ps1
           Copy-Item windows\scripts\lib.ps1 windows-gui\cleanup-lib.ps1
           Copy-Item VERSION windows-gui\
           $commit | Set-Content windows-gui\RELEASE_COMMIT -Encoding ASCII
-          Compress-Archive -Path windows-gui\* `
-            -DestinationPath lazy-starter-kit-windows-gui.zip
-          $zipHash =
-            (Get-FileHash lazy-starter-kit-windows-gui.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-          [System.IO.File]::WriteAllText(
-            (Join-Path $PWD 'lazy-starter-kit-windows-gui.zip.sha256'),
-            "$zipHash  lazy-starter-kit-windows-gui.zip`n",
-            [System.Text.Encoding]::ASCII
-          )
+          Compress-Archive -Path windows-gui\* -DestinationPath lazy-starter-kit-windows-gui.zip
+          $zipHash = (Get-FileHash lazy-starter-kit-windows-gui.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText((Join-Path $PWD 'lazy-starter-kit-windows-gui.zip.sha256'), "$zipHash  lazy-starter-kit-windows-gui.zip`n", [System.Text.Encoding]::ASCII)
           New-Item -ItemType Directory -Path windows-double-click | Out-Null
-          $launcher = [System.IO.File]::ReadAllText(
-            (Join-Path $PWD 'windows\Install-lazy-starter-kit.cmd'),
-            [System.Text.Encoding]::UTF8
-          ).Replace(
-            '__BOOTSTRAP_SHA256__',
-            $bootstrapHash
-          )
-          if ($launcher -match '__BOOTSTRAP_SHA256__') {
-            throw 'Windows launcher digest placeholder was not replaced'
-          }
-          [System.IO.File]::WriteAllText(
-            (Join-Path $PWD 'windows-double-click\Install-lazy-starter-kit.cmd'),
-            $launcher,
-            (New-Object System.Text.UTF8Encoding($false))
-          )
+          $launcher = [System.IO.File]::ReadAllText((Join-Path $PWD 'windows\Install-lazy-starter-kit.cmd'), [System.Text.Encoding]::UTF8).Replace('__BOOTSTRAP_SHA256__', $bootstrapHash)
+          if ($launcher -match '__BOOTSTRAP_SHA256__') { throw 'Windows launcher digest placeholder was not replaced' }
+          [System.IO.File]::WriteAllText((Join-Path $PWD 'windows-double-click\Install-lazy-starter-kit.cmd'), $launcher, (New-Object System.Text.UTF8Encoding($false)))
           Copy-Item windows\install.ps1 windows-double-click\bootstrap-install.ps1
           Copy-Item VERSION windows-double-click\
           $commit | Set-Content windows-double-click\RELEASE_COMMIT -Encoding ASCII
-          Compress-Archive -Path windows-double-click\* `
-            -DestinationPath lazy-starter-kit-windows-double-click.zip
-          $launcherZipHash =
-            (Get-FileHash lazy-starter-kit-windows-double-click.zip -Algorithm SHA256).Hash.ToLowerInvariant()
-          [System.IO.File]::WriteAllText(
-            (Join-Path $PWD 'lazy-starter-kit-windows-double-click.zip.sha256'),
-            "$launcherZipHash  lazy-starter-kit-windows-double-click.zip`n",
-            [System.Text.Encoding]::ASCII
-          )
+          Compress-Archive -Path windows-double-click\* -DestinationPath lazy-starter-kit-windows-double-click.zip
+          $launcherZipHash = (Get-FileHash lazy-starter-kit-windows-double-click.zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          [System.IO.File]::WriteAllText((Join-Path $PWD 'lazy-starter-kit-windows-double-click.zip.sha256'), "$launcherZipHash  lazy-starter-kit-windows-double-click.zip`n", [System.Text.Encoding]::ASCII)
       - name: attest Windows release archives
         uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
         with:
           subject-path: |
             lazy-starter-kit-windows-gui.zip
             lazy-starter-kit-windows-double-click.zip
-      - name: upload Windows assets
+      - name: upload Windows assets to draft
         shell: powershell
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload $env:GITHUB_REF_NAME lazy-starter-kit-windows-gui.zip lazy-starter-kit-windows-gui.zip.sha256 lazy-starter-kit-windows-double-click.zip lazy-starter-kit-windows-double-click.zip.sha256 --clobber --repo $env:GITHUB_REPOSITORY
+
+  publish-release:
+    name: publish verified release
+    needs: [macos-installers, windows-installers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: publish only after every release artifact succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload $env:GITHUB_REF_NAME `
-            lazy-starter-kit-windows-gui.zip `
-            lazy-starter-kit-windows-gui.zip.sha256 `
-            lazy-starter-kit-windows-double-click.zip `
-            lazy-starter-kit-windows-double-click.zip.sha256 `
-            --repo $env:GITHUB_REPOSITORY
+          set -euo pipefail
+          is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
+          [[ "$is_draft" == "true" ]] || { echo "::error::Expected $GITHUB_REF_NAME to still be a draft before final publish"; exit 1; }
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false
