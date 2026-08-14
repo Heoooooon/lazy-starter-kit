@@ -9,486 +9,236 @@ The fastest way to start AI coding on your own machine.
 [![CI](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Heoooooon/lazy-starter-kit/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Platform](https://img.shields.io/badge/macOS-Apple%20Silicon-000000?logo=apple&logoColor=white)](#)
-[![Stars](https://img.shields.io/github/stars/Heoooooon/lazy-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/lazy-starter-kit/stargazers)
+[![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-[한국어](./README.md) · **English** · [Install flow ↗](https://heoooooon.github.io/lazy-starter-kit/) · [Changelog](./CHANGELOG.md)
-
-**Platforms:** **macOS** (this page) · [Linux](./linux/README.md) · [Windows](./windows/README.md)
-
-<img src="./docs/demo.gif" alt="lazy-starter-kit demo — ./install.sh --dry-run" width="760" />
+[한국어](./README.md) · **English** · [Changelog](./CHANGELOG.md)
 
 </div>
 
 ---
 
-## Contents
+## What is this?
 
-<details><summary>Jump to a section</summary>
+A fresh laptop or PC usually means installing Git, runtimes, terminal tools,
+Docker, and AI coding agents one by one.
 
-- [Which one sounds like you?](#which-one-sounds-like-you)
-- [Quick start](#quick-start) · [A second Mac, or a fresh reinstall](#a-second-mac-or-a-fresh-reinstall)
-- [Why this kit](#why-this-kit)
-- [Running a class or study group](#running-a-class-or-study-group)
-- [Linux & Windows](#linux--windows)
-- [What you get](#what-you-get)
-- [Steps & flags](#steps--flags)
-- [Running on a Mac that already has tools](#running-on-a-mac-that-already-has-tools)
-- [Permissions](#permissions) · [Customize](#customize)
-- [After install](#after-install)
-- [Notes on the AI agents](#notes-on-the-ai-agents)
-- [Extend your agents (tool ecosystem)](#extend-your-agents-tool-ecosystem)
-- [Uninstall](#uninstall) · [Versioning](#versioning) · [Credits](#credits)
+lazy-starter-kit bootstraps that development environment in one pass and gives
+you a way to verify the result afterwards.
 
-</details>
+Main components include:
+
+- CLI: git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide
+- Runtimes: Node.js, Python, Go, Rust
+- Shell/prompt: zsh, oh-my-zsh, starship, Nerd Font
+- Containers: Colima on macOS, Docker Engine on Linux, optional Docker Desktop on Windows
+- AI agents: Claude Code, gajae-code, Codex, lazycodex
+
+Existing tools are left alone where practical, and managed configuration files
+are edited only inside clearly marked blocks. Use `--doctor` to inspect the
+current state and `--dry-run` to preview changes before applying them.
 
 ---
 
-## Which one sounds like you?
+## Install
 
-Same install, different blockers.
+### macOS
 
-<table>
-<tr>
-<td width="33%"><img src="./docs/images/lsk-card-start-en.webp" alt="Starting out — tangled cables and unopened boxes" width="100%"></td>
-<td width="33%"><img src="./docs/images/lsk-card-reproduce-en.webp" alt="Setting up another machine — several computers showing the same screen" width="100%"></td>
-<td width="33%"><img src="./docs/images/lsk-card-teach-en.webp" alt="Teaching a class — laptops starting from one line" width="100%"></td>
-</tr>
-<tr>
-<td valign="top">
-
-**First time doing AI coding?**
-
-Day one becomes setup day. Git is missing, the Node version is wrong, and the terminal prints an error you have no way to rank.
-
-→ Don't stall at setup — **start your first project today.**
-
-[Quick start ↓](#quick-start)
-
-</td>
-<td valign="top">
-
-**Setting up a second Mac (a new mini)?**
-
-Every new machine turns into an archaeology session about what you installed last time, and the machines drift apart from there.
-
-→ Don't memorize your environment — **reproduce it.**
-
-[A second Mac ↓](#a-second-mac-or-a-fresh-reinstall)
-
-</td>
-<td valign="top">
-
-**Teaching AI coding?**
-
-The first bottleneck in a class is never prompting — it's everyone's basic setup. One person has no Git, another is opening a terminal for the first time.
-
-→ Stop teaching installs — **teach building.**
-
-[Class setup ↓](#running-a-class-or-study-group)
-
-</td>
-</tr>
-</table>
-
-## Quick start
-
-### No terminal required: download and double-click
-
-Choose the native GUI for a guided install, or the small double-click launcher
-to start the existing installer immediately:
-
-| Platform | GUI installer (recommended) | Quick launcher |
-|---|---|---|
-| **macOS** | [Download GUI](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip) | [Download launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-double-click.zip) |
-| **Windows** | [Download GUI](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip) | [Download launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip) |
-
-Extract the ZIP, then double-click the included installer. Both paths delegate
-to the same `install.sh` / `install.ps1` engine documented below.
-
-> **The macOS GUI app ships with Apple Developer ID signing and notarization.**
-> If macOS blocks the quick launcher, Control-click it and choose **Open**.
-> Windows artifacts are not code-signed yet; choose **More info → Run anyway**
-> if SmartScreen appears.
-
-```sh
+```bash
 curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
 ```
 
-On a brand-new Mac with no `git`, this triggers the Xcode Command Line Tools install
-first — re-run the same command once they finish.
+### Linux
 
-Prefer to read before you run (recommended):
+Supports Ubuntu/Debian, Fedora/RHEL, Arch, and openSUSE families.
 
-```sh
+```bash
+curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
+```
+
+Details: [linux/README.md](linux/README.md)
+
+### Windows
+
+From PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
+```
+
+Details: [windows/README.md](windows/README.md)
+
+GUI and double-click installers are available from
+[Releases](https://github.com/Heoooooon/lazy-starter-kit/releases).
+
+---
+
+## Prefer to inspect it first?
+
+If you do not want to execute a remote script immediately, clone the repository
+and run a dry run first.
+
+```bash
 git clone https://github.com/Heoooooon/lazy-starter-kit.git
 cd lazy-starter-kit
-./install.sh --dry-run     # see exactly what it would do
-./install.sh               # apply
+./install.sh --dry-run
 ```
 
-### A second Mac, or a fresh reinstall
+Windows:
 
-Once you own more than one machine, the thing that matters is not installing fast
-once — it's being able to rebuild the same environment again.
-
-1. `./install.sh --dry-run` — see what this particular machine is missing.
-2. `./install.sh` — build the base environment.
-3. `./install.sh --doctor` later — see what drifted, then re-run to fill only the gaps.
-
-Anything already present is skipped, so re-running is always safe. Instead of
-remembering what you put on the old machine, you run the same command again.
-
-## Why this kit
-
-- 🧪 **Really installed on 6 environments, every commit** — CI runs the full
-  install → verify → uninstall on macOS, Windows, Ubuntu, Fedora, Arch and
-  openSUSE, plus a second back-to-back install (idempotency) and a
-  previous-release → main **upgrade path**. "Does it work on my machine?" is
-  answered by tests, not docs.
-- 🛟 **Layered safety for config and cleanup** — one-time `.bak` backups,
-  marker-block-only edits, fail-closed recursive-delete boundaries, and Codex /
-  Claude Code hooks that block recursive `rm` before execution.
-- 🏢 **Corporate machines are first-class** — survives without sudo/admin
-  (user-space tools still install), Docker Desktop stays opt-in (licensing),
-  profile encoding preserved, and a `--profile work` preset.
-- 🔁 **Not fire-and-forget** — `--doctor` diagnoses ok / missing / off-PATH per
-  tool, `--update` pulls the latest kit and re-runs, and re-running is always
-  safe.
-- 🔍 **Supply-chain transparency** — pinned/verified external installers,
-  [SECURITY.md](./SECURITY.md), SHA-pinned GitHub Actions.
-
-> If this kit saved you a setup day, **a ⭐ star** helps a lot!
-
-<img src="./assets/readme/hero.svg" alt="CI runs install, verify and uninstall on six platforms (macOS, Windows, Ubuntu, Fedora, Arch, openSUSE) on every commit." width="100%" />
-
-### Support tiers
-
-| Tier | Platforms | Promise |
-|---|---|---|
-| **Tier 1** | macOS 14+ (Apple Silicon) · Windows 11/Server 2025 · Ubuntu 24.04 · Fedora · Arch · openSUSE Tumbleweed | Real install → verify → uninstall in CI **on every commit** (+ idempotency & upgrade-path tests) |
-| **Tier 2** | Windows 10 1809+ · Debian 12+ · RHEL 9/Rocky · openSUSE Leap · WSL2 · Intel Macs | Same code paths, expected to work — reported regressions fixed with priority |
-| Unsupported | Alpine (musl) · 32-bit | Upstream tools ship no builds |
-
-What semver protects (flags, step ids, markers, env vars): [VERSIONING.md](./VERSIONING.md).
-
-
-## Running a class or study group
-
-In a hands-on class the first thing that breaks is not prompting, it's setup: one
-person has a different Node version, one has no Git, one is opening a terminal for
-the first time. This is what cuts that time down.
-
-**Tell students before the session**
-
-1. Send them to the one page that matches their machine — macOS (this page) ·
-   [Linux](./linux/README.md) · [Windows](./windows/README.md).
-2. Have them run `--dry-run` (`-DryRun` on Windows) first. Seeing the plan removes
-   most of the anxiety about "what is this script doing to my laptop".
-3. Budget **5–20 minutes**. Do it before the session, not during it.
-4. Ask for a screenshot of `--doctor` afterwards. It shows per tool what is missing
-   (✗) and what is installed but off PATH (!) — you can triage before anyone arrives.
-
-**What actually comes up on the day**
-
-| Situation | What to say |
-| --- | --- |
-| "The install stopped halfway." | Run it again. Everything already done is skipped. |
-| "Command not found." | Close the terminal completely and open a new one. |
-| "It's a work laptop, I have no admin rights." | Windows installs per-user and lists admin-only items at the end; `-Profile work` keeps it light. Linux without sudo skips system packages only. |
-| "One specific tool is missing." | Re-run that step alone: `--only <step>` (`-Only <step>` on Windows). |
-| "Can I undo this afterwards?" | Yes — [Uninstall](#uninstall). Say so up front; it lowers resistance. |
-
-> You will not make every laptop identical. You can get every student to the point
-> where `claude` or `codex` starts from the same line.
-
-## Linux & Windows
-
-This repo ships parallel kits for the other two platforms — same 7-step,
-idempotent, `--dry-run`-first philosophy, adapted to each OS's native tooling:
-
-| Platform | Package base | One-liner |
-|---|---|---|
-| **Linux** ([`linux/`](./linux/README.md)) | apt · dnf/yum · pacman · zypper (glibc) + official tool installers | `curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh \| bash` |
-| **Windows** ([`windows/`](./windows/README.md)) | winget + mise/rustup | `irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 \| iex` |
-
-Each is self-contained under its directory (`install`, `uninstall`, `scripts/`,
-`config/`) so you can clone and run just the one you need. The macOS kit below
-stays at the repo root.
-
-## What you get
-
-| Layer | Tools |
-|---|---|
-| **Base** | Xcode Command Line Tools, Homebrew |
-| **CLI** | git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide |
-| **Shell** | zsh + oh-my-zsh (plugins: git, npm, node, macos, autosuggestions, syntax-highlighting), **starship** prompt, JetBrainsMono Nerd Font |
-| **Runtimes** | **mise** → node (LTS), python, go · **rustup** → rust + rust-analyzer · uv · bun |
-| **Containers** | **Colima** + docker / compose / buildx (Docker Desktop not required) |
-| **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`) |
-
-## Steps & flags
-
-Steps run in this order:
-
-```
-prereqs  brew  runtimes  shell  docker  git  agents
-```
-
-```sh
-./install.sh --dry-run          # change nothing, just print
-./install.sh --yes              # non-interactive, accept defaults
-./install.sh --only brew,shell  # run a subset
-./install.sh --skip agents      # run all but one
-./install.sh --no-agents        # alias for --skip agents
-./install.sh --list             # print step ids
-./install.sh --doctor           # health report: ok / missing / off-PATH per tool
-./install.sh --update           # pull the latest kit, then re-run
-./install.sh --profile work     # presets: full · minimal · work (corporate PCs)
-```
-
-Every step is **idempotent** — safe to re-run. `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, and
-`~/.docker/config.json` are edited via clearly marked managed blocks that
-get replaced (never duplicated) on re-runs. Existing files you own are preserved.
-
-## Running on a Mac that already has tools
-
-The kit is built for a **fresh machine**, but it's safe to run on a partially
-set-up one — it never overwrites your config. Specifics:
-
-- **Non-destructive by default**: Homebrew/oh-my-zsh/`gjc`/`codex` are skipped if
-  already present; your **git identity** is only set when empty (never clobbered);
-  `brew bundle` skips formulae you already have.
-- **Runtimes are the exception to watch.** node/python/go are installed via **mise**.
-  If you already have node from another source (system `.pkg`, `nvm`, `brew`, …),
-  mise installs **its own** and **shadows yours via PATH** — it does *not* remove or
-  migrate the old one. You'll end up with both; mise's wins in new shells. The
-  `runtimes` step now prints a warning when it detects a non-mise runtime. Verify
-  with `which -a node`.
-- **Hand-edited `${ZDOTDIR-$HOME}/.zshrc`?** The kit appends its own marked block, so lines you
-  added by hand (e.g. your own `mise activate` / `starship init`) will run *in
-  addition* to the kit's — harmless but redundant. Move your lines into the managed
-  block, or remove the duplicates.
-- **Docker Desktop already installed?** Colima coexists but shares the `docker` CLI
-  and contexts; pick one to avoid confusion (`docker context use`).
-
-## Permissions
-
-The scripts **never call `sudo` themselves.** Elevated access is needed in exactly
-two places, and only on a truly fresh machine:
-
-- **Homebrew install** — the official installer prompts for your Mac password once
-  (`prereqs` step, only when brew is missing).
-- **Xcode Command Line Tools** — a GUI dialog you click "Install" on (only when missing).
-
-Everything else runs in **user space, no sudo**: mise → `~/.local`, rustup →
-`~/.rustup`, bun → `~/.bun`, Homebrew packages (after setup), and all dotfiles in
-`~`. Installing a cask like Orca into `/Applications` may prompt for your password,
-and first-launch Gatekeeper/permission prompts are normal (on use, not install).
-`gh auth login` is your GitHub account sign-in, not a system permission. Uninstall is
-also fully user-space (Homebrew itself is never removed).
-
-- **Installs come from a verified release**: the one-liner resolves the **newest release tag**, not `main` — a commit that just landed never reaches new users straight away. The run prints which ref it picked (`==> Using v0.9.0`), and `STARTER_KIT_BRANCH` pins any tag you want.
-- **A truncated download never executes**: the classic `curl | bash` hazard is a dropped connection leaving half a script to run. Here the piped part is only the short bootstrap that clones and hands off; the real install runs from files fetched whole. External installers (Claude Code, oh-my-zsh, Docker, Hermes) are downloaded and checked before they are executed, never piped straight into bash.
-- **Supply-chain honesty**: this kit downloads and runs the **official install scripts** from upstream projects (Homebrew, oh-my-zsh, Docker, Hermes, …) over **HTTPS**, and installs npm/bun packages at their **latest versions** — so you're trusting those upstreams. See [SECURITY.md](./SECURITY.md) for scope and reporting.
-
-## Customize
-
-- **Brew packages** — edit [`Brewfile`](./Brewfile), then `./install.sh --only brew`.
-- **Runtime versions** — edit `MISE_TOOLS` in [`scripts/03-runtimes.sh`](./scripts/03-runtimes.sh).
-- **Prompt** — [`config/starship.toml`](./config/starship.toml) (copied to `~/.config/` only if absent).
-- **Shell block** — [`config/zshrc.block.sh`](./config/zshrc.block.sh).
-
-## Optional productivity apps & CLI pack
-
-The default kit stays focused on **developer tools**. If you also want a more
-comfortable daily macOS setup, install this small, curated set of free/open-source
-apps — it's intentionally minimal, not a "recommended apps" dump:
-
-```sh
-brew bundle --file Brewfile.optional
-# or directly:
-brew install --cask rectangle maccy
-# modern-CLI pack (the kit's zsh block auto-detects these — no config needed):
-brew install eza atuin git-delta lazygit
-```
-
-- **[Rectangle](https://github.com/rxhanson/Rectangle)** — window snapping, a free/open-source Magnet alternative.
-- **[Maccy](https://github.com/p0deje/Maccy)** — clipboard history manager, free/open-source.
-- **[Mole](https://github.com/tw93/Mole)** — Mac clean/uninstall/analyze/optimize/monitor (`mo`).
-- **Modern-CLI pack** — [eza](https://github.com/eza-community/eza) (ls with git status; `ls`/`ll`/`lt` aliases activate automatically), [atuin](https://github.com/atuinsh/atuin) (searchable history, takes over Ctrl-R), [git-delta](https://github.com/dandavison/delta) (pretty diffs; enable with `git config --global core.pager delta`), [lazygit](https://github.com/jesseduffield/lazygit) (git TUI).
-
-> **Base vs. optional:** the default install is the frozen, lean dev base; new
-> non-core tools go into `Brewfile.optional`. See [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## After install
-
-1. **Open a new terminal**, or from an existing Zsh session `source` the quoted `.zshrc` path printed by the installer.
-2. **GitHub**: if `gh auth login` was skipped, run it once.
-3. **Colima**: starts on demand — `colima start` (or `brew services start colima` to auto-start at login). It does **not** survive a reboot unless you enable the service.
-4. **lazycodex**: launch `codex` once and **approve the OmO hooks** in the startup review; hooks never run before approval.
-
-### First prompt in 5 minutes
-
-Installed tools are the start, not the finish — your first AI-built artifact is. In a new terminal:
-
-```sh
-mkdir my-first-ai
-cd my-first-ai
-claude    # first run asks you to sign in with your claude.ai account
-```
-
-Then paste this prompt:
-
-> Build a single-file breakout game (index.html) in this folder that I can open directly in a browser. When you're done, tell me how to open it.
-
-A few minutes later, double-click `index.html` — that's your first AI-built result.
-Prefer Codex? Run `codex` and sign in with your ChatGPT account.
-Want Grok or Antigravity? After the kit, run one line from [Manual install](#manual-install-grok--antigravity).
-For concepts, next projects, and tool extensions, see **[cmore.dev](https://cmore.dev/)**.
-
-## Notes on the AI agents
-
-- The `agents` step installs a `PreToolUse` guard for Codex and Claude Code. It
-  blocks recursive `rm` (including direct `/bin/rm` and nested shell forms) and
-  installs `lazy-safe-rm`, which only removes strict non-symlink descendants of
-  the current Git workspace. Approve the hook when Codex first asks you to review it.
-  Hooks are defense in depth, not an unbypassable security boundary; keep Codex's
-  `workspace-write` sandbox enabled as the final containment layer.
-- **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) installs via the official native installer (`claude.ai/install.sh`) into `~/.local/bin` and keeps itself updated.
-- **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) installs globally via **bun** (`bun add -g gajae-code`); its bin lives in `~/.bun/bin` (added to PATH by the shell block).
-- **[codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`@openai/codex`) installs globally via npm (mise-managed node).
-- **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** is intentionally **never** installed globally — it always runs through `npx lazycodex-ai …` and layers the OmO harness onto codex.
-- **[Hermes Agent](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (`hermes`, Nous Research) is **opt-in only** — never installed by default: `HERMES=1 ./install.sh` runs the official one-liner (`curl …hermes-agent.nousresearch.com/install.sh | bash`) with `--skip-setup`. It self-manages Python/Node/Chromium and links `hermes` into `~/.local/bin`. The install is **non-fatal** (a failure only warns). After install, run `hermes setup --portal`, then `hermes`.
-- **[Grok Build](https://x.ai/cli)** (`grok`) is **not** installed by the kit — it has its own subscription flow, so it is a manual one-liner (see below).
-- **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`, Google) is **not** installed by the kit — it has its own account flow and a small free tier, so it is a manual one-liner (see below). Gemini CLI's closed-source successor; uninstall still removes the binary if you installed it yourself.
-
-### Manual install: Grok · Antigravity
-
-> Neither is part of the `install.sh` / `install.ps1` agents step — each has its
-> own account and subscription flow, so only the people who want them run a line.
-> Teardown is handled either way: the kit's uninstall scripts remove both even
-> when you installed them yourself.
-
-#### Grok Build (xAI)
-
-**macOS / Linux**
-```sh
-curl -fsSL https://x.ai/cli/install.sh | bash
-```
-
-**Windows (PowerShell)**
 ```powershell
-irm https://x.ai/cli/install.ps1 | iex
+git clone https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit\windows
+.\install.ps1 -DryRun
 ```
 
-Verify → launch → sign in:
+---
 
-```sh
-grok --version   # verify install
-grok             # first run opens the browser for grok.com login
+## Common options
+
+macOS/Linux:
+
+```bash
+./install.sh --dry-run
+./install.sh --doctor
+./install.sh --update
+./install.sh --only agents
+./install.sh --skip docker
+./install.sh --profile minimal
+./install.sh --profile work
 ```
 
-- **Subscription**: SuperGrok or X Premium Plus ([details](https://x.ai/cli)).
-- **API key auth** (CI / no browser): `export XAI_API_KEY="xai-..."` then `grok`.
-- **Update**: `grok update`
-- Binary usually lands in `~/.grok/bin` (Windows: `%USERPROFILE%\.grok\bin`). If `grok` is not found, open a new terminal or add that path to your PATH.
+Windows uses PowerShell-style flags such as `-DryRun` and `-Only` instead of
+`--dry-run` and `--only`.
 
-#### Antigravity CLI (Google)
+Install steps are designed to be idempotent: re-running the installer should not
+duplicate its managed configuration blocks.
 
-**macOS / Linux**
-```sh
-curl -fsSL https://antigravity.google/cli/install.sh | bash
+---
+
+## Verify after install
+
+```bash
+./install.sh --doctor
 ```
 
-**Windows (PowerShell)**
+`--doctor` reports whether each tool is:
+
+- installed and available
+- installed but not on PATH
+- missing
+
+You can re-run only the affected step when needed.
+
+```bash
+./install.sh --only runtimes
+./install.sh --only agents
+```
+
+---
+
+## Automatic uninstall is not supported
+
+**lazy-starter-kit does not provide automatic uninstall functionality.**
+
+Older versions included uninstall scripts, but that behavior has been retired.
+After installation, the kit cannot reliably determine which tools it installed
+itself and which tools already belonged to the user.
+
+For example, if Codex, Claude Code, Homebrew packages, mise, or oh-my-zsh were
+already present before running the kit, deleting software solely by package name
+or path could remove an existing development environment, configuration, auth
+state, or user data.
+
+The current policy is therefore:
+
+- The kit does not automatically remove packages or developer tools.
+- Legacy entrypoints `uninstall.sh`, `linux/uninstall.sh`, and
+  `windows/uninstall.ps1` perform no deletion and stop immediately.
+- To remove a specific tool, use that tool's official uninstall instructions.
+- For `.zshrc`, `.zprofile`, or PowerShell profiles, inspect and manually remove
+  the blocks marked `lazy-starter-kit` if you no longer want them.
+
+Automatic removal will not be reintroduced until the installer can reliably
+record and enforce ownership of everything it creates.
+
+---
+
+## Safety design
+
+- **Dry run**: preview planned changes before applying them.
+- **Existing config protection**: managed blocks are used instead of replacing entire user config files.
+- **Fail closed on damaged markers**: malformed managed-block markers cause config edits to be refused.
+- **Config backup**: a `.bak` backup is created before the first managed edit of a file.
+- **Recursive-delete boundaries**: internal cleanup rejects HOME, filesystem root, paths outside the allowed boundary, and symlink traversal.
+- **AI shell guard**: an additional defense layer blocks recursive `rm` calls from Codex and Claude Code hooks.
+- **Release-based install**: after bootstrap, installation code resolves against the newest release tag by default.
+- **CI**: install and health verification run on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE.
+
+This project still relies on external supply chains including Homebrew,
+npm/bun packages, and official installers maintained by upstream projects. See
+[SECURITY.md](SECURITY.md) for the security scope and reporting policy.
+
+---
+
+## If Node or Python is already installed
+
+Existing runtimes are not removed. Node, Python, and Go can be installed through
+mise as separate versions and configured to take precedence in new shells.
+
+macOS/Linux:
+
+```bash
+which -a node
+which -a python
+```
+
+Windows:
+
 ```powershell
-irm https://antigravity.google/cli/install.ps1 | iex
+Get-Command node -All
+Get-Command python -All
 ```
 
-Verify → launch:
+---
 
-```sh
-agy --version    # verify install
-agy              # first run signs you in with a Google account
+## Corporate machines
+
+Use the work profile for a lighter setup.
+
+```bash
+./install.sh --profile work
 ```
 
-- **The free tier is small** — heavy use needs a paid plan.
-- Gemini CLI's **closed-source** successor.
-- Binary lands in `~/.local/bin/agy` (Windows: `%LOCALAPPDATA%\agy\bin`).
+Windows:
 
-## Extend your agents (tool ecosystem)
-
-The kit installs the **agents**; their real power comes from the **skills, MCP servers, and plugins** you attach to them. Picking those is its own rabbit hole, so we curated them.
-
-> **→ [cmore.dev tool ecosystem](https://cmore.dev/lazy-starter-kit/ecosystem/)**
-> Tools organized by field (documents, government/law, games, design, coding agents, and more) — most open source, a few free official tools — each with a hands-on **editor review and an honest limitation**, and an install command ready to copy.
-
-## Uninstall
-
-Reverse everything the kit set up, in reverse dependency order:
-
-```sh
-./uninstall.sh --dry-run     # preview the teardown
-./uninstall.sh               # run it (destructive groups are confirm-gated)
-./uninstall.sh --yes         # non-interactive, accept every removal
-./uninstall.sh --only agents # remove just one group
+```powershell
+.\install.ps1 -Profile work
 ```
 
-Groups: `agents shell docker runtimes brew` (run in reverse).
+Items that cannot be installed because of missing admin rights or company policy
+are skipped or reported. On systems restricted by AppLocker, MDM, proxies, or
+other organizational controls, follow your organization's IT policy.
 
-Every recursive directory removal is validated as a strict physical descendant
-of its explicit allowed root before deletion starts. Root/HOME, boundary-equal,
-outside, dot-segment, and symlink/reparse-point targets abort the operation even
-under `--yes` or dry-run.
+---
 
-Safe by design:
-- **Never auto-removed**: Homebrew, Xcode Command Line Tools, and your **git identity**.
-- **gajae-code (`gjc`) is kept** unless you pass `--with-gajae` (refused while `gjc` is running).
-- Removing codex backs up `~/.codex/auth.json` to `~/` first; pass `--keep-codex-home` to leave `~/.codex` intact.
-- Removing Hermes deletes its `~/.local/bin/hermes` shim and (after confirming) `~/.hermes`.
-- Only the kit's own managed blocks (`# >>> lazy-starter-kit:* >>>`) are stripped from your dotfiles — hand-written lines are untouched.
+## Development / contributing
 
-## Versioning
+- Design: [DESIGN.md](DESIGN.md)
+- Versioning policy: [VERSIONING.md](VERSIONING.md)
+- Security policy: [SECURITY.md](SECURITY.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
 
-Released versions are tagged (`vX.Y.Z`) and follow [SemVer](https://semver.org/);
-see [CHANGELOG.md](./CHANGELOG.md). Check your copy with `./install.sh --version`.
-
-The one-liner installs the newest release tag. Pin a specific one — or ride `main` — with:
-
-```sh
-STARTER_KIT_BRANCH=v0.9.0 \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
-STARTER_KIT_BRANCH=main \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
+```bash
+./install.sh --dry-run
+./install.sh --doctor
 ```
 
-## Credits
+CI checks shell syntax, shellcheck/PSScriptAnalyzer, installation, idempotency,
+doctor behavior, upgrade paths, and key safety regressions.
 
-This kit just wires together other people's great open-source work. All credit to
-the upstream projects — please star/support them:
-
-**Base & CLI**
-- [Homebrew](https://brew.sh) · [git](https://git-scm.com) · [GitHub CLI](https://github.com/cli/cli)
-- [ripgrep](https://github.com/BurntSushi/ripgrep) · [fd](https://github.com/sharkdp/fd) · [fzf](https://github.com/junegunn/fzf) · [bat](https://github.com/sharkdp/bat)
-- [jq](https://github.com/jqlang/jq) · [tree](https://gitlab.com/OldManProgrammer/unix-tree) · [ast-grep](https://github.com/ast-grep/ast-grep) · [zoxide](https://github.com/ajeetdsouza/zoxide)
-
-**Runtimes**
-- [mise](https://github.com/jdx/mise) · [uv](https://github.com/astral-sh/uv) · [rustup](https://github.com/rust-lang/rustup) · [bun](https://github.com/oven-sh/bun)
-- [Node.js](https://nodejs.org) · [Python](https://www.python.org) · [Go](https://go.dev) · [Rust](https://www.rust-lang.org) · [rust-analyzer](https://github.com/rust-lang/rust-analyzer)
-
-**Shell**
-- [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) · [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) · [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
-- [Starship](https://github.com/starship/starship) · [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts) ([JetBrains Mono](https://github.com/JetBrains/JetBrainsMono))
-
-**Containers & terminal**
-- [Colima](https://github.com/abiosoft/colima) · [Docker CLI](https://github.com/docker/cli) · [Compose](https://github.com/docker/compose) · [Buildx](https://github.com/docker/buildx)
-- [Orca](https://github.com/stablyai/orca) (MIT ADE for parallel coding agents; previously [cmux](https://www.cmux.dev/))
-
-**AI agents**
-- [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent) · [Antigravity CLI](https://antigravity.google/docs/cli-install) · [Grok Build](https://x.ai/cli)
+---
 
 ## License
 
-MIT — see [LICENSE](./LICENSE).
+MIT — [LICENSE](LICENSE)
