@@ -32,7 +32,16 @@ jobs:
           set -euo pipefail
           echo "Waiting for ci.yml on $GITHUB_SHA"
           for attempt in $(seq 1 60); do
-            row="$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ci.yml --commit "$GITHUB_SHA" --event push --limit 20 --json databaseId,status,conclusion,createdAt --jq 'sort_by(.createdAt) | reverse | .[0] | if . == null then "" else "\(.databaseId)|\(.status)|\(.conclusion // \"\")" end')"
+            row="$(
+              gh run list \
+                --repo "$GITHUB_REPOSITORY" \
+                --workflow ci.yml \
+                --commit "$GITHUB_SHA" \
+                --event push \
+                --limit 20 \
+                --json databaseId,status,conclusion,createdAt \
+                --jq 'sort_by(.createdAt) | reverse | .[0] | if . == null then "" else [.databaseId, .status, (.conclusion // "")] | map(tostring) | join("|") end'
+            )"
             if [[ -z "$row" ]]; then
               echo "CI run not visible yet (attempt $attempt/60)"
               sleep 10
