@@ -24,11 +24,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck zsh
       - name: bash syntax (3.2-safe parse)
         run: |
-          for f in install.sh uninstall.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm config/zshrc.block.sh tests/*.sh; do
+          for f in install.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm config/zshrc.block.sh tests/*.sh; do
             bash -n "$f"
           done
       - name: shellcheck
-        run: shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm tests/*.sh
+        run: shellcheck -x -S warning -e SC2154 install.sh lib/common.sh scripts/*.sh scripts/ai/lazy-safe-rm tests/*.sh
       - name: node syntax
         run: node --check scripts/ai/shell-command-guard.js && node --check scripts/ai/install-shell-guard.js
       - name: existing Homebrew state regression
@@ -51,14 +51,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: bash syntax
         run: |
-          for f in linux/install.sh linux/uninstall.sh linux/scripts/*.sh linux/config/zshrc.block.sh; do
+          for f in linux/install.sh linux/scripts/*.sh linux/config/zshrc.block.sh; do
             bash -n "$f"
           done
       - name: shellcheck
-        run: shellcheck -x -S warning -e SC2154 linux/install.sh linux/uninstall.sh linux/scripts/*.sh
+        run: shellcheck -x -S warning -e SC2154 linux/install.sh linux/scripts/*.sh
 
   linux-e2e:
-    name: linux install -> uninstall (ubuntu)
+    name: linux install + verify (ubuntu)
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -66,9 +66,6 @@ jobs:
 
       - name: install (non-interactive; skip Docker)
         env:
-          # mise resolves versions via api.github.com; anonymous requests share
-          # the runner IP's 60/hr limit and flake — authenticate with the job
-          # token (5000/hr) instead.
           GITHUB_TOKEN: ${{ github.token }}
         run: ./linux/install.sh --yes --skip docker
 
@@ -102,23 +99,8 @@ jobs:
       - name: doctor exits 0 on a healthy install (exit code is a contract)
         run: ./linux/install.sh --doctor
 
-      - name: uninstall (teardown)
-        run: ./linux/uninstall.sh --yes --with-gajae --skip docker
-
-      - name: verify removed
-        run: |
-          if grep -q 'lazy-starter-kit' "$HOME/.zshrc" 2>/dev/null; then
-            echo "STILL zshrc block"; exit 1
-          fi
-          echo "ok   zshrc block removed"
-          export PATH="$HOME/.local/bin:$PATH"
-          if command -v claude >/dev/null 2>&1; then echo "STILL claude"; exit 1; fi
-          echo "ok   claude removed"
-
   linux-e2e-distros:
-    # The README claims Fedora/Arch/openSUSE are verified end-to-end; this job
-    # makes CI actually cover them (Ubuntu is covered by linux-e2e above).
-    name: linux install -> uninstall (${{ matrix.image }})
+    name: linux install + verify (${{ matrix.image }})
     runs-on: ubuntu-latest
     container: ${{ matrix.image }}
     timeout-minutes: 50
@@ -130,10 +112,6 @@ jobs:
           - archlinux:latest
           - opensuse/tumbleweed
     steps:
-      # These minimal base images ship bash/curl/tar/gzip but NOT git. Install
-      # git so actions/checkout uses git (its REST-tarball fallback would also
-      # work via tar+gzip, but git is more robust). Containers run as root and
-      # have no sudo — the kit's SUDO="" root path handles that fine.
       - name: bootstrap container (git for checkout)
         shell: bash
         run: |
@@ -141,33 +119,17 @@ jobs:
           if command -v dnf >/dev/null 2>&1; then
             dnf install -y git tar gzip
           elif command -v pacman >/dev/null 2>&1; then
-            # Arch: a bare 'pacman -Sy' is a partial-upgrade hazard, so do a full
-            # -Syu (the installer runs the same upgrade anyway under --yes).
             pacman -Syu --noconfirm git tar
           elif command -v zypper >/dev/null 2>&1; then
-            # Tumbleweed is rolling: the container snapshot regularly drifts
-            # behind the mirrors, and mid-publish mirror syncs then 404 on the
-            # exact RPM versions the stale metadata references. `dup` aligns
-            # the container with the current snapshot first (a few minutes,
-            # but it removes the dominant flake in this job).
             zypper --non-interactive dup || zypper --non-interactive refresh
             zypper --non-interactive install git tar gzip
           fi
-          # opensuse/tumbleweed's image config defines NO PATH env. Once a later
-          # installer (bun/uv/rustup in the kit's install step) prepends to
-          # GITHUB_PATH, the runner rebuilds the step PATH from that empty base
-          # and `docker exec` can no longer even find `sh` (exit 127). Seed the
-          # system dirs via GITHUB_PATH (the runner ignores PATH set through
-          # GITHUB_ENV) so every later rebuild keeps them.
           echo "$PATH" | tr ':' '\n' >> "$GITHUB_PATH"
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: install (non-interactive; skip Docker)
         env:
-          # mise resolves versions via api.github.com; anonymous requests share
-          # the runner IP's 60/hr limit and flake — authenticate with the job
-          # token (5000/hr) instead.
           GITHUB_TOKEN: ${{ github.token }}
         run: ./linux/install.sh --yes --skip docker
 
@@ -189,23 +151,7 @@ jobs:
       - name: doctor exits 0 on a healthy install (exit code is a contract)
         run: ./linux/install.sh --doctor
 
-      - name: uninstall (teardown)
-        run: ./linux/uninstall.sh --yes --with-gajae --skip docker
-
-      - name: verify removed
-        run: |
-          if grep -q 'lazy-starter-kit' "$HOME/.zshrc" 2>/dev/null; then
-            echo "STILL zshrc block"; exit 1
-          fi
-          echo "ok   zshrc block removed"
-          export PATH="$HOME/.local/bin:$PATH"
-          if command -v claude >/dev/null 2>&1; then echo "STILL claude"; exit 1; fi
-          echo "ok   claude removed"
-
   linux-upgrade-path:
-    # Install from the newest release tag, then re-run the CURRENT kit on top —
-    # proves migrations and managed-block replacement survive real upgrades,
-    # not just fresh installs.
     name: linux upgrade path (latest tag -> main)
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -216,7 +162,7 @@ jobs:
 
       - name: install from the newest release tag
         env:
-          HERMES: "0"  # the released tag still defaults Hermes on; keep CI lean
+          HERMES: "0"
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           tag=$(git tag --sort=-v:refname | head -1)
@@ -282,13 +228,10 @@ jobs:
         run: tests/install-entrypoints.sh
       - name: release signing contract
         run: tests/release-signing.sh
-      # HERMES=1 keeps the opt-in Hermes wiring in the preview logs (dry-run
-      # only prints; nothing is executed).
       - run: HERMES=1 ./install.sh --dry-run
-      - run: ./uninstall.sh --dry-run --yes
 
   integration:
-    name: macOS install -> uninstall
+    name: macOS install + verify
     runs-on: macos-14
     timeout-minutes: 45
     steps:
@@ -298,9 +241,8 @@ jobs:
         run: tests/zdotdir-existing-home.sh
 
       - name: install (non-interactive)
-        # plain run: non-tty so Colima start is auto-declined; everything else runs.
         env:
-          GITHUB_TOKEN: ${{ github.token }}  # authenticated mise version lookups
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./install.sh
 
       - name: verify installed
@@ -315,7 +257,7 @@ jobs:
           echo "python: $(python --version)"
           echo "go:     $(go version)"
           echo "codex:  $(codex --version 2>/dev/null | head -1 || echo '?')"
-          test -d "$HOME/.oh-my-zsh"            || { echo "MISS oh-my-zsh"; fail=1; }
+          test -d "$HOME/.oh-my-zsh" || { echo "MISS oh-my-zsh"; fail=1; }
           grep -q 'lazy-starter-kit:main' "$HOME/.zshrc" || { echo "MISS zshrc block"; fail=1; }
           test -d "$HOME/.codex/plugins/cache/sisyphuslabs/omo" && echo "ok   lazycodex/omo" || echo "warn lazycodex/omo not found"
           exit $fail
@@ -336,24 +278,8 @@ jobs:
       - name: doctor exits 0 on a healthy install (exit code is a contract)
         run: ./install.sh --doctor
 
-      - name: uninstall (full teardown)
-        run: ./uninstall.sh --yes --with-gajae
-
-      - name: verify removed
-        run: |
-          set -euo pipefail
-          eval "$(/opt/homebrew/bin/brew shellenv)" || true
-          export PATH="$HOME/.local/share/mise/shims:$HOME/.bun/bin:$HOME/.local/bin:$PATH"
-          fail=0
-          gone() { command -v "$1" >/dev/null 2>&1 && { echo "STILL $1"; fail=1; } || echo "gone $1"; }
-          for t in gjc codex claude starship mise; do gone "$t"; done
-          test -d "$HOME/.oh-my-zsh" && { echo "STILL oh-my-zsh"; fail=1; } || echo "gone oh-my-zsh"
-          if grep -q 'lazy-starter-kit' "$HOME/.zshrc" 2>/dev/null; then echo "STILL zshrc block"; fail=1; else echo "gone zshrc block"; fi
-          test -x /opt/homebrew/bin/brew && echo "ok   Homebrew preserved" || { echo "Homebrew missing!"; fail=1; }
-          exit $fail
-
   windows-e2e:
-    name: windows install -> uninstall
+    name: windows install + verify
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
@@ -378,7 +304,7 @@ jobs:
       - name: install (non-interactive; skip Docker Desktop; Hermes n/a on Windows)
         shell: pwsh
         env:
-          GITHUB_TOKEN: ${{ github.token }}  # authenticated mise version lookups
+          GITHUB_TOKEN: ${{ github.token }}
         run: .\windows\install.ps1 -Yes -Skip docker
 
       - name: verify installed
@@ -410,26 +336,7 @@ jobs:
           } else { Write-Host "MISS profile block"; $fail = 1 }
           exit $fail
 
-      - name: uninstall (teardown)
-        shell: pwsh
-        run: .\windows\uninstall.ps1 -Yes -WithGajae
-
-      - name: verify removed
-        shell: pwsh
-        run: |
-          $prof = $PROFILE.CurrentUserAllHosts
-          if ((Test-Path $prof) -and (Select-String -Path $prof -SimpleMatch 'lazy-starter-kit' -Quiet)) {
-            Write-Host "STILL profile block"; exit 1
-          }
-          Write-Host "ok   profile block removed"
-          if (Test-Path "$env:USERPROFILE\.local\bin\claude.exe") {
-            Write-Host "STILL claude"; exit 1
-          }
-          Write-Host "ok   claude removed"
-
   cron-failure-alert:
-    # The weekly scheduled run exists to catch upstream drift (bit-rot); a
-    # silent failure defeats the point. Open — or bump — a tracking issue.
     name: alert on scheduled-run failure
     runs-on: ubuntu-latest
     needs: [lint, lint-linux, linux-e2e, linux-e2e-distros, linux-upgrade-path, lint-windows, dryrun, integration, windows-e2e]

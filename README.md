@@ -10,567 +10,232 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 [![Release](https://img.shields.io/github/v/tag/Heoooooon/lazy-starter-kit?label=release&sort=semver&color=2ea043)](https://github.com/Heoooooon/lazy-starter-kit/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
-[![Stars](https://img.shields.io/github/stars/Heoooooon/lazy-starter-kit?style=flat&color=f0c000)](https://github.com/Heoooooon/lazy-starter-kit/stargazers)
 
-**한국어** · [English](./README.en.md) · [설치 흐름 보기 ↗](https://heoooooon.github.io/lazy-starter-kit/) · [변경 이력](./CHANGELOG.md)
-
-<img src="./docs/demo.gif" alt="lazy-starter-kit 데모 — ./install.sh --dry-run" width="760" />
+**한국어** · [English](./README.en.md) · [변경 이력](./CHANGELOG.md)
 
 </div>
 
 ---
 
-## 목차
+## 이게 뭔가요?
 
-<details>
-<summary>펼쳐서 원하는 곳으로 바로 가기</summary>
+새 노트북이나 PC에서 개발을 시작하려면 Git, 런타임, 터미널 도구, Docker,
+AI 코딩 에이전트 등을 하나씩 설치해야 합니다.
 
-- [어떤 상황에서 필요하신가요?](#어떤-상황에서-필요하신가요)
-- [이게 뭔가요? (1분 설명)](#이게-뭔가요-1분-설명)
-- [다른 셋업 스크립트와 뭐가 다른가요?](#다른-셋업-스크립트와-뭐가-다른가요)
-- [먼저, 내 컴퓨터부터 고르세요](#먼저-내-컴퓨터부터-고르세요) — [Windows](#-windows-설치-제일-자세히) · [macOS](#-macos-설치) · [Linux](#-linux-설치)
-- [수업 전 설치 안내 (강사용)](#수업-전-설치-안내-강사용)
-- [설치가 끝난 뒤에도](#설치가-끝난-뒤에도)
-- [첫 프롬프트까지 5분](#첫-프롬프트까지-5분)
-- [무엇이 깔리나](#무엇이-깔리나)
-- [AI 코딩, 여기서 더 확장하세요 (도구 생태계)](#ai-코딩-여기서-더-확장하세요-도구-생태계) — [Grok · Antigravity 수동 설치](#수동-설치-grok--antigravity)
-- [설치해도 안전한가요?](#설치해도-안전한가요)
-- [지우고 싶어요 (제거)](#지우고-싶어요-제거)
-- [자주 묻는 질문 (FAQ)](#자주-묻는-질문-faq)
-- [고급 / 커스터마이즈](#고급--커스터마이즈)
+lazy-starter-kit은 이 과정을 한 번에 구성하고, 설치가 끝난 뒤 제대로
+동작하는지 확인할 수 있게 만든 개발 환경 부트스트랩입니다.
 
-</details>
+설치되는 주요 항목:
 
----
+- CLI: git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide
+- 런타임: Node.js, Python, Go, Rust
+- 셸/프롬프트: zsh, oh-my-zsh, starship, Nerd Font
+- 컨테이너: macOS Colima, Linux Docker Engine, Windows Docker Desktop(선택)
+- AI 에이전트: Claude Code, gajae-code, Codex, lazycodex
 
-## 어떤 상황에서 필요하신가요?
-
-같은 설치인데, 막히는 지점은 사람마다 다릅니다.
-
-<table>
-<tr>
-<td width="33%"><img src="./docs/images/lsk-card-start.webp" alt="처음 시작하는 사람 — 뒤엉킨 케이블과 뜯지 않은 상자" width="100%"></td>
-<td width="33%"><img src="./docs/images/lsk-card-reproduce.webp" alt="새 장비를 세팅하는 사람 — 같은 화면을 띄운 여러 대의 컴퓨터" width="100%"></td>
-<td width="33%"><img src="./docs/images/lsk-card-teach.webp" alt="바이브코딩을 가르치는 사람 — 같은 줄에서 시작하는 노트북들" width="100%"></td>
-</tr>
-<tr>
-<td valign="top">
-
-**처음 바이브코딩을 시작하나요?**
-
-첫날부터 코딩이 아니라 설치만 하게 됩니다. Git이 없고, Node 버전이 다르고, 터미널에 오류가 뜨면 무엇부터 고쳐야 할지 알기 어렵습니다.
-
-→ 설치에서 멈추지 않고 **오늘 첫 프로젝트를 시작합니다.**
-
-[초보자 설치 가이드로 ↓](#먼저-내-컴퓨터부터-고르세요)
-
-</td>
-<td valign="top">
-
-**새 Mac mini를 서브 머신으로 세팅하나요?**
-
-새 장비를 켤 때마다 예전 컴퓨터에 뭘 깔았는지 기억을 더듬게 됩니다. 그러다 보면 장비마다 환경이 조금씩 달라집니다.
-
-→ 개발 환경을 기억하지 말고 **같은 과정으로 재현합니다.**
-
-[macOS 설치로 ↓](#-macos-설치)
-
-</td>
-<td valign="top">
-
-**바이브코딩을 가르치고 있나요?**
-
-수업의 첫 병목은 프롬프트가 아니라 수강생들의 기본 설치입니다. 누구는 Git이 없고, 누구는 터미널을 처음 열어봅니다.
-
-→ 설치를 가르치는 대신 **만드는 걸 가르칩니다.**
-
-[수업 전 설치 안내로 ↓](#수업-전-설치-안내-강사용)
-
-</td>
-</tr>
-</table>
+이미 있는 도구는 가능한 한 그대로 두고, 관리하는 설정 파일은 표시된
+블록만 수정합니다. 상태 확인은 `--doctor`, 실행 전 확인은 `--dry-run`을
+사용하세요.
 
 ---
 
-## 이게 뭔가요? (1분 설명)
+## 설치
 
-**도구를 많이 깔아주는 게 목적이 아닙니다.** 환경 차이와 설치 실수를 줄여서, 누구든 같은 출발선에서 바로 만들기 시작하게 하는 게 목적입니다. 아래 도구들은 그걸 위한 수단이에요.
-
-새 노트북/PC를 받으면 개발에 필요한 도구를 **하나하나 찾아 깔아야** 합니다. 이 키트는 그걸 **명령어 한 줄**로 대신 해줍니다. 붙여넣고 Enter만 누르면:
-
-- 자주 쓰는 **CLI 도구** (git, ripgrep, fzf, bat 등)
-- **프로그래밍 런타임** (Node.js, Python, Go, Rust)
-- **예쁜 터미널/프롬프트** (starship) + 자동완성
-- **컨테이너** (Docker) 준비
-- **AI 코딩 에이전트** (Claude Code, gajae-code, codex 등)
-
-까지 알아서 깔고, **제대로 깔렸는지 검증**까지 합니다.
-
-> **안심하세요.** 이 키트는 **당신 설정을 함부로 덮어쓰지 않습니다.** 이미 있는 건 건너뛰고, 몇 번을 다시 돌려도 안전하며, 설치한 걸 **되돌리는 제거 스크립트**도 있습니다. 자세한 안전 설계는 아래 [설치해도 안전한가요?](#설치해도-안전한가요) 참고.
-
----
-
-## 다른 셋업 스크립트와 뭐가 다른가요?
-
-인터넷의 dotfiles·gist 스크립트는 대개 만든 사람 취향이고, 실행하면 내 컴퓨터에 뭘 바꾸는지 알기 어렵습니다. 이 킷은 세 가지가 다릅니다.
-
-- **초보자 기준으로 썼습니다.** 터미널을 처음 여는 사람도 그대로 따라 하도록 OS별 단계를 하나하나 적었어요.
-- **안전을 설계로 증명합니다.** 기존 설정을 덮어쓰지 않고(표시된 블록만 편집·자동 백업), 몇 번을 다시 돌려도 안전하며, 되돌리는 제거 스크립트가 있습니다.
-- **말이 아니라 CI로 검증합니다.** macOS·Windows·Ubuntu·Fedora·Arch·openSUSE에서 커밋마다 설치→검증→제거를 자동 테스트해요(2회 연속 설치·업그레이드 경로 포함).
-
-> 실행이 걱정되면 언제든 먼저 `--dry-run`(맥/리눅스)·`-DryRun`(윈도우)으로 "무엇을 할지"만 볼 수 있어요.
-
----
-
-## 먼저, 내 컴퓨터부터 고르세요
-
-### 터미널이 어렵다면: 다운로드하고 더블클릭
-
-명령어를 복사할 필요 없는 설치 파일도 제공합니다. 아래에서 내 컴퓨터용
-파일을 내려받아 압축을 풀고 실행하세요.
-
-| 내 컴퓨터 | GUI 설치 앱 (추천) | 빠른 더블클릭 설치 |
-| --- | --- | --- |
-| **Mac** | [GUI 앱 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip) → 압축 풀기 → **Lazy Starter Kit Installer** 실행 | [간단 실행기 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-double-click.zip) → 압축 풀기 → **Install-lazy-starter-kit** 더블클릭 |
-| **Windows** | [GUI 앱 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip) → 압축 풀기 → **Lazy Starter Kit Installer** 더블클릭 | [간단 실행기 다운로드](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip) → 압축 풀기 → **Install-lazy-starter-kit** 더블클릭 |
-
-- **GUI 앱**에서는 설치 범위와 미리보기 여부를 고르고 진행 로그를 볼 수 있습니다.
-- **빠른 설치**는 선택 화면 없이 기존 설치기를 바로 시작합니다.
-- 설치 엔진은 아래의 한 줄 명령과 완전히 같습니다. 별도의 설치 로직을 숨겨 두지 않습니다.
-
-> **Mac GUI 앱은 Apple Developer ID 서명과 공증을 거쳐 배포됩니다.**
-> Mac 간단 실행기는 차단 시 **Control-클릭 → 열기**로 실행하세요.
-> Windows 설치 파일은 아직 코드 서명 전이므로 SmartScreen 경고가 뜨면
-> **추가 정보 → 실행**을 선택해야 할 수 있습니다.
-
-| 내 컴퓨터 | 여기로 |
-| --- | --- |
-| <img src="./docs/icons/windows.svg" width="16" height="16" alt="Windows 로고"> **Windows** (회사 PC 대부분) | [→ Windows 설치](#-windows-설치-제일-자세히) |
-| <img src="./docs/icons/apple.svg" width="16" height="16" alt="Apple 로고"> **Mac** (맥북 등) | [→ macOS 설치](#-macos-설치) |
-| <img src="./docs/icons/linux.svg" width="16" height="16" alt="Linux 로고"> **Linux** (우분투/페도라 등) | [→ Linux 설치](#-linux-설치) |
-
-각 가이드는 **터미널을 처음 여는 분** 기준으로 썼어요. 그대로 따라만 하면 됩니다.
-
-<details>
-<summary><b>터미널이 이미 익숙하다면?</b> 한 줄 복붙 모음 (클릭)</summary>
-
-```bash
-# macOS
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
-
-# Linux (Ubuntu/Fedora/Arch/openSUSE — 자동 감지)
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
-```
-
-```powershell
-# Windows (PowerShell)
-irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
-```
-
-</details>
-
-실행 전 계획만 보려면 clone 후 `--dry-run`, 회사 PC는 `--profile work`, 상세 옵션은 [고급 / 커스터마이즈](#고급--커스터마이즈). 각 OS는 폴더로 분리돼 있어요: [`windows/`](windows/README.md) · [`linux/`](linux/README.md) · macOS(최상위).
-
----
-
-## <img src="./docs/icons/windows.svg" width="20" height="20" alt="Windows 로고"> Windows 설치 (제일 자세히)
-
-> 대상: **Windows 10(1809 이상) 또는 Windows 11**. 대부분의 회사 PC가 여기 해당합니다. 개발 경험이 전혀 없어도 아래만 그대로 따라 하면 됩니다.
-
-### 1단계 — PowerShell 열기
-
-1. 키보드에서 **`Windows 키`**를 누르거나 화면 왼쪽 아래 **시작 버튼**을 클릭합니다.
-2. 그대로 **`powershell`**이라고 타이핑합니다.
-3. 목록에 뜨는 **"Windows PowerShell"**을 클릭해서 엽니다. (파란색 또는 검은색 창이 떠요.)
-
-> 더 좋은 경험을 원하면 "터미널"(Windows Terminal)에서 PowerShell을 열어도 됩니다. 없으면 그냥 Windows PowerShell로 충분해요.
-
-### 2단계 — 아래 한 줄을 붙여넣고 Enter
-
-아래 회색 상자 오른쪽 위의 **복사 버튼**(📋)을 누르세요. 그리고 PowerShell 창을 **한 번 클릭**한 뒤 **마우스 오른쪽 버튼**을 누르면 붙여넣기가 됩니다. 마지막으로 **Enter**.
-
-```powershell
-irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
-```
-
-- `git`이 없어도 **자동으로 깔아줍니다.** (그냥 기다리면 돼요.)
-- 중간에 설치 진행 상황이 주르륵 올라갑니다. 컴퓨터/인터넷 속도에 따라 **5~20분** 걸릴 수 있어요. 창을 닫지 말고 기다리세요.
-- 도중에 "Docker Desktop을 설치할까요?" 같은 **질문이 뜨면** 필요 없으면 그냥 `n` 입력 후 Enter (회사 라이선스 이슈가 있어 기본은 설치 안 함). 뭔지 모르겠으면 전부 그냥 Enter — 안전한 기본값으로 진행됩니다.
-
-<details>
-<summary><b>"스크립트를 실행할 수 없습니다" 같은 빨간 오류가 뜨면?</b> (클릭)</summary>
-
-Windows 보안 정책 때문일 수 있어요. 아래 **한 줄로 대신 실행**하세요(복붙 → Enter):
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex"
-```
-
-</details>
-
-### 3단계 — 끝나면 딱 3가지만
-
-설치가 끝나면 화면 맨 아래에 **"Next steps"** 안내가 나옵니다. 그대로 하면 돼요:
-
-1. **PowerShell 창을 완전히 닫고 새로 여세요.** (그래야 새 설정이 적용돼요.)
-2. **글꼴 설정** — 프롬프트 아이콘이 예쁘게 보이려면: Windows Terminal → **설정(Settings)** → 사용하는 프로필 → **모양(Appearance)** → **글꼴(Font face)**을 **`JetBrainsMono Nerd Font`**로 바꾸세요.
-3. **GitHub 로그인** (선택) — 화면에 `gh auth login` 안내가 나오면 한 번 실행해서 GitHub 계정에 로그인하세요. (git 이름/이메일도 자동으로 맞춰줍니다.)
-
-> **자동완성 써보기**: 새 창에서 명령어를 치기 시작하면 **회색 글씨로 뒷부분을 미리 제안**해줍니다. 마음에 들면 **오른쪽 화살표(→)**를 눌러 그대로 채워요. 안 뜨면 **PowerShell 7**을 쓰는 게 확실합니다: `winget install Microsoft.PowerShell` 후 재시작.
-
-### 회사 PC에서 자주 겪는 문제 (Windows)
-
-| 증상 | 해결 |
-| --- | --- |
-| `winget`을 찾을 수 없다 | Microsoft Store에서 **"앱 설치 관리자(App Installer)"** 설치 후 다시 실행 |
-| 일부 도구가 "MISS"로 빠짐 | **관리자 권한(UAC)**이 필요한 패키지예요. 관리자 PowerShell에서 `.\install.ps1 -Only packages` 재실행하거나 사내 소프트웨어 포털 이용 |
-| 회사 프록시 뒤라 다운로드 실패 | PowerShell에서 `$env:HTTPS_PROXY="http://프록시주소:포트"` 설정 후 재실행 |
-| 회사 정책(AppLocker 등)으로 스크립트 자체 차단 | 정책상 실행 불가 — IT 담당자 문의 |
-
-> 💡 회사 PC라면 처음부터 가볍게 깔 수도 있어요: `.\install.ps1 -Profile work` (Docker 등 무거운 것 제외). 리눅스 환경(WSL2)까지 원하면 `.\install.ps1 -Only wsl` (베타).
-
-📖 **Windows 상세 문서**: [windows/README.md](windows/README.md)
-
----
-
-## <img src="./docs/icons/apple.svg" width="20" height="20" alt="Apple 로고"> macOS 설치
-
-> 대상: **Apple Silicon 맥** (M1/M2/M3/M4…). 새 맥에 최적화돼 있어요.
-
-### 1단계 — 터미널 열기
-
-`Command(⌘) + Space` → **`터미널`** 또는 **`Terminal`** 입력 → Enter.
-
-### 2단계 — 한 줄 붙여넣고 Enter
+### macOS
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
 ```
 
-- `git`이 없는 완전 새 맥이면 먼저 **Xcode Command Line Tools** 설치 창이 뜹니다. **"설치"**를 누르고, 끝나면 위 명령어를 **한 번 더** 실행하세요.
-- 중간에 **Mac 비밀번호**를 한 번 물을 수 있어요(Homebrew 설치 시). 정상입니다.
+### Linux
 
-### 3단계 — 끝나면
-
-- **새 터미널을 열거나**, 현재 Zsh 세션에서 설치 종료 메시지에 표시된 `.zshrc` 경로를 `source` 하세요.
-- 안내에 따라 `gh auth login`(GitHub 로그인), 터미널 글꼴을 `JetBrainsMono Nerd Font`로 설정.
-
-> 실행 전에 **무엇을 하는지 먼저 보고 싶다면** (권장):
->
-> ```bash
-> git clone https://github.com/Heoooooon/lazy-starter-kit.git
-> cd lazy-starter-kit
-> ./install.sh --dry-run   # 아무것도 안 바꾸고 계획만 출력
-> ./install.sh             # 실제 적용
-> ```
-
-<details>
-<summary><b>새 Mac mini를 서브 머신으로 세팅한다면</b> (클릭)</summary>
-
-장비가 늘어나거나 초기화를 반복할수록, 중요한 건 "빠르게 한 번 까는 것"보다 **같은 환경을 다시 만들 수 있는 것**입니다.
-
-1. 먼저 `--dry-run`으로 이 장비에 무엇이 바뀌는지 확인합니다.
-2. `./install.sh`로 기본 환경을 구성합니다.
-3. 나중에 상태가 의심되면 `./install.sh --doctor`로 무엇이 빠졌는지 확인하고, 그대로 다시 실행해 빠진 것만 채웁니다.
-
-이미 깔린 건 건너뛰기 때문에 **몇 번을 다시 돌려도 안전**합니다. 그래서 "예전 컴퓨터에 뭘 깔았더라"를 기억하는 대신, 같은 명령을 다시 실행하는 것으로 끝납니다.
-
-</details>
-
----
-
-## <img src="./docs/icons/linux.svg" width="20" height="20" alt="Linux 로고"> Linux 설치
-
-> 지원: **Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE** (glibc 배포판). 패키지 매니저를 **자동 감지**합니다.
->
-> ⚠️ **Alpine(musl)은 미지원** — 업스트림 도구(node/ast-grep/bun)에 musl 빌드가 없어요.
-
-### 1단계 — 터미널 열기 → 2단계 — 한 줄 붙여넣고 Enter
+Ubuntu/Debian, Fedora/RHEL, Arch, openSUSE 계열을 지원합니다.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
 ```
 
-- 시스템 패키지 설치에 **sudo(관리자) 비밀번호**를 물을 수 있어요. (sudo가 없으면 시스템 패키지만 건너뛰고 유저 도구는 정상 설치됩니다.)
-- Docker는 물어볼 때 동의해야만 설치됩니다(무거워서 기본은 건너뜀).
+상세 문서: [linux/README.md](linux/README.md)
 
-### 3단계 — 끝나면
+### Windows
 
-- **새 터미널을 열거나**, 현재 Zsh 세션에서 설치 종료 메시지에 표시된 `.zshrc` 경로를 `source` 하세요.
-- Docker를 깔았다면 **로그아웃 후 다시 로그인**(또는 `newgrp docker`)해야 권한이 적용돼요.
-
-📖 **Linux 상세 문서**: [linux/README.md](linux/README.md)
-
----
-
-## 수업 전 설치 안내 (강사용)
-
-바이브코딩 수업에서 가장 먼저 막히는 건 프롬프트가 아니라 설치입니다. 누구는 Node 버전이 다르고, 누구는 Git이 없고, 누구는 터미널을 처음 열어봅니다. 아래는 그 시간을 줄이려고 정리한 방법입니다.
-
-**수업 전에 수강생에게 안내할 것**
-
-1. 자기 컴퓨터에 맞는 섹션 하나만 보게 하세요 — [Windows](#-windows-설치-제일-자세히) · [macOS](#-macos-설치) · [Linux](#-linux-설치)
-2. 실행 전에 `--dry-run`(윈도우는 `-DryRun`)으로 무엇이 바뀌는지 먼저 보게 하면 불안감이 줄어듭니다.
-3. 설치 시간은 **5~20분**입니다. 수업 시간에 하지 말고 미리 끝내오게 하세요.
-4. 설치가 끝나면 `--doctor`를 한 번 실행하고 **결과 화면을 캡처해서 보내달라고** 하세요. 어떤 도구가 빠졌는지(✗), 깔렸는데 터미널이 못 찾는지(!)가 한눈에 나옵니다.
-
-**수업 당일에 자주 나오는 상황**
-
-| 상황 | 대응 |
-| --- | --- |
-| 설치가 중간에 멈췄다고 함 | 그냥 다시 실행하게 하세요. 이미 된 건 건너뜁니다. |
-| 명령어를 못 찾는다고 함 | 터미널을 완전히 닫고 새로 열게 하세요. |
-| 회사/학교 노트북이라 권한이 없음 | Windows는 사용자 범위로 설치되고 관리자 필요한 항목만 목록으로 알려줍니다. `-Profile work`로 가볍게 설치하세요. |
-| 특정 도구만 빠짐 | `--only <단계>`(윈도우 `-Only <단계>`)로 그 단계만 다시 돌립니다. |
-| 실습 후 원래대로 돌리고 싶어함 | [제거 스크립트](#지우고-싶어요-제거)로 되돌릴 수 있다고 미리 알려주세요. |
-
-> 모든 컴퓨터를 완전히 똑같이 만들 수는 없습니다. 다만 수강생이 같은 출발선에서 `claude`나 `codex`를 실행하는 지점까지는 맞출 수 있습니다.
-
----
-
-## 설치가 끝난 뒤에도
-
-이 키트는 한 번 쓰고 버리는 스크립트가 아니에요. 계속 곁에 두고 쓰세요. (윈도우는 `--flag` 대신 `-Flag` 형태)
-
-- **뭔가 안 될 때** → `./install.sh --doctor` 어떤 도구가 잘 깔렸는지(✓), 빠졌는지(✗), 깔렸는데 터미널이 못 찾는 건지(!)를 한눈에 보여주고 **고치는 명령까지 알려줍니다.**
-- **새 버전이 나왔을 때** → `./install.sh --update` 키트 최신 버전을 받아온 뒤 알아서 다시 실행해요.
-- **다시 실행하고 싶을 때** → 그냥 `./install.sh` 이미 된 건 건너뛰고 빠진 것만 채웁니다. 몇 번을 돌려도 안전해요.
-- **골라 깔고 싶을 때** → `--profile minimal`(도구+런타임+셸만) / `--profile work`(회사 PC용) / `--only agents`(특정 단계만)
-
----
-
-## 첫 프롬프트까지 5분
-
-도구가 깔린 건 끝이 아니라 시작이에요. "이제 뭘 하지?"에서 멈추지 않도록, 새 터미널에서 그대로 따라 해보세요. (macOS/Linux/Windows 모두 동일하게 됩니다.)
-
-**1. 연습용 폴더 만들기** — 에이전트는 "지금 있는 폴더"를 작업장으로 삼아요.
-
-```bash
-mkdir my-first-ai
-cd my-first-ai
-```
-
-**2. Claude Code 켜기** — 처음 한 번은 로그인을 물어봐요. [claude.ai](https://claude.ai/) 계정으로 로그인하면 됩니다.
-
-```bash
-claude
-```
-
-**3. 첫 프롬프트 붙여넣기** — 아래를 그대로 복사해서 Enter:
-
-> 이 폴더에 브라우저에서 바로 열 수 있는 한 파일짜리 벽돌깨기 게임(index.html)을 만들어줘. 다 만들면 여는 방법도 알려줘.
-
-몇 분 뒤 `index.html`이 생기고, 더블클릭하면 **AI와 만든 첫 결과물**이 브라우저에서 돌아갑니다.
-
-- Claude 대신 Codex를 쓰려면: `codex` 실행 후 ChatGPT 계정으로 로그인.
-- Grok·Antigravity를 쓰려면: 킷 설치 후 [수동 설치](#수동-설치-grok--antigravity) 한 줄을 실행하세요.
-- 개념 정리·다음 프로젝트·도구 확장은 **[cmore.dev](https://cmore.dev/)**에 순서대로 정리돼 있어요.
-
----
-
-## 무엇이 깔리나
-
-이름이 낯설어도 괜찮아요 — 전부 전 세계 개발자들이 매일 쓰는 검증된 도구들입니다.
-
-| 계층 | 도구 |
-| --- | --- |
-| **CLI 기본** | git, gh(GitHub CLI), jq, ripgrep(rg), fd, fzf, bat, tree, ast-grep, zoxide |
-| **셸/프롬프트** | zsh + oh-my-zsh + 자동완성·구문강조, **starship** 프롬프트, JetBrainsMono Nerd Font (Windows는 PowerShell 프로필 + PSReadLine 자동완성) |
-| **런타임** | **mise** → Node(LTS)·Python·Go · **rustup** → Rust + rust-analyzer · **uv** · **bun** |
-| **컨테이너** | macOS=Colima, Linux=Docker Engine(선택), Windows=Docker Desktop(선택·라이선스 주의) 또는 WSL2 |
-| **Git/GitHub** | 계정 신원(이메일), HTTPS 자격증명, 합리적 기본값 |
-| **AI 에이전트** | **Claude Code**(`claude`), **gajae-code**(`gjc`), **codex**, **lazycodex**(OmO) (+ 옵션으로 Hermes) |
-| **WSL2** (Windows, 베타) | WSL2 + Ubuntu 활성화 후 그 안에 Linux 킷 자동 설치 (`-Only wsl`) |
-
-> 세부 목록·OS별 차이는 각 OS 상세 문서에 있어요.
-
----
-
-## AI 코딩, 여기서 더 확장하세요 (도구 생태계)
-
-이 킷은 **AI 코딩 에이전트**를 깔아줍니다. 하지만 에이전트의 진짜 힘은 거기에 붙여 쓰는 **스킬·MCP·플러그인**에서 나와요. 뭘 붙일지 고르는 것도 또 다른 삽질이라, 따로 큐레이션해 뒀습니다.
-
-> **→ [cmore.dev 도구 생태계](https://cmore.dev/lazy-starter-kit/ecosystem/)** 분야별(문서·행정·법률·게임·디자인·코딩 에이전트 등) 도구를, 직접 써보고 쓴 **에디터 리뷰 + 솔직한 한계**와 함께 모았습니다(대부분 오픈소스, 일부는 무료로 쓰는 공식 도구). 설치 명령까지 바로 복사할 수 있어요.
-
-킷과 함께 쓰는 에이전트는 이렇습니다. 앞의 넷은 **자동으로 깔리고**, 나머지 셋은 필요한 사람만 켜거나 따로 설치합니다.
-
-| 에이전트 | 한 줄 소개 | 설치 |
-| --- | --- | --- |
-| **[Claude Code](https://cmore.dev/lazy-starter-kit/ecosystem/claude-code/)** (`claude`) | 내 프로젝트 안에서 직접 코드를 읽고 고치는 Anthropic 에이전트 | 자동 |
-| **[Codex](https://cmore.dev/lazy-starter-kit/ecosystem/codex/)** (`codex`) | 터미널에서 도는 OpenAI 코딩 에이전트 | 자동 |
-| **[gajae-code](https://cmore.dev/lazy-starter-kit/ecosystem/gajae-code/)** (`gjc`) | 인터뷰·검토된 계획·검증까지 갖춘 자율 코딩 러너 | 자동 |
-| **[lazycodex](https://cmore.dev/lazy-starter-kit/ecosystem/lazycodex/)** (OmO) | 복잡한 코드베이스를 위한 Codex 하네스 | 자동 |
-| **[Hermes](https://cmore.dev/lazy-starter-kit/ecosystem/hermes-agent/)** (`hermes`, macOS·Linux) | 경험에서 스킬을 만들고 세션 너머로 나를 학습하는 자율 에이전트 | `HERMES=1 ./install.sh` |
-| **[Grok Build](https://x.ai/cli)** (`grok`) | xAI 코딩 에이전트 | [수동 한 줄](#수동-설치-grok--antigravity) |
-| **[Antigravity CLI](https://antigravity.google/docs/cli-install)** (`agy`) | 구글 코딩 에이전트(Gemini CLI 후속) | [수동 한 줄](#수동-설치-grok--antigravity) |
-
-에이전트 이름을 누르면 각 도구의 **자세한 에디터 리뷰·설치법**으로 바로 갑니다.
-
-### 수동 설치: Grok · Antigravity
-
-> 이 둘은 `install.sh` / `install.ps1` 에이전트 단계에 **포함되지 않습니다.** 각자 계정·구독 흐름이 따로 있어서, 필요한 사람만 킷 설치 후 아래 한 줄을 실행하는 방식입니다.
->
-> 제거는 신경 안 써도 돼요. 직접 깐 경우에도 킷의 제거 스크립트가 같이 정리합니다.
-
-#### Grok Build (xAI)
-
-**macOS / Linux**
-
-```bash
-curl -fsSL https://x.ai/cli/install.sh | bash
-```
-
-**Windows (PowerShell)**
+PowerShell에서:
 
 ```powershell
-irm https://x.ai/cli/install.ps1 | iex
+irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
 ```
 
-설치 확인 → 실행 → 로그인:
+상세 문서: [windows/README.md](windows/README.md)
+
+GUI/더블클릭 설치 파일은 [Releases](https://github.com/Heoooooon/lazy-starter-kit/releases)에서 받을 수 있습니다.
+
+---
+
+## 먼저 확인하고 싶다면
+
+남의 스크립트를 바로 실행하기 꺼려진다면 clone 후 dry-run을 권장합니다.
 
 ```bash
-grok --version   # 설치 확인
-grok             # 첫 실행 시 브라우저에서 grok.com 로그인
+git clone https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit
+./install.sh --dry-run
 ```
 
-- **구독**: SuperGrok 또는 X Premium Plus 필요 ([안내](https://x.ai/cli)).
-- **API 키 방식**(CI·브라우저 없는 환경): `export XAI_API_KEY="xai-..."` 후 `grok`.
-- **업데이트**: `grok update`
-- 바이너리는 보통 `~/.grok/bin`(Windows: `%USERPROFILE%\.grok\bin`)에 깔립니다. PATH에 안 잡히면 **터미널을 새로 열거나** 해당 경로를 PATH에 추가하세요.
-
-#### Antigravity CLI (Google)
-
-**macOS / Linux**
-
-```bash
-curl -fsSL https://antigravity.google/cli/install.sh | bash
-```
-
-**Windows (PowerShell)**
+Windows:
 
 ```powershell
-irm https://antigravity.google/cli/install.ps1 | iex
+git clone https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit\windows
+.\install.ps1 -DryRun
 ```
-
-설치 확인 → 실행:
-
-```bash
-agy --version    # 설치 확인
-agy              # 첫 실행 시 구글 계정 로그인
-```
-
-- **무료 티어가 작습니다.** 많이 쓰려면 유료 플랜이 필요해요.
-- Gemini CLI의 후속이고 **클로즈드 소스**입니다.
-- 바이너리는 `~/.local/bin/agy`(Windows: `%LOCALAPPDATA%\agy\bin`)에 깔립니다.
 
 ---
 
-## 설치해도 안전한가요?
+## 자주 쓰는 옵션
 
-네. 안전을 최우선으로 설계했고, **말로만이 아니라 테스트로 증명합니다.**
+macOS/Linux:
 
-- **덮어쓰지 않음**: 이미 깔린 도구/설정은 건너뜁니다. 당신이 만든 파일은 보존돼요.
-- **몇 번을 다시 돌려도 안전**: CI가 매 커밋 **두 번 연속 설치**해서 확인합니다(멱등).
-- **표시된 블록만 편집**: 설정 파일(`${ZDOTDIR-$HOME}/.zshrc`, PowerShell 프로필 등)에는 `# >>> lazy-starter-kit ... >>>`로 **명확히 표시된 구역**만 넣고, 재실행 시 그 구역만 교체합니다(중복 없음). 손으로 쓴 줄은 안 건드려요. 처음 고치기 전엔 **자동 백업**(`.bak`)을 만들고, 마커가 손상돼 있으면 수정을 거부합니다.
-- **git 신원 보호**: 이름/이메일이 **비어 있을 때만** 채우고, 있으면 절대 안 바꿉니다.
-- **재귀 삭제 경계 검증**: 설치 중 플러그인 재시도와 제거 스크립트의 디렉터리 정리는 대상 전체를 먼저 검사합니다. `HOME`·루트·허용 경계 자체·경계 밖 경로·심볼릭 링크가 섞이면 아무것도 지우지 않고 실패합니다. `--dry-run`에서도 같은 검증을 거칩니다.
-- **AI의 `rm -rf` 차단**: `agents` 단계가 Codex·Claude Code의 `PreToolUse` 훅을 설치해 재귀 `rm`을 실행 전에 거부하고, 현재 Git 작업공간의 엄격한 하위 경로만 받는 `lazy-safe-rm`을 제공합니다. Codex가 처음 훅 검토를 요청하면 승인해야 활성화됩니다.
-- **데이터 삭제 범위**: 설치는 사용자 데이터를 지우지 않습니다. 제거는 기존 확인 절차에 더해 위 경계 검증을 통과한 키트 관리 디렉터리만 정리합니다.
-- **되돌리기 제공**: 아래 [제거](#지우고-싶어요-제거)로 깔끔히 원복.
-- **검증된 릴리스에서만 설치**: 한 줄 명령어는 개발 중인 `main`이 아니라 **가장 최근 릴리스 태그**를 받아옵니다. 방금 올라간 커밋이 곧바로 새 사용자에게 나가지 않아요. 어떤 버전을 쓰는지 실행 즉시 `==> Using v0.9.0`으로 표시하고, `STARTER_KIT_BRANCH`로 원하는 태그에 고정할 수도 있습니다.
-- **잘린 다운로드는 실행되지 않음**: `curl | bash`의 고전적 위험은 전송이 끊겨 스크립트가 반쪽만 실행되는 것입니다. 이 킷에서 파이프로 실행되는 부분은 **git clone 후 넘겨주는 짧은 부트스트랩**뿐이고, 실제 설치는 통째로 받은 파일에서 돌아갑니다. 외부 설치 스크립트(Claude Code·oh-my-zsh·Docker·Hermes)도 **받아서 검사한 뒤에만** 실행합니다.
-- **공급망(supply chain) 정직 고지**: 이 키트는 Homebrew·oh-my-zsh·Docker·Hermes 등 **업스트림 프로젝트의 공식 설치 스크립트를 HTTPS로** 내려받아 실행하고, npm/bun 패키지는 **최신 버전으로** 설치합니다. 즉 그 업스트림들을 신뢰하는 셈이니, 걱정되면 각 프로젝트를 먼저 확인하세요. 보안 범위·신고는 [SECURITY.md](SECURITY.md) 참고.
+```bash
+./install.sh --dry-run
+./install.sh --doctor
+./install.sh --update
+./install.sh --only agents
+./install.sh --skip docker
+./install.sh --profile minimal
+./install.sh --profile work
+```
 
-> 정말 걱정되면 **먼저 `--dry-run`(맥/리눅스) 또는 `-DryRun`(윈도우)**으로 "무엇을 할지"만 확인하세요. 남의/회사 메인 PC라면 **여분 PC나 가상머신(VM)에서 먼저** 테스트하는 걸 권합니다. AI 훅은 지원되는 셸 도구 호출을 막는 추가 방어층이며 끄거나 우회 가능한 절대 보안 경계는 아닙니다. Codex는 `workspace-write` 샌드박스를 함께 쓰는 것을 권장합니다.
+Windows는 `--dry-run` 대신 `-DryRun`, `--only` 대신 `-Only`처럼 PowerShell
+형식을 사용합니다.
 
-> **검증**: **macOS·Windows(Server 2025)·Ubuntu·Fedora·openSUSE·Arch** 모두 커밋마다 설치→검증→제거(end-to-end)를 자동 테스트(CI)로 돌립니다. 두 번 연속 설치(멱등성)와 **이전 릴리스→최신 업그레이드 경로**도 테스트에 포함돼요.
-
-<img src="./assets/readme/hero.svg" alt="6개 플랫폼(macOS·Windows·Ubuntu·Fedora·Arch·openSUSE)에서 커밋마다 설치·검증·제거를 CI로 돌립니다." width="100%" />
-
-### 지원 범위
-
-| 등급 | 플랫폼 | 보증 |
-| --- | --- | --- |
-| **Tier 1** | macOS 14+ (Apple Silicon) · Windows 11/Server 2025 · Ubuntu 24.04 · Fedora · Arch · openSUSE Tumbleweed | **매 커밋마다 CI가 실제로 설치→검증→제거** (+ 2회 연속 설치, 업그레이드 경로) |
-| **Tier 2** | Windows 10 1809+ · Debian 12+ · RHEL 9/Rocky · openSUSE Leap · WSL2 · Intel Mac | 같은 코드라 동작 예상 — 문제 제보 시 우선 수정 |
-| 미지원 | Alpine(musl) · 32bit | 업스트림 도구에 빌드가 없음 |
-
-자세한 정책(무엇이 semver로 보호되는지)은 [VERSIONING.md](VERSIONING.md) 참고.
-
-> 이 키트가 세팅 시간을 아껴줬다면 **⭐ 스타 하나**가 다음 개선의 큰 힘이 됩니다!
+설치 단계는 여러 번 실행해도 같은 관리 블록을 중복 생성하지 않도록
+멱등성을 기준으로 설계되어 있습니다.
 
 ---
 
-## 지우고 싶어요 (제거)
-
-설치한 것을 의존성 역순으로 되돌립니다. (위험한 항목은 물어보고 진행)
-
-**macOS**
+## 설치 후 확인
 
 ```bash
-cd lazy-starter-kit && ./uninstall.sh          # 물어보며 제거
-./uninstall.sh --yes                            # 다 자동 수락
+./install.sh --doctor
 ```
 
-**Linux**
+`--doctor`는 도구별로 다음 상태를 보여줍니다.
+
+- 정상 설치됨
+- 설치됐지만 PATH에서 찾지 못함
+- 설치되지 않음
+
+문제가 있는 단계만 다시 실행할 수도 있습니다.
 
 ```bash
-cd lazy-starter-kit/linux && ./uninstall.sh
+./install.sh --only runtimes
+./install.sh --only agents
 ```
 
-**Windows** (PowerShell)
+---
+
+## 자동 제거(Uninstall)는 지원하지 않습니다
+
+**lazy-starter-kit은 자동 uninstall 기능을 제공하지 않습니다.**
+
+이전 버전에는 제거 스크립트가 있었지만 폐기했습니다. 이유는 설치 이후
+시점만 보고는 어떤 도구가 lazy-starter-kit이 새로 설치한 것인지, 사용자가
+원래 사용하던 것인지 신뢰성 있게 구분할 수 없기 때문입니다.
+
+예를 들어 사용자가 이미 Codex, Claude Code, Homebrew 패키지, mise,
+oh-my-zsh 등을 사용하고 있었다면 이름이나 경로만 기준으로 자동 삭제하는
+방식은 기존 개발 환경이나 사용자 데이터를 지울 위험이 있습니다.
+
+따라서 현재 정책은 다음과 같습니다.
+
+- 자동으로 패키지나 개발 도구를 제거하지 않습니다.
+- 기존 `uninstall.sh`, `linux/uninstall.sh`, `windows/uninstall.ps1` 진입점은
+  삭제 작업을 수행하지 않고 중단합니다.
+- 특정 도구를 제거해야 한다면 해당 도구의 공식 제거 방법을 사용하세요.
+- `.zshrc`, `.zprofile`, PowerShell profile의
+  `lazy-starter-kit` 표시 블록은 내용을 확인한 뒤 수동으로 제거하세요.
+
+향후 설치 시점의 소유권을 신뢰성 있게 기록하는 방식이 마련되기 전까지
+자동 제거 기능은 다시 추가하지 않습니다.
+
+---
+
+## 안전 설계
+
+- **Dry run**: 적용 전에 실행 계획을 확인할 수 있습니다.
+- **기존 설정 보호**: 사용자 설정 전체를 교체하지 않고 관리 블록을 사용합니다.
+- **손상된 마커 fail-closed**: 관리 블록 마커가 비정상이면 파일 수정을 거부합니다.
+- **설정 백업**: 관리 파일을 처음 변경할 때 `.bak` 백업을 만듭니다.
+- **재귀 삭제 경계 검사**: 내부 정리가 필요한 경우 HOME/루트/경계 밖/심볼릭 링크를 거부합니다.
+- **AI shell guard**: Codex/Claude Code의 재귀 `rm` 호출을 차단하는 추가 방어층을 제공합니다.
+- **릴리스 기준 설치**: 부트스트랩 이후 설치 코드는 최신 릴리스 태그를 기준으로 실행됩니다.
+- **CI**: macOS, Windows, Ubuntu, Fedora, Arch, openSUSE에서 설치와 상태 검증을 자동 실행합니다.
+
+이 키트는 Homebrew, npm/bun 패키지, 각 프로젝트의 공식 설치 프로그램 등
+여러 외부 공급망을 신뢰합니다. 자세한 범위는 [SECURITY.md](SECURITY.md)를
+참고하세요.
+
+---
+
+## 이미 Node/Python이 설치되어 있다면
+
+기존 런타임을 삭제하지 않습니다. Node/Python/Go는 mise가 별도 버전을
+설치하고 새 셸에서 우선 사용하도록 구성할 수 있습니다.
+
+macOS/Linux:
+
+```bash
+which -a node
+which -a python
+```
+
+Windows:
 
 ```powershell
-cd lazy-starter-kit\windows; .\uninstall.ps1
+Get-Command node -All
+Get-Command python -All
 ```
-
-- **git 신원, git 자체, 폰트, Homebrew/빌드도구**는 자동으로 안 지웁니다.
-- **gajae-code(`gjc`)는 보존** — 지우려면 `--with-gajae`(맥/리눅스) / `-WithGajae`(윈도우).
 
 ---
 
-## 자주 묻는 질문 (FAQ)
+## 회사 PC
 
-**Q. 이미 Node/Python이 깔려 있어요. 충돌 안 나요?**
-지우지 않습니다. mise가 **자기 버전을 깔고 PATH로 우선**시켜요(shadow). 기존 것은 그대로 남습니다. 확인: 맥/리눅스 `which -a node`, 윈도우 `Get-Command node -All`.
-
-**Q. 설치가 중간에 실패했어요.**
-대부분 네트워크/권한 문제예요. **다시 실행해도 안전**합니다(이미 된 건 건너뜀). 뭐가 빠졌는지는 `--doctor`로 확인하고, 특정 단계만 다시는 `--only <단계>`(맥/리눅스), `-Only <단계>`(윈도우).
-
-**Q. 관리자 권한이 없어요(회사 PC).**
-Windows는 가능한 건 **사용자 범위로 설치**하고, 관리자가 필요한 것만 끝에 목록으로 알려줍니다. Linux는 sudo가 없으면 시스템 패키지는 건너뛰고 사용자 도구는 정상 설치돼요.
-
-**Q. 수업이나 스터디에서 여러 명한테 쓰려면요?**
-[수업 전 설치 안내](#수업-전-설치-안내-강사용) 섹션을 보세요. 사전 안내 순서와 당일 대응표를 정리해 뒀습니다.
-
-**Q. 어떤 버전이 깔리나요?**
-한 줄 명령어는 **가장 최근 릴리스 태그**를 받아옵니다. 개발 중인 `main`이 아니라, CI가 6개 플랫폼에서 설치→검증→제거를 통과시킨 버전이에요. 실행하면 `==> Using v0.9.0`처럼 어떤 버전을 쓰는지 먼저 알려줍니다.
-
-특정 버전으로 고정하거나, 반대로 개발 중인 `main`을 쓰고 싶다면:
+가벼운 설정만 원하면 work profile을 사용할 수 있습니다.
 
 ```bash
-STARTER_KIT_BRANCH=v0.9.0 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
-STARTER_KIT_BRANCH=main   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh)"
+./install.sh --profile work
 ```
 
-**Q. 여기 없는 질문은 어디서 물어보나요?**
-[GitHub Discussions](https://github.com/Heoooooon/lazy-starter-kit/discussions)에 편하게 올려주세요. 버그 같으면 [이슈](https://github.com/Heoooooon/lazy-starter-kit/issues)로, "이게 왜 안 되지?" 수준이면 Discussions가 맞아요 — 초보 질문 환영입니다.
+Windows:
+
+```powershell
+.\install.ps1 -Profile work
+```
+
+관리자 권한이나 사내 정책 때문에 설치할 수 없는 항목은 건너뛰거나 안내를
+출력합니다. AppLocker, MDM, 프록시 등 조직 정책으로 실행 자체가 차단된
+환경에서는 IT 관리자 정책을 따라야 합니다.
 
 ---
 
-## 고급 / 커스터마이즈
+## 개발 / 기여
 
-- **모든 플래그**: `--dry-run`, `--yes`, `--only`, `--skip`, `--profile`, `--doctor`, `--update`, `--list`, `--version` (윈도우는 `-Only`처럼 대시 하나).
-- **설치 도구 편집**: 각 OS의 `Brewfile`(맥) / `scripts/02-packages.*` / `scripts/03-runtimes.*`.
-- **프롬프트/셸 블록**: `config/starship.toml`, `config/zshrc.block.sh`(맥/리눅스), `config/profile.block.ps1`(윈도우).
-- 자세한 옵션·문제해결은 각 OS 상세 문서를 보세요.
+- 설계: [DESIGN.md](DESIGN.md)
+- 버전 정책: [VERSIONING.md](VERSIONING.md)
+- 보안 정책: [SECURITY.md](SECURITY.md)
+- 기여 가이드: [CONTRIBUTING.md](CONTRIBUTING.md)
+- 변경 이력: [CHANGELOG.md](CHANGELOG.md)
+
+```bash
+./install.sh --dry-run
+./install.sh --doctor
+```
+
+CI는 셸 문법, shellcheck/PSScriptAnalyzer, 설치, 멱등성, doctor,
+업그레이드 경로와 주요 안전 회귀 테스트를 확인합니다.
 
 ---
-
-## 크레딧
-
-이 키트는 훌륭한 오픈소스들을 엮은 것뿐입니다. 원작 프로젝트에 ⭐를 눌러주세요: [Homebrew](https://brew.sh/) · [mise](https://github.com/jdx/mise) · [starship](https://github.com/starship/starship) · [rustup](https://github.com/rust-lang/rustup) · [bun](https://github.com/oven-sh/bun) · [uv](https://github.com/astral-sh/uv) · [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) · [ripgrep](https://github.com/BurntSushi/ripgrep) · [fd](https://github.com/sharkdp/fd) · [bat](https://github.com/sharkdp/bat) · [fzf](https://github.com/junegunn/fzf) · [ast-grep](https://github.com/ast-grep/ast-grep) · [Colima](https://github.com/abiosoft/colima) · [Claude Code](https://github.com/anthropics/claude-code) · [gajae-code](https://github.com/Yeachan-Heo/gajae-code) · [Codex](https://github.com/openai/codex) · [lazycodex / OmO](https://github.com/code-yeongyu/lazycodex) · [Hermes Agent](https://github.com/NousResearch/hermes-agent) · [Grok Build](https://x.ai/cli)
 
 ## 라이선스
 
-MIT — [LICENSE](LICENSE) 참고.
+MIT — [LICENSE](LICENSE)
