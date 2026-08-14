@@ -152,7 +152,7 @@ jobs:
         run: ./linux/install.sh --doctor
 
   linux-upgrade-path:
-    name: linux upgrade path (latest tag -> main)
+    name: linux upgrade path (latest published release -> main)
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -160,13 +160,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: install from the newest release tag
+      - name: install from the latest published release
         env:
           HERMES: "0"
           GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          tag=$(git tag --sort=-v:refname | head -1)
-          echo "installing from $tag"
+          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          [[ -n "$tag" ]] || { echo "could not resolve latest published release" >&2; exit 1; }
+          echo "installing from published release $tag"
           git worktree add /tmp/kit-old "$tag"
           /tmp/kit-old/linux/install.sh --yes --skip docker
 
