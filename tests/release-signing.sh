@@ -3,23 +3,77 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORKFLOW="$(<"$ROOT/.github/workflows/release.yml")"
+MAC_INSTALLER="$(<"$ROOT/install.sh")"
+LINUX_INSTALLER="$(<"$ROOT/linux/install.sh")"
+WINDOWS_INSTALLER="$(<"$ROOT/windows/install.ps1")"
 
 fail() {
   printf 'FAIL %s\n' "$*" >&2
   exit 1
 }
 
-# Release and CI entrypoints are invoked directly, so their executable mode is
-# part of the shipped contract rather than a local convenience.
 for executable in \
   Install-lazy-starter-kit.command \
   install.sh \
   gui/macos/build-app.sh \
   tests/install-entrypoints.sh \
   tests/release-signing.sh; do
-  [[ -x "$ROOT/$executable" ]] \
-    || fail "$executable is not executable"
+  [[ -x "$ROOT/$executable" ]] || fail "$executable is not executable"
 done
+
+# A tag must never become a public release merely because it exists. The
+# workflow first waits for ci.yml to succeed on the exact tagged SHA, keeps the
+# release as a draft while platform artifacts are built, and only publishes
+# after both packaging jobs succeed.
+for token in \
+  'verify tagged commit passed CI' \
+  'actions: read' \
+  '--workflow ci.yml' \
+  '--commit "$GITHUB_SHA"' \
+  '--event push' \
+  'Refusing release: CI run' \
+  'create draft GitHub release' \
+  '--draft' \
+  'needs: verify-ci' \
+  'upload macOS assets to draft' \
+  'upload Windows assets to draft' \
+  '--clobber' \
+  'publish verified release' \
+  'needs: [macos-installers, windows-installers]' \
+  '--draft=false'; do
+  [[ "$WORKFLOW" == *"$token"* ]] || fail "release gate is missing: $token"
+done
+
+# Default bootstrap/update selection must use the latest PUBLISHED GitHub
+# Release. A pushed v* tag that has not completed the release workflow yet must
+# not be selected. The official repo fails closed if /releases/latest cannot be
+# resolved instead of silently executing main.
+for spec in "macOS:$MAC_INSTALLER" "Linux:$LINUX_INSTALLER"; do
+  platform="${spec%%:*}"
+  source_text="${spec#*:}"
+  for token in \
+    '/releases/latest' \
+    '/releases/tag/' \
+    'published GitHub Release' \
+    'refusing to fall back to main'; do
+    [[ "$source_text" == *"$token"* ]] || fail "$platform installer is missing published-release guard: $token"
+  done
+done
+
+for token in \
+  'Get-KitLatestRef' \
+  '/releases/latest' \
+  '/releases/tag/' \
+  'HttpWebRequest' \
+  'published GitHub Release' \
+  'refusing to fall back to main'; do
+  [[ "$WINDOWS_INSTALLER" == *"$token"* ]] || fail "Windows installer is missing published-release guard: $token"
+done
+
+[[ "$LINUX_INSTALLER" != *'installing from the existing checkout'* ]] \
+  || fail 'Linux bootstrap can still continue from a stale checkout after fetch failure'
+[[ "$LINUX_INSTALLER" == *'refusing to use a stale checkout'* ]] \
+  || fail 'Linux bootstrap does not fail closed on stale checkout drift'
 
 # Given a tagged release, when the macOS installer job runs, then it must use
 # the real Developer ID + Apple notarization secrets rather than ad-hoc signing.
@@ -36,8 +90,7 @@ for token in \
   'spctl --assess'; do
   [[ "$WORKFLOW" == *"$token"* ]] || fail "release workflow is missing: $token"
 done
-[[ "$WORKFLOW" != *'codesign --force --deep --sign -'* ]] \
-  || fail "release workflow still uses ad-hoc signing"
+[[ "$WORKFLOW" != *'codesign --force --deep --sign -'* ]] || fail "release workflow still uses ad-hoc signing"
 
 # Windows PowerShell 5.1 decodes BOM-less UTF-8 as the active ANSI code page.
 # The release job must therefore read the Korean launchers explicitly as UTF-8,
@@ -56,9 +109,7 @@ for token in \
   'lazy-starter-kit-windows-double-click.zip`n'; do
   [[ "$WORKFLOW" == *"$token"* ]] || fail "release packaging is missing: $token"
 done
-[[ "$WORKFLOW" != *'Get-Content gui\windows\installer.ps1 -Raw'* ]] \
-  || fail 'release workflow decodes the Windows GUI with the default code page'
-[[ "$WORKFLOW" != *'Get-Content windows\Install-lazy-starter-kit.cmd -Raw'* ]] \
-  || fail 'release workflow decodes the Windows launcher with the default code page'
+[[ "$WORKFLOW" != *'Get-Content gui\windows\installer.ps1 -Raw'* ]] || fail 'release workflow decodes the Windows GUI with the default code page'
+[[ "$WORKFLOW" != *'Get-Content windows\Install-lazy-starter-kit.cmd -Raw'* ]] || fail 'release workflow decodes the Windows launcher with the default code page'
 
-printf 'PASS release signing and packaging contract\n'
+printf 'PASS release signing, gating, bootstrap, and packaging contract\n'

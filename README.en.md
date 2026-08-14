@@ -171,7 +171,8 @@ record and enforce ownership of everything it creates.
 - **Config backup**: a `.bak` backup is created before the first managed edit of a file.
 - **Recursive-delete boundaries**: internal cleanup rejects HOME, filesystem root, paths outside the allowed boundary, and symlink traversal.
 - **AI shell guard**: an additional defense layer blocks recursive `rm` calls from Codex and Claude Code hooks.
-- **Release-based install**: after bootstrap, installation code resolves against the newest release tag by default.
+- **Published-release install**: default installs and updates from detached checkouts resolve the newest **published GitHub Release**, not simply the newest `v*` tag. Tags that are still building or whose release failed are not selected by default.
+- **Release gate**: the release stays a draft until `ci.yml` has succeeded for the exact tagged commit and macOS/Windows packaging, signing, and attestations all complete. It is published only after every release job succeeds.
 - **CI**: install and health verification run on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE.
 
 This project still relies on external supply chains including Homebrew,

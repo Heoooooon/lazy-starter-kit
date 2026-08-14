@@ -36,7 +36,7 @@
 .PARAMETER Update
   Update the kit checkout, then continue the install with the remaining
   switches (e.g. -Update -Only agents). Branch checkouts fast-forward; detached
-  release checkouts move to the newest release tag. Requires a git checkout.
+  release checkouts move to the newest published release. Requires a git checkout.
 
 .EXAMPLE
   irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
@@ -81,9 +81,9 @@ $script:RunFromFile =
 $HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'https://github.com/Heoooooon/lazy-starter-kit.git' }
 # STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or 'main' to ride
-# the development branch). Left unset, the bootstrap resolves the newest release
-# tag instead of main -- a fresh machine should get a ref CI actually verified
-# end-to-end, not whatever landed on main minutes ago.
+# the development branch). Left unset, the bootstrap resolves the newest
+# published GitHub Release instead of merely taking the newest v* tag. A tag
+# that is still building or whose release failed must never become the default.
 $RepoBranch = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { $null }
 $RepoCommit = if ($env:STARTER_KIT_COMMIT) { $env:STARTER_KIT_COMMIT } else { $null }
 $CloneDir   = if ($env:STARTER_KIT_DIR)    { $env:STARTER_KIT_DIR }    else { Join-Path $HomeDir '.lazy-starter-kit' }
@@ -177,9 +177,39 @@ function Resolve-Root {
   return (Join-Path $CloneDir 'windows')
 }
 
-# Get-KitLatestRef -- newest vX.Y.Z tag on the remote; 'main' when a repo has no
-# release tags yet (forks, first-ever run before v0.1.0).
+# Get-KitLatestRef -- newest published GitHub Release tag. For the official repo,
+# failure to resolve a published release is fatal rather than falling back to
+# main. Non-GitHub custom repos retain the legacy tag/main fallback.
 function Get-KitLatestRef {
+  $repoWeb = $null
+  if ($RepoUrl.StartsWith('https://github.com/')) {
+    $repoWeb = $RepoUrl
+  } elseif ($RepoUrl.StartsWith('git@github.com:')) {
+    $repoWeb = 'https://github.com/' + $RepoUrl.Substring('git@github.com:'.Length)
+  } elseif ($RepoUrl.StartsWith('ssh://git@github.com/')) {
+    $repoWeb = 'https://github.com/' + $RepoUrl.Substring('ssh://git@github.com/'.Length)
+  }
+  if ($repoWeb) {
+    $repoWeb = $repoWeb.TrimEnd('/')
+    if ($repoWeb.EndsWith('.git')) { $repoWeb = $repoWeb.Substring(0, $repoWeb.Length - 4) }
+    try {
+      $request = [System.Net.HttpWebRequest]::Create("$repoWeb/releases/latest")
+      $request.Method = 'HEAD'
+      $request.AllowAutoRedirect = $true
+      $response = $request.GetResponse()
+      try { $finalUri = $response.ResponseUri.AbsoluteUri } finally { $response.Close() }
+      $prefix = "$repoWeb/releases/tag/"
+      if ($finalUri.StartsWith($prefix)) {
+        $tag = $finalUri.Substring($prefix.Length).TrimEnd('/')
+        if ($tag -and $tag -notmatch '/') { return $tag }
+      }
+    } catch {}
+  }
+
+  if ($repoWeb -eq 'https://github.com/Heoooooon/lazy-starter-kit') {
+    throw 'Could not resolve the latest published lazy-starter-kit release; refusing to fall back to main.'
+  }
+
   try {
     $line = (git ls-remote --tags --refs --sort=-v:refname $RepoUrl 'v*' 2>$null | Select-Object -First 1)
     if ($line -and $line -match 'refs/tags/(.+)$') { return $Matches[1] }
@@ -258,7 +288,8 @@ if ($Update) {
   $oldVersion = $KitVersion
   # On a branch (manual clone / dev checkout) fast-forward it and leave the user
   # where they put themselves. Detached means the bootstrap pinned a release tag,
-  # so "update" means move to the newest release (or to STARTER_KIT_BRANCH).
+  # so "update" means move to the newest published release (or to
+  # STARTER_KIT_BRANCH when explicitly pinned).
   # Invoke-NativeSilently: git writes progress to stderr, which under EAP=Stop on
   # WinPS 5.1 would abort the run; we only probe $LASTEXITCODE here.
   Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'symbolic-ref', '-q', 'HEAD') | Out-Null
@@ -269,11 +300,7 @@ if ($Update) {
       Stop-Kit "git pull --ff-only failed (exit $LASTEXITCODE). Resolve local changes or divergence, then re-run."
     }
   } else {
-    $ref = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { $null }
-    if (-not $ref) {
-      $line = (Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'ls-remote', '--tags', '--refs', '--sort=-v:refname', 'origin', 'v*') | Select-Object -First 1)
-      if ($line -and $line -match 'refs/tags/(.+)$') { $ref = $Matches[1] } else { $ref = 'main' }
-    }
+    $ref = if ($env:STARTER_KIT_BRANCH) { $env:STARTER_KIT_BRANCH } else { Get-KitLatestRef }
     Write-Step "Update: checking out $ref"
     Invoke-NativeSilently 'git' @('-C', $checkoutRoot, 'fetch', '--depth', '1', 'origin', $ref) | Out-Null
     if ($LASTEXITCODE -ne 0) {

@@ -28,9 +28,9 @@ set -euo pipefail
 REPO_URL="${STARTER_KIT_REPO:-https://github.com/Heoooooon/lazy-starter-kit.git}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 # STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or "main" to ride
-# the development branch). Left unset, the bootstrap resolves the newest release
-# tag instead of main — a fresh machine should get a ref CI actually verified
-# end-to-end, not whatever landed on main minutes ago.
+# the development branch). Left unset, the bootstrap resolves the newest
+# published GitHub Release instead of merely taking the newest v* tag. A tag
+# that is still building or whose release failed must never become the default.
 REPO_BRANCH="${STARTER_KIT_BRANCH:-}"
 REPO_COMMIT="${STARTER_KIT_COMMIT:-}"
 EPHEMERAL_ROOT="${STARTER_KIT_EPHEMERAL_ROOT:-}"
@@ -39,10 +39,42 @@ if [[ -n "$REPO_COMMIT" && ! "$REPO_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
   exit 1
 fi
 
-# kit_latest_ref — newest vX.Y.Z tag on the remote; "main" when a repo has no
-# release tags yet (forks, first-ever run before v0.1.0).
+# kit_latest_ref — newest published GitHub Release tag. For the official repo,
+# failure to resolve a published release is fatal: silently falling back to main
+# would defeat the release/CI trust boundary. Non-GitHub custom repos retain the
+# legacy tag/main fallback for local forks and tests.
 kit_latest_ref() {
-  local tag
+  local repo_web="" final="" tag=""
+  case "$REPO_URL" in
+    https://github.com/*)
+      repo_web="${REPO_URL%.git}" ;;
+    git@github.com:*)
+      repo_web="https://github.com/${REPO_URL#git@github.com:}"
+      repo_web="${repo_web%.git}" ;;
+    ssh://git@github.com/*)
+      repo_web="https://github.com/${REPO_URL#ssh://git@github.com/}"
+      repo_web="${repo_web%.git}" ;;
+  esac
+  repo_web="${repo_web%/}"
+
+  if [[ -n "$repo_web" ]] && command -v curl >/dev/null 2>&1; then
+    final="$(curl -fsSL -o /dev/null -w '%{url_effective}' "$repo_web/releases/latest" 2>/dev/null || true)"
+    case "$final" in
+      "$repo_web"/releases/tag/*)
+        tag="${final#"$repo_web"/releases/tag/}"
+        if [[ -n "$tag" && "$tag" != */* ]]; then
+          printf '%s\n' "$tag"
+          return 0
+        fi
+        ;;
+    esac
+  fi
+
+  if [[ "$repo_web" == "https://github.com/Heoooooon/lazy-starter-kit" ]]; then
+    echo "Could not resolve the latest published lazy-starter-kit release; refusing to fall back to main." >&2
+    return 1
+  fi
+
   tag="$(git ls-remote --tags --refs --sort=-v:refname "$REPO_URL" 'v*' 2>/dev/null \
          | head -1 | sed 's#.*refs/tags/##')"
   if [[ -n "$tag" ]]; then echo "$tag"; else echo main; fi
@@ -207,13 +239,19 @@ doctor() {
 # Update (--update): pull the latest kit, then re-exec the freshly-pulled
 # installer with the remaining args. Handled BEFORE normal parsing so it
 # composes with any other flag (order-independent) and the run always uses the
-# updated step files rather than the stale ones already on disk.
+# updated step files rather than the stale ones already on disk. Detached
+# release checkouts resolve the newest published release before fetching.
 # ---------------------------------------------------------------------------
 DO_UPDATE=0; PASS_ARGS=()
 for arg in "$@"; do
   if [[ "$arg" == "--update" ]]; then DO_UPDATE=1; else PASS_ARGS+=("$arg"); fi
 done
 if [[ "$DO_UPDATE" == "1" ]]; then
+  if ! git -C "$ROOT" symbolic-ref -q HEAD >/dev/null 2>&1 \
+     && [[ -z "${STARTER_KIT_BRANCH:-}" ]]; then
+    latest_ref="$(kit_latest_ref)" || die "could not resolve latest published release"
+    export STARTER_KIT_BRANCH="$latest_ref"
+  fi
   update_kit "$ROOT"
   exec bash "$ROOT/install.sh" ${PASS_ARGS[@]+"${PASS_ARGS[@]}"}
 fi
