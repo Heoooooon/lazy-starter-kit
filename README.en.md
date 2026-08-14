@@ -415,7 +415,8 @@ record and enforce ownership of everything it creates.
 - **Config backup**: a `.bak` backup is created before the first managed edit of a file.
 - **Recursive-delete boundaries**: internal cleanup rejects HOME, filesystem root, paths outside the allowed boundary, and symlink traversal.
 - **AI shell guard**: an additional defense layer blocks recursive `rm` calls from Codex and Claude Code hooks.
-- **Explicit source or release**: a local checkout runs that source; the standard remote bootstrap resolves the newest release tag by default. Release GUIs pin their own commit.
+- **Explicit source or release**: a local checkout runs that source. The standard remote bootstrap and updates from detached checkouts resolve the newest **published GitHub Release**, not simply the newest `v*` tag, so tags that are still building or whose release failed aren't selected. Release GUIs pin their own commit.
+- **Release gate**: a release stays a draft until `ci.yml` succeeds for the exact tagged commit and macOS/Windows packaging, signing and attestations complete. It's published only after every release job succeeds.
 - **CI**: install and health verification run on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE.
 
 This project still relies on external supply chains including Homebrew,
