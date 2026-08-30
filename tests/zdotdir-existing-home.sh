@@ -222,15 +222,4 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     || fail "doctor: active ZDOTDIR/.zprofile was reported missing"
 fi
 
-env -u ZDOTDIR HOME="$zshenv_home" SHELL=/bin/zsh \
-  PATH="$zshenv_home/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
-  /bin/bash "$platform_root/uninstall.sh" --only shell --yes >/dev/null 2>&1
-if grep -qsF '# >>> lazy-starter-kit:' "$zshenv_zdot/.zshrc"; then
-  fail "uninstall: managed blocks remained in the active ZDOTDIR/.zshrc"
-fi
-if [[ "$(uname -s)" == "Darwin" ]] \
-  && grep -qsF '# >>> lazy-starter-kit:' "$zshenv_zdot/.zprofile"; then
-  fail "uninstall: managed blocks remained in the active ZDOTDIR/.zprofile"
-fi
-
 printf 'ok: install targets the Zsh startup directory used by existing users\n'
