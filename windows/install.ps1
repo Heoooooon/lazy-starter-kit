@@ -507,6 +507,7 @@ function Invoke-Doctor {
       Write-Ok "profile block present ($short)"
     } else {
       Write-Warn "profile block missing ($short) -- fix: .\install.ps1 -Only shell"
+      $missing++
     }
   }
   # starship.toml (04-shell.ps1 installs it at ~\.config\starship.toml)
@@ -515,6 +516,7 @@ function Invoke-Doctor {
     Write-Ok "starship.toml present (~\.config\starship.toml)"
   } else {
     Write-Warn "starship.toml missing (~\.config\starship.toml) -- fix: .\install.ps1 -Only shell"
+    $missing++
   }
 
   Write-Step "Summary"

@@ -209,7 +209,7 @@ jobs:
         run: |
           $fail = 0
           @(Get-ChildItem -Path windows,gui/windows -Recurse -Include *.ps1) + @(
-            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1,tests/windows-profiles.ps1,tests/windows-beginner-onboarding.ps1
+            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1,tests/windows-profiles.ps1,tests/windows-beginner-onboarding.ps1,tests/windows-doctor.ps1
           ) | ForEach-Object {
             $tokens = $null; $errors = $null
             $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
@@ -368,6 +368,10 @@ jobs:
             Write-Host "ok   profile block"
           } else { Write-Host "MISS profile block"; $fail = 1 }
           exit $fail
+
+      - name: doctor config exit code regression
+        shell: pwsh
+        run: .\tests\windows-doctor.ps1
 
   cron-failure-alert:
     name: alert on scheduled-run failure
