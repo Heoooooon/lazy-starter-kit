@@ -6,7 +6,7 @@ first saves everyone time. Issues and PRs are welcome — in Korean or English.
 ## Repo layout
 
 ```
-.               macOS kit (install.sh, uninstall.sh, scripts/, Brewfile)
+.               macOS kit (install.sh, scripts/, Brewfile; legacy uninstall stub)
 lib/common.sh   helpers shared by the macOS and Linux kits (sourced by both)
 linux/          Linux kit (mirrors the macOS tree)
 windows/        Windows kit (PowerShell 5.1 + 7)
@@ -47,7 +47,7 @@ PRs that add non-core tools to the base will be asked to move them to
   `mapfile`, `${x,,}`, etc. (`bash -n` must pass under `/bin/bash`).
 - **Idempotent & non-destructive** — re-running must be safe; never clobber a
   user's existing config (fill empty values, use the managed-block markers).
-- **shellcheck clean** — `shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh scripts/*.sh`.
+- **shellcheck clean** — `shellcheck -x -S warning -e SC2154 install.sh lib/common.sh scripts/*.sh tests/*.sh`.
 - **Shared helpers live in `lib/common.sh`** — the OS-agnostic bash helpers
   (colors, `run`, `ask`/`confirm`, `inject_block`, …) are shared by the macOS
   (`scripts/lib.sh`) and Linux (`linux/scripts/lib.sh`) kits, which source it and
@@ -60,9 +60,9 @@ PRs that add non-core tools to the base will be asked to move them to
   pipeline chains; `Set-StrictMode -Version Latest` must pass, and native
   commands that write stderr are wrapped (`Invoke-NativeSilently`) because
   scripts run with `$ErrorActionPreference = 'Stop'`.
-- **Preview first** — verify with `./install.sh --dry-run` (and `--dry-run` for
-  uninstall).
-- **CI must pass** — lint + macOS dry-run + a real install→uninstall run.
+- **Preview first** — verify installer changes with `./install.sh --dry-run`.
+- **CI must pass** — lint, dry-run, real install/verification, idempotency,
+  Doctor, upgrade, and safety regressions.
 - **Versioning** — user-visible changes bump [`VERSION`](./VERSION) and get a
   note in [`CHANGELOG.md`](./CHANGELOG.md). The flags, step ids, managed-block
   markers, and env vars are a **semver contract** — see
@@ -75,8 +75,9 @@ Run what CI runs:
 ```sh
 # bash kits — lint
 bash -n install.sh linux/install.sh lib/common.sh
-shellcheck -x -S warning -e SC2154 install.sh uninstall.sh lib/common.sh \
-  scripts/*.sh scripts/ai/lazy-safe-rm linux/install.sh linux/uninstall.sh linux/scripts/*.sh
+shellcheck -x -S warning -e SC2154 install.sh lib/common.sh \
+  scripts/*.sh scripts/ai/lazy-safe-rm tests/*.sh
+shellcheck -x -S warning -e SC2154 linux/install.sh linux/scripts/*.sh
 node --check scripts/ai/shell-command-guard.js
 node --check scripts/ai/install-shell-guard.js
 tests/macos-existing-home.sh
@@ -100,10 +101,10 @@ docker run --rm -v "$PWD":/src ubuntu:24.04 bash -c \
    cp -r /src /kit && cd /kit && bash linux/install.sh --yes --skip docker'
 ```
 
-CI then runs the full install → verify → idempotency → doctor → uninstall cycle
-on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE Tumbleweed, plus an
-upgrade-path test — the checks above are enough to make a PR worth opening;
-the matrix catches the rest.
+CI then runs full installation and verification on macOS, Windows, Ubuntu,
+Fedora, Arch, and openSUSE Tumbleweed, plus platform-specific idempotency,
+Doctor, upgrade-path, and safety regressions. Automatic uninstall is retired;
+the legacy entrypoints are non-destructive stubs and are not a CI teardown step.
 
 ## Releases (maintainers)
 

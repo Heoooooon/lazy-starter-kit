@@ -111,6 +111,6 @@ function Step-Agents {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  irm https://antigravity.google/cli/install.ps1 | iex
-  # uninstall.ps1 still removes %LOCALAPPDATA%\agy when present, so a manually
-  # installed copy is torn down with the rest of the kit.
+  # Automatic uninstall is retired; a manually installed copy remains
+  # user-owned and must be removed using its official instructions.
 }

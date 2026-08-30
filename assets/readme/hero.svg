@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 540" width="1200" height="540" role="img" aria-labelledby="lsk-hero-title lsk-hero-desc">
   <title id="lsk-hero-title">lazy-starter-kit — 명령어 한 줄로 새 컴퓨터를 개발 환경으로</title>
-  <desc id="lsk-hero-desc">왼쪽에는 프로젝트 이름과 한 줄 설명, 오른쪽에는 커밋마다 설치·검증·제거를 e2e로 돌리는 CI 대상 6개 플랫폼(macOS, Windows, Ubuntu, Fedora, Arch, openSUSE) 목록, 아래에는 잘리지 않은 전체 설치 명령어가 있습니다.</desc>
+  <desc id="lsk-hero-desc">왼쪽에는 프로젝트 이름과 한 줄 설명, 오른쪽에는 커밋마다 설치·검증을 e2e로 돌리는 CI 대상 6개 플랫폼(macOS, Windows, Ubuntu, Fedora, Arch, openSUSE) 목록, 아래에는 잘리지 않은 전체 설치 명령어가 있습니다.</desc>
 
   <rect width="1200" height="540" rx="18" fill="#0d1117"/>
   <rect x="0.5" y="0.5" width="1199" height="539" rx="17.5" fill="none" stroke="#21262d"/>
@@ -25,7 +25,7 @@
   <!-- 우: 진짜 차별점 = CI 실측 -->
   <g>
     <rect x="660" y="48" width="476" height="330" rx="14" fill="#161b22" stroke="#21262d"/>
-    <text x="692" y="88" font-size="17" font-weight="700" fill="#8b949e" letter-spacing="1.4" font-family="ui-sans-serif, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', Helvetica, Arial, sans-serif">커밋마다 CI · 설치 → 검증 → 제거</text>
+    <text x="692" y="88" font-size="17" font-weight="700" fill="#8b949e" letter-spacing="1.4" font-family="ui-sans-serif, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', Helvetica, Arial, sans-serif">커밋마다 CI · 설치 → 검증 → 안전 회귀</text>
     <path d="M692 104 L1104 104" stroke="#21262d" stroke-width="2"/>
 
     <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace" font-size="21">
