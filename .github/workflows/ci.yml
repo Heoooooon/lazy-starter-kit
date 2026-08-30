@@ -56,6 +56,8 @@ jobs:
           done
       - name: shellcheck
         run: shellcheck -x -S warning -e SC2154 linux/install.sh linux/scripts/*.sh
+      - name: piped bootstrap trust-boundary regression
+        run: tests/bootstrap-working-tree.sh
 
   linux-e2e:
     name: linux install + verify (ubuntu)
