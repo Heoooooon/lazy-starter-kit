@@ -35,6 +35,8 @@ jobs:
         run: tests/macos-existing-home.sh
       - name: existing ZDOTDIR regression
         run: tests/zdotdir-existing-home.sh
+      - name: piped bootstrap trust-boundary regression
+        run: tests/bootstrap-working-tree.sh
       - name: recursive deletion boundary regression
         run: tests/safe-recursive-delete.sh
       - name: detached update failure regression
