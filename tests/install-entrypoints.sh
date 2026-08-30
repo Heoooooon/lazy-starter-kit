@@ -70,7 +70,7 @@ BOOTSTRAP_CHECKOUT="$TMP/bootstrap-checkout"
 git clone --quiet --no-hardlinks "$ROOT" "$BOOTSTRAP_CHECKOUT"
 if STARTER_KIT_REPO="$ROOT" \
   STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-  STARTER_KIT_BRANCH=main \
+  STARTER_KIT_BRANCH=HEAD \
   STARTER_KIT_COMMIT=0000000000000000000000000000000000000000 \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null 2>&1
 then
@@ -78,13 +78,13 @@ then
 fi
 STARTER_KIT_REPO="$ROOT" \
 STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-STARTER_KIT_BRANCH=main \
+STARTER_KIT_BRANCH=HEAD \
 STARTER_KIT_COMMIT="$PINNED_COMMIT" \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null
 printf 'local change\n' > "$BOOTSTRAP_CHECKOUT/untracked-change"
 if STARTER_KIT_REPO="$ROOT" \
   STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-  STARTER_KIT_BRANCH=main \
+  STARTER_KIT_BRANCH=HEAD \
   STARTER_KIT_COMMIT="$PINNED_COMMIT" \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null 2>&1
 then
