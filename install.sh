@@ -25,6 +25,7 @@
 #
 set -euo pipefail
 
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
 REPO_URL="${STARTER_KIT_REPO:-https://github.com/Heoooooon/lazy-starter-kit.git}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 # STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or "main" to ride
@@ -52,7 +53,7 @@ kit_latest_ref() {
 # Resolve the repo root, or bootstrap by cloning (supports curl | bash).
 # ---------------------------------------------------------------------------
 resolve_root() {
-  local src="${BASH_SOURCE[0]:-}"
+  local src="$SCRIPT_SOURCE"
   if [[ -n "$src" ]]; then
     local dir; dir="$(cd "$(dirname "$src")" 2>/dev/null && pwd || true)"
     if [[ -n "$dir" && -f "$dir/scripts/lib.sh" ]]; then
@@ -116,8 +117,8 @@ if [[ -n "$EPHEMERAL_ROOT" && "$ROOT" == "$EPHEMERAL_ROOT" ]]; then
 fi
 # Resolve this script's own absolute path (empty when piped from curl).
 SELF=""
-if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-  SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || true)/$(basename "${BASH_SOURCE[0]}")"
+if [[ -n "$SCRIPT_SOURCE" ]]; then
+  SELF="$(cd "$(dirname "$SCRIPT_SOURCE")" 2>/dev/null && pwd || true)/$(basename "$SCRIPT_SOURCE")"
 fi
 # If we bootstrapped (cloned), hand off to the cloned copy with the original args.
 if [[ "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then

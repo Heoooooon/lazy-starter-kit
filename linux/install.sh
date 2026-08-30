@@ -28,6 +28,7 @@
 #
 set -euo pipefail
 
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
 REPO_URL="${STARTER_KIT_REPO:-https://github.com/Heoooooon/lazy-starter-kit.git}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 # STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or "main" to ride
@@ -49,7 +50,7 @@ kit_latest_ref() {
 # Resolve the repo root (the linux/ dir), or bootstrap by cloning (curl | bash).
 # ---------------------------------------------------------------------------
 resolve_root() {
-  local src="${BASH_SOURCE[0]:-}"
+  local src="$SCRIPT_SOURCE"
   if [[ -n "$src" ]]; then
     local dir; dir="$(cd "$(dirname "$src")" 2>/dev/null && pwd || true)"
     if [[ -n "$dir" && -f "$dir/scripts/lib.sh" ]]; then
@@ -65,6 +66,10 @@ resolve_root() {
   [[ -n "$REPO_BRANCH" ]] || REPO_BRANCH="$(kit_latest_ref)"
   echo "==> Using ${REPO_BRANCH}" >&2
   if [[ -d "$CLONE_DIR/.git" ]]; then
+    if [[ -n "$(git -C "$CLONE_DIR" status --porcelain --untracked-files=normal)" ]]; then
+      echo "Existing checkout has local changes; refusing to run: $CLONE_DIR" >&2
+      exit 1
+    fi
     # Fetch the exact ref, then detach onto it — works for both tags and
     # branches, unlike `pull --ff-only`. A failure here is reported instead of
     # silently installing from a stale checkout.
@@ -84,8 +89,8 @@ resolve_root() {
 ROOT="$(resolve_root)"
 # Resolve this script's own absolute path (empty when piped from curl).
 SELF=""
-if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-  SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || true)/$(basename "${BASH_SOURCE[0]}")"
+if [[ -n "$SCRIPT_SOURCE" ]]; then
+  SELF="$(cd "$(dirname "$SCRIPT_SOURCE")" 2>/dev/null && pwd || true)/$(basename "$SCRIPT_SOURCE")"
 fi
 # If we bootstrapped (cloned), hand off to the cloned copy with the original args.
 if [[ "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then
