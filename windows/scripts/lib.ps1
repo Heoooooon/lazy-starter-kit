@@ -357,6 +357,33 @@ function Get-ProfileEncoding {
 # Update-ManagedBlock -Path <file> -Tag <tag> -Content <string>
 # Re-running replaces the block; never duplicates.
 # ---------------------------------------------------------------------------
+function Get-ManagedBlockState {
+  param(
+    [AllowEmptyCollection()][string[]]$Lines,
+    [Parameter(Mandatory)][string]$Begin,
+    [Parameter(Mandatory)][string]$End
+  )
+  $beginCount = 0
+  $endCount = 0
+  $beginIndex = -1
+  $endIndex = -1
+  for ($i = 0; $i -lt $Lines.Count; $i++) {
+    if ($Lines[$i] -eq $Begin) {
+      if ($beginIndex -lt 0) { $beginIndex = $i }
+      $beginCount++
+    }
+    if ($Lines[$i] -eq $End) {
+      if ($endIndex -lt 0) { $endIndex = $i }
+      $endCount++
+    }
+  }
+  if ($beginCount -eq 0 -and $endCount -eq 0) { return 'absent' }
+  if ($beginCount -eq 1 -and $endCount -eq 1 -and $beginIndex -lt $endIndex) {
+    return 'valid'
+  }
+  return 'damaged'
+}
+
 function Update-ManagedBlock {
   param(
     [Parameter(Mandatory)][string]$Path,
@@ -371,21 +398,20 @@ function Update-ManagedBlock {
   # don't corrupt a profile with Korean comments on WinPS 5.1.
   $enc = Get-ProfileEncoding $Path
 
-  # Refuse to touch a file whose markers are unbalanced (crashed run / hand-edit):
-  # rewriting would drop everything between the lone marker and EOF -- the user's
-  # own config. Mirrors inject_block in the bash kits.
+  # Refuse to touch a file whose markers are unmatched, duplicated, or out of order:
+  # rewriting could drop user content through EOF. Mirrors inject_block in Bash.
+  $blockState = 'absent'
   if (Test-Path $Path) {
     $existing = [System.IO.File]::ReadAllLines($Path, $enc)
-    $hasBegin = $existing -contains $begin
-    $hasEnd   = $existing -contains $end
-    if ($hasBegin -ne $hasEnd) {
-      Write-Warn "$short has an unmatched lazy-starter-kit '$Tag' marker; refusing to modify it. Fix or delete the stray marker line by hand."
+    $blockState = Get-ManagedBlockState -Lines $existing -Begin $begin -End $end
+    if ($blockState -eq 'damaged') {
+      Write-Warn "$short has malformed lazy-starter-kit '$Tag' markers; refusing to modify it. Keep exactly one begin marker before exactly one end marker, or delete the stray marker lines by hand."
       return
     }
   }
 
   if ($script:DryRun) {
-    if ((Test-Path $Path) -and (Select-String -Path $Path -SimpleMatch $begin -Quiet)) {
+    if ($blockState -eq 'valid') {
       Write-Info "[dry-run] would update '$Tag' block in $short"
     } else {
       Write-Info "[dry-run] would add '$Tag' block to $short"
@@ -431,16 +457,14 @@ function Remove-ManagedBlock {
   # Preserve the file's existing encoding on read and write-back (see Get-ProfileEncoding).
   $enc = Get-ProfileEncoding $Path
 
-  # Refuse on unbalanced markers (see Update-ManagedBlock): a lone begin marker
-  # would make the skip loop drop the user's own config below it.
+  # Refuse on every malformed marker layout (see Update-ManagedBlock).
   $existing = [System.IO.File]::ReadAllLines($Path, $enc)
-  $hasBegin = $existing -contains $begin
-  $hasEnd   = $existing -contains $end
-  if ($hasBegin -ne $hasEnd) {
-    Write-Warn "$short has an unmatched lazy-starter-kit '$Tag' marker; refusing to modify it. Fix or delete the stray marker line by hand."
+  $blockState = Get-ManagedBlockState -Lines $existing -Begin $begin -End $end
+  if ($blockState -eq 'damaged') {
+    Write-Warn "$short has malformed lazy-starter-kit '$Tag' markers; refusing to modify it. Keep exactly one begin marker before exactly one end marker, or delete the stray marker lines by hand."
     return
   }
-  if (-not $hasBegin) { Write-Info "no '$Tag' block in $short"; return }
+  if ($blockState -eq 'absent') { Write-Info "no '$Tag' block in $short"; return }
 
   if ($script:DryRun) { Write-Info "[dry-run] would remove '$Tag' block from $short"; return }
 

@@ -44,6 +44,49 @@ try {
   $script:DryRun = $false
   if (-not (Test-Path -LiteralPath $dry)) { Fail 'dry-run deleted a target' }
 
+  $tag = 'lazy-starter-kit:test'
+  $begin = "# >>> $tag >>>"
+  $end = "# <<< $tag <<<"
+  $encoding = New-Object System.Text.UTF8Encoding($true)
+  $damagedCases = @(
+    @{ Name = 'out-of-order'; Lines = @('user-before', $end, 'user-middle', $begin, 'user-after') },
+    @{ Name = 'duplicate-begin'; Lines = @('user-before', $begin, 'managed', $end, $begin, 'user-after') }
+  )
+  foreach ($damagedCase in $damagedCases) {
+    $profile = Join-Path $allowed ("profile-{0}.ps1" -f $damagedCase.Name)
+    [IO.File]::WriteAllLines($profile, [string[]]$damagedCase.Lines, $encoding)
+    $before = [Convert]::ToBase64String([IO.File]::ReadAllBytes($profile))
+    Update-ManagedBlock -Path $profile -Tag $tag -Content 'replacement'
+    if ([Convert]::ToBase64String([IO.File]::ReadAllBytes($profile)) -ne $before) {
+      Fail "Update-ManagedBlock changed a $($damagedCase.Name) profile"
+    }
+    Remove-ManagedBlock -Path $profile -Tag $tag
+    if ([Convert]::ToBase64String([IO.File]::ReadAllBytes($profile)) -ne $before) {
+      Fail "Remove-ManagedBlock changed a $($damagedCase.Name) profile"
+    }
+    if (Test-Path -LiteralPath "$profile.lazy-starter-kit.bak") {
+      Fail "damaged $($damagedCase.Name) markers created a rewrite backup"
+    }
+  }
+
+  $validProfile = Join-Path $allowed 'profile-valid.ps1'
+  [IO.File]::WriteAllLines(
+    $validProfile,
+    [string[]]@('user-before', $begin, 'old-managed', $end, 'user-after'),
+    $encoding
+  )
+  Update-ManagedBlock -Path $validProfile -Tag $tag -Content 'new-managed'
+  $updated = [IO.File]::ReadAllLines($validProfile, $encoding)
+  if (($updated -notcontains 'new-managed') -or ($updated -contains 'old-managed')) {
+    Fail 'valid managed block was not updated'
+  }
+  Remove-ManagedBlock -Path $validProfile -Tag $tag
+  $removed = [IO.File]::ReadAllLines($validProfile, $encoding)
+  if (($removed.Count -ne 2) -or $removed[0] -ne 'user-before' -or $removed[1] -ne 'user-after') {
+    Fail 'valid managed block removal did not preserve surrounding content'
+  }
+  Write-Output 'ok: Windows managed blocks fail closed on damaged markers'
+
   $junction = Join-Path $allowed 'junction'
   New-Item -ItemType Junction -Path $junction -Target $outside | Out-Null
   Expect-Throw { Remove-KitTree -AllowedRoot $allowed -Path $junction } 'junction target'
