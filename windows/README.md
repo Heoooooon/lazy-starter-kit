@@ -162,33 +162,18 @@ next run picks up from wherever it left off (initialize → run the Linux kit).
 > unattended, and CI can't do nested virtualization). Use `-Only wsl` to run it
 > explicitly, or `-Skip wsl` to leave it out.
 
-## Uninstall
+## Automatic uninstall is not supported
 
-```powershell
-.\uninstall.ps1 -DryRun     # preview the teardown
-.\uninstall.ps1             # run it (destructive groups are confirm-gated)
-.\uninstall.ps1 -Yes        # non-interactive, accept every removal
-.\uninstall.ps1 -Only agents
-```
+The legacy `uninstall.ps1` entrypoint is a non-destructive stub and performs no
+removal. The kit cannot reliably distinguish tools it installed from tools that
+already belonged to the user, so automatic package, profile, or WSL teardown
+could remove pre-existing tools, configuration, auth state, or data.
 
-Groups (reverse order): `wsl agents shell docker runtimes packages`.
-
-Safe by design:
-- **WSL distro is never auto-removed**: the `wsl` group offers
-  `wsl --unregister Ubuntu` behind a **default-No** prompt with an explicit
-  **data-loss** warning (unregister permanently deletes the whole distro
-  filesystem). It's **never** run under `-Yes`. **WSL itself stays installed** —
-  only the Ubuntu distro is offered for removal.
-- **Never auto-removed**: your **git identity**, `git` itself, and the Nerd Font.
-- **gajae-code (`gjc`) is kept** unless you pass `-WithGajae` (refused while running).
-- Removing codex backs up `~/.codex/auth.json` first; `-KeepCodexHome` leaves it intact.
-- Recursive cleanup is centralized in `Remove-KitTree`: it requires a strict
-  descendant of an explicit root and rejects drive roots, `USERPROFILE`, outside
-  paths, dot segments, and junction/reparse-point traversal before deletion.
-- The agents step installs the same Codex/Claude Code recursive-`rm` hook used by
-  the macOS/Linux kits. `lazy-safe-rm.cmd` delegates guarded workspace cleanup to
-  Git Bash, which is installed with Git for Windows.
-- Only the kit's own managed block is stripped from your PowerShell profile.
+To remove a particular tool, follow that tool's official uninstall instructions.
+Inspect both CurrentUserAllHosts PowerShell profiles and manually remove blocks
+marked `lazy-starter-kit` if you no longer want the managed shell configuration.
+Never run `wsl --unregister` unless you intend to permanently delete that distro's
+entire filesystem.
 
 ## Troubleshooting
 

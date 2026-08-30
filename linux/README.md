@@ -35,7 +35,8 @@ cd lazy-starter-kit/linux
 Fedora/RHEL (`dnf`/`yum`), Arch (`pacman`), openSUSE (`zypper`) — all **glibc**.
 Alpine/musl (`apk`) is **not supported** (upstream node, ast-grep and bun ship
 no musl builds). Ubuntu, Fedora, openSUSE and Arch are all verified
-end-to-end (install → verify → uninstall) in CI on every change.
+with a full install and verification in CI on every change; Ubuntu also covers
+idempotency and the Doctor exit-code contract.
 
 ## What you get
 
@@ -75,7 +76,7 @@ duplicated) on re-runs. Existing files you own are preserved.
 
 The agents step also installs a Codex/Claude Code `PreToolUse` guard that blocks
 recursive `rm` and provides `lazy-safe-rm` for strict descendants of the current
-Git workspace. Recursive installer/uninstaller cleanup independently validates
+Git workspace. Recursive internal cleanup independently validates
 physical containment and refuses root, HOME, boundary, outside, and symlink targets.
 
 ## Design notes
@@ -96,23 +97,16 @@ physical containment and refuses root, HOME, boundary, outside, and symlink targ
   installs docker-ce + compose + buildx and adds you to the `docker` group
   (effective after re-login).
 
-## Uninstall
+## Automatic uninstall is not supported
 
-```sh
-./uninstall.sh --dry-run     # preview the teardown
-./uninstall.sh               # run it (destructive groups are confirm-gated)
-./uninstall.sh --yes         # non-interactive, accept every removal
-./uninstall.sh --only agents # remove just one group
-```
+The legacy `uninstall.sh` entrypoint is a non-destructive stub and performs no
+removal. The kit cannot reliably distinguish tools it installed from tools that
+already belonged to the user, so removing packages or paths automatically could
+delete an existing development environment, configuration, auth state, or data.
 
-Groups (reverse order): `agents shell docker runtimes packages`.
-
-Safe by design:
-- **Never auto-removed**: your **git identity**, and the compiler/build tools.
-- **gajae-code (`gjc`) is kept** unless you pass `--with-gajae`.
-- Removing codex backs up `~/.codex/auth.json` first; `--keep-codex-home` leaves
-  `~/.codex` intact.
-- Only the kit's own managed blocks are stripped from `${ZDOTDIR-$HOME}/.zshrc`.
+To remove a particular tool, follow that tool's official uninstall instructions.
+Inspect `${ZDOTDIR-$HOME}/.zshrc` and manually remove blocks marked
+`lazy-starter-kit` if you no longer want the managed shell configuration.
 
 ## Troubleshooting
 
