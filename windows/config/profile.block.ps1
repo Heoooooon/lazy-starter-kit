@@ -9,7 +9,7 @@ if (Get-Command mise -ErrorAction SilentlyContinue) {
   (& mise activate pwsh) -join "`n" | Invoke-Expression
 }
 
-# bun: global packages (e.g. gjc / gajae-code) live in ~/.bun/bin
+# bun: global package executables live in ~/.bun/bin
 $env:BUN_INSTALL = Join-Path $env:USERPROFILE '.bun'
 if (Test-Path (Join-Path $env:BUN_INSTALL 'bin')) {
   $env:Path = (Join-Path $env:BUN_INSTALL 'bin') + ';' + $env:Path

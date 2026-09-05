@@ -7,7 +7,7 @@ command -v mise >/dev/null && eval "$(mise activate zsh)"
 [ -d /opt/homebrew/opt/rustup/bin ] && export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 [ -d /usr/local/opt/rustup/bin ]    && export PATH="/usr/local/opt/rustup/bin:$PATH"
 
-# bun: global packages (e.g. gjc / gajae-code) live in ~/.bun/bin
+# bun: global package executables live in ~/.bun/bin
 export BUN_INSTALL="$HOME/.bun"
 [ -d "$BUN_INSTALL/bin" ] && export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
