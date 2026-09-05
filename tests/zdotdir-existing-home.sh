@@ -222,15 +222,39 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
     || fail "doctor: active ZDOTDIR/.zprofile was reported missing"
 fi
 
-env -u ZDOTDIR HOME="$zshenv_home" SHELL=/bin/zsh \
+uninstall_snapshot="$TMP_ROOT/uninstall-before"
+uninstall_files=(.config/zsh/.zshrc .config/zsh/.zprofile .zshrc .zshenv .config/starship.toml)
+for file in "${uninstall_files[@]}"; do
+  mkdir -p "$uninstall_snapshot/$(dirname "$file")"
+  cp -L "$zshenv_home/$file" "$uninstall_snapshot/$file"
+  if [[ -L "$zshenv_home/$file" ]]; then
+    readlink "$zshenv_home/$file" > "$uninstall_snapshot/$file.link"
+  fi
+done
+
+expected_uninstall_status=1
+[[ "$platform_root" != "$ROOT/linux" ]] || expected_uninstall_status=2
+if env -u ZDOTDIR HOME="$zshenv_home" SHELL=/bin/zsh \
   PATH="$zshenv_home/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
-  /bin/bash "$platform_root/uninstall.sh" --only shell --yes >/dev/null 2>&1
-if grep -qsF '# >>> lazy-starter-kit:' "$zshenv_zdot/.zshrc"; then
-  fail "uninstall: managed blocks remained in the active ZDOTDIR/.zshrc"
+  /bin/bash "$platform_root/uninstall.sh" --only shell --yes >/dev/null 2>&1; then
+  fail "uninstall: automatic uninstall unexpectedly succeeded"
+else
+  uninstall_status=$?
 fi
-if [[ "$(uname -s)" == "Darwin" ]] \
-  && grep -qsF '# >>> lazy-starter-kit:' "$zshenv_zdot/.zprofile"; then
-  fail "uninstall: managed blocks remained in the active ZDOTDIR/.zprofile"
-fi
+[[ "$uninstall_status" -eq "$expected_uninstall_status" ]] \
+  || fail "uninstall: expected refusal status $expected_uninstall_status, got $uninstall_status"
+for file in "${uninstall_files[@]}"; do
+  cmp -s "$uninstall_snapshot/$file" "$zshenv_home/$file" \
+    || fail "uninstall: changed or removed $file"
+  if [[ -f "$uninstall_snapshot/$file.link" ]]; then
+    [[ -L "$zshenv_home/$file" ]] \
+      || fail "uninstall: replaced $file symlink"
+    cmp -s "$uninstall_snapshot/$file.link" <(readlink "$zshenv_home/$file") \
+      || fail "uninstall: changed $file symlink target"
+  else
+    [[ ! -L "$zshenv_home/$file" ]] \
+      || fail "uninstall: replaced $file with a symlink"
+  fi
+done
 
 printf 'ok: install targets the Zsh startup directory used by existing users\n'
