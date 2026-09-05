@@ -2,7 +2,7 @@
 #
 # lazy-starter-kit — install a complete macOS dev environment from scratch.
 # From nothing → Xcode CLT, Homebrew, runtimes, shell, Docker, AI agents
-# (Claude Code + gajae-code + codex + lazycodex).
+# (Claude Code + codex; Hermes opt-in).
 #
 # Usage:
 #   ./install.sh [options]
@@ -186,7 +186,7 @@ doctor() {
   _doctor_runtime go     runtimes
   _doctor_tool rustc runtimes
   _doctor_tool zsh   prereqs
-  for t in gjc codex claude; do
+  for t in codex claude; do
     _doctor_tool "$t" agents
   done
 

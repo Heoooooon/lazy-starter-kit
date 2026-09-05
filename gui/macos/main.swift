@@ -445,7 +445,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     }
     runtimesChoice.toolTip = "Node.js, Python, Go, Rust와 버전 관리자"
     dockerChoice.toolTip = "Colima, Docker CLI, Compose와 Buildx"
-    agentsChoice.toolTip = "Claude Code, Codex, gajae-code와 lazycodex"
+    agentsChoice.toolTip = "Claude Code, Codex"
     applyProfilePlan(profilePlans[0])
 
     let componentChoices = NSStackView(
@@ -841,7 +841,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       lines.append("Docker: Colima · Docker CLI · Compose · Buildx")
     }
     if agentsChoice.state == .on {
-      lines.append("AI 에이전트: Claude Code · Codex · gajae-code · lazycodex")
+      lines.append("AI 에이전트: Claude Code · Codex")
     }
     let details = lines.joined(separator: "\n")
     profileDetails.stringValue = details
