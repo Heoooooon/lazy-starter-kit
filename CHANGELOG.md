@@ -7,9 +7,11 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-The latest published release remains **v0.12.0**. The changes below are in
-current source only; existing release archives don't include them. `VERSION`
-remains `0.12.0` until a separate release is prepared.
+## [0.13.0] - 2026-09-05
+
+This release ships the recommended setup in the macOS and Windows GUI ZIPs,
+double-click launchers, and release-pinned source. Older v0.12.0 archives remain
+unchanged; download v0.13.0 to use the new agent and uninstall policies.
 
 ### Added
 - **Recommended profiles across macOS, Linux and Windows** ([PR #22](https://github.com/Heoooooon/lazy-starter-kit/pull/22)).
@@ -18,8 +20,8 @@ remains `0.12.0` until a separate release is prepared.
   Docker and, on Windows, WSL. Existing `full`, `minimal` and `work` profiles
   remain available; the CLI default is still `full`.
 - **Bilingual beginner setup and first-project guidance.** Root READMEs now
-  separate the explicit `main` clone and local recommended installer from
-  release-pinned setup, link the actual macOS and Windows GUI assets, and
+  provide release-pinned source and recommended installer commands,
+  link the actual macOS and Windows GUI assets, and
   explain inspection, preview, apply, new-terminal version checks and sign-in.
   Stable `#recommended-setup` and `#first-project` anchors are provided in both
   READMEs. The profile and release/source policies are recorded in VERSIONING.md.
@@ -89,7 +91,7 @@ behavior already shipped by v0.12.0.
 - **Antigravity CLI is no longer installed by `install.sh`.** It has its own
   Google account flow and isn't a kit-managed agent. In this released snapshot,
   the agents step installs Claude Code, gajae-code, codex and lazycodex,
-  plus opt-in Hermes Agent on macOS/Linux. See Unreleased for the current roster.
+  plus opt-in Hermes Agent on macOS/Linux. See v0.13.0 for the current roster.
 
 ### Removed
 - **`ANTIGRAVITY=1` no longer does anything.** The env var is gone from all
@@ -454,7 +456,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.10.7...v0.11.0
 [0.9.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.1...v0.9.0
