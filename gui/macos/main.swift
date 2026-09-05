@@ -10,6 +10,11 @@ private struct InstallerProfile {
 
 private let profilePlans = [
   InstallerProfile(
+    id: "recommended",
+    title: "추천 설치",
+    steps: ["prereqs", "brew", "runtimes", "shell", "git", "agents"]
+  ),
+  InstallerProfile(
     id: "full",
     title: "전체 설치",
     steps: ["prereqs", "brew", "runtimes", "shell", "docker", "git", "agents"]
@@ -236,6 +241,7 @@ private func selfTest() {
     "hasApplicationIcon": true,
     "interfaceVersion": 4,
     "profiles": profiles,
+    "defaultProfile": profilePlans[0].id,
     "profileSteps": profileSteps,
     "supportsAppearanceSnapshots": true,
     "supportsCustomSelection": true,
@@ -1165,6 +1171,32 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     }
   }
 
+  private func firstUseGuidance() -> String {
+    let steps = selectedStepIDs()
+    var checks = ["brew --version; git --version; gh --version"]
+    if steps.contains("runtimes") {
+      checks.append("node --version; python3 --version; go version; rustc --version")
+    }
+    if steps.contains("docker") {
+      checks.append("docker --version; colima --version")
+    }
+    if steps.contains("agents") {
+      checks.append("claude --version; codex --version")
+    }
+    var lines = [
+      "",
+      "설치기 종료는 도구 검증이 아닙니다. 오류나 건너뛴 항목은 위 로그를 확인하세요.",
+      "새 터미널을 열고 선택한 도구의 버전을 직접 확인하세요:",
+    ] + checks + [
+      "",
+      "첫 프로젝트: 작업 폴더에서 git init을 실행하세요.",
+    ]
+    if steps.contains("agents") {
+      lines.append("그 폴더에서 claude 또는 codex를 실행하고 도구 자체 로그인 안내를 따르세요.")
+    }
+    return lines.joined(separator: "\n") + "\n"
+  }
+
   private func handleSessionResult(_ result: InstallerProcessResult, dryRun: Bool) {
     if result.cancelled {
       finish(
@@ -1188,14 +1220,14 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       message: result.status == 0
         ? (
           dryRun
-            ? "미리보기 완료 · 실제 설치를 시작할 수 있습니다."
-            : "구성 적용 완료 · 새 터미널을 열어 PATH와 프롬프트를 적용하세요."
+            ? "미리보기 완료 · 구성 적용 가능"
+            : "설치기 완료 · 도구 확인 필요"
         )
         : (dryRun
           ? "미리보기가 완료되지 않았습니다. 아래 로그를 확인해 주세요."
           : "설치가 완료되지 않았습니다. 아래 로그를 확인해 주세요."),
       action: action,
-      capturedLog: result.output
+      capturedLog: result.output + (action == .openNewTerminal ? firstUseGuidance() : "")
     )
   }
 
@@ -1265,6 +1297,13 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       let environment = BuildInfo.developerMode
         ? ProcessInfo.processInfo.environment
         : [:]
+      if let snapshotPath = environment["STARTER_KIT_GUI_SNAPSHOT"] {
+        do {
+          try renderSnapshot(to: snapshotPath)
+        } catch {
+          appendLog("\nQA snapshot failed: \(error.localizedDescription)\n")
+        }
+      }
       if let resultPath = environment["STARTER_KIT_GUI_RESULT"] {
         do {
           try "\(code)\n\(message)\n\(action.rawValue)\n\(guidance?.rawValue ?? "")\n".write(
@@ -1331,9 +1370,10 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     case "ready-success":
       dryRun.state = .off
       logEmptyState.isHidden = true
-      log.stringValue = "qa-selected:--yes --only prereqs,brew,runtimes,shell,docker,git,agents\nqa-final\n"
+      log.stringValue = "qa-selected:--yes --only \(selectedStepIDs().joined(separator: ","))\nqa-final\n"
+        + firstUseGuidance()
       setStatus(
-        "구성 적용 완료 · 새 터미널을 열어 PATH와 프롬프트를 적용하세요.",
+        "설치기 완료 · 도구 확인 필요",
         style: .success
       )
       installButton.title = "구성 다시 적용"
