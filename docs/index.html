@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CMORE Ready — 새 컴퓨터, 개발 준비 끝.</title>
+  <title>CMORE Ready · 새 컴퓨터, 개발 준비 끝.</title>
   <meta name="description" content="macOS, Windows, Linux의 개발 도구와 AI 코딩 환경을 오픈소스 설치 로직으로 한 번에 준비하세요.">
   <link rel="canonical" href="https://cmore.dev/lazy-starter-kit/">
   <meta name="theme-color" content="#070B12">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="CMORE Ready">
-  <meta property="og:title" content="CMORE Ready — 새 컴퓨터, 개발 준비 끝.">
+  <meta property="og:title" content="CMORE Ready · 새 컴퓨터, 개발 준비 끝.">
   <meta property="og:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
   <meta property="og:url" content="https://cmore.dev/lazy-starter-kit/">
   <meta property="og:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
   <meta property="og:image:width" content="1280">
   <meta property="og:image:height" content="640">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="CMORE Ready — 새 컴퓨터, 개발 준비 끝.">
+  <meta name="twitter:title" content="CMORE Ready · 새 컴퓨터, 개발 준비 끝.">
   <meta name="twitter:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
   <meta name="twitter:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
   <link rel="icon" href="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" type="image/svg+xml">
@@ -913,7 +913,7 @@
         </p>
         <div class="actions">
           <a class="button button-primary" href="#start">무료로 시작</a>
-          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">릴리스 노트</a>
+          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0">v0.13.0 릴리스 노트</a>
         </div>
         <p class="source-note">by CMORE · Powered by lazy-starter-kit</p>
       </div>
@@ -930,7 +930,7 @@
             <img src="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" width="64" height="64" alt="">
             <div>
               <strong>설치 계획 미리보기</strong>
-              <span>현재 소스 기준 예시이며, 공개 ZIP과는 다릅니다.</span>
+              <span>v0.13.0 추천 구성 예시이며, 실제 설치 결과는 아닙니다.</span>
             </div>
           </div>
           <div class="setup-choice">
@@ -983,14 +983,14 @@
           <span class="step-number">01</span>
           <div>
             <h3>내 운영체제에서 시작</h3>
-            <p>새 추천 구성을 쓰려면 <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">현재 소스 기준 추천 설치 안내</a>에서 시작하세요. 공개 ZIP은 이전 릴리스입니다.</p>
+            <p>처음이라면 아래 <a href="#start">v0.13.0 GUI ZIP</a>을 받아 시작하세요. macOS와 Windows를 지원하며, Linux는 v0.13.0 소스로 설치합니다.</p>
           </div>
         </article>
         <article class="step">
           <span class="step-number">02</span>
           <div>
             <h3>구성을 고르고 미리보기</h3>
-            <p>현재 소스의 GUI는 추천 설치·미리보기로 시작합니다. Docker와 Windows WSL은 제외됩니다. CLI 기본값은 전체 설치이므로 추천 프로필을 명시하세요.</p>
+            <p>v0.13.0 GUI는 recommended + 미리보기로 시작합니다. Docker와 Windows WSL은 제외됩니다. CLI 기본값은 여전히 full이므로 recommended 프로필을 명시하세요.</p>
           </div>
         </article>
         <article class="step">
@@ -1028,7 +1028,7 @@
           </div>
           <div class="safety-item">
             <strong>자동 제거 미지원</strong>
-            <span>기존 도구와 키트가 설치한 도구를 확실히 구분할 수 없어 자동 제거는 지원하지 않습니다. 개별 도구의 공식 제거 안내를 따르고, 설정과 백업은 직접 확인하세요.</span>
+            <span>v0.13.0은 기존 도구와 키트가 설치한 도구를 확실히 구분할 수 없어 자동 제거를 지원하지 않습니다. 개별 도구의 공식 제거 안내를 따르고, 설정과 백업은 직접 확인하세요.</span>
           </div>
         </div>
       </div>
@@ -1044,6 +1044,7 @@
           <p class="section-intro">
             추천 구성은 런타임, 셸, Git, Claude Code와 Codex를 준비합니다.
             Docker는 별도 선택이며, Hermes는 macOS·Linux에서 선택 설치합니다.
+            v0.13.0은 gajae-code (gjc), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
             설치 후 새 터미널에서 선택한 도구를 확인하세요. doctor는 추천 구성만이 아닌 전체 도구 목록을 점검합니다.
           </p>
           <ul class="tool-band" aria-label="지원 도구">
@@ -1086,30 +1087,30 @@
         <p class="section-kicker">Start free</p>
         <h2 id="start-title">오늘, 같은 출발선에서 시작하세요.</h2>
         <p>
-          <strong>주의: 최신 공개 릴리스 v0.12.0은 추천 설치 도입과 레거시 에이전트 설치 중단 이전 버전입니다.</strong>
-          아래 GUI ZIP에는 이 변경이 없습니다. 새 구성을 쓰려면
-          <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">현재 소스 기준 추천 설치 안내</a>를 따르세요.
-          공개 버전의 변경 내역은 <a href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">릴리스 노트</a>에서 별도로 확인하세요.
+          <strong>v0.13.0 GUI는 추천 설치와 미리보기로 시작합니다.</strong>
+          내 운영체제의 ZIP을 풀고 설치기를 여세요. 로그를 확인한 뒤 미리보기를 끄고 적용하세요.
+          자세한 순서는 <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.13.0/README.md#recommended-setup">v0.13.0 추천 설치 안내</a>를 따르세요.
+          변경 내역은 <a href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0">v0.13.0 릴리스 노트</a>에서 확인하세요.
         </p>
         <ul class="download-list" aria-label="운영체제별 시작 방법">
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-macos-gui.zip">
               <strong>macOS</strong>
-              <span>공개 GUI ZIP · 현재 v0.12.0<br>새 추천 구성은 포함되지 않습니다.</span>
+              <span>v0.13.0 GUI ZIP · macOS 14+<br>압축을 풀고 Lazy Starter Kit Installer.app을 여세요.</span>
               <b>macOS ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip">
               <strong>Windows</strong>
-              <span>공개 GUI ZIP · 현재 v0.12.0<br>새 추천 구성은 포함되지 않습니다.</span>
+              <span>v0.13.0 GUI ZIP · 추천 + 미리보기<br>압축을 풀고 Lazy-Starter-Kit-Installer.cmd를 여세요.</span>
               <b>Windows ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.13.0/linux/README.md">
               <strong>Linux</strong>
-              <span>현재 소스에서 추천 구성의 미리보기·설치·확인 순서를 안내합니다.</span>
+              <span>GUI 없이 v0.13.0 소스로 설치합니다. 추천 구성의 미리보기·설치·확인 순서를 안내합니다.</span>
               <b>추천 설치 안내</b>
             </a>
           </li>

@@ -27,7 +27,7 @@ Docker, and AI coding agents one by one.
 lazy-starter-kit bootstraps that development environment in one pass and gives
 you a way to verify the result afterwards.
 
-The current-source recommended setup includes:
+The v0.13.0 recommended setup includes:
 
 - CLI: git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide
 - Runtimes: Node.js, Python, Go, Rust
@@ -47,20 +47,45 @@ current state and `--dry-run` to preview changes before applying them.
 
 <a id="recommended-setup"></a>
 
-## Recommended setup (current source, not yet released)
+## Recommended setup (v0.13.0)
 
-**Start here if you want Claude Code and Codex without retired agents or
-Docker/WSL.** The latest release is still **v0.12.0**. Its installers include
-the older agent roster (gajae-code and lazycodex), start with the full profile,
-and still include automatic uninstall. They don't provide the current-source
-policy. Release ZIPs are pinned to their release, not updated by changes to
-`main`.
+**New to this? On macOS and Windows, use the v0.13.0 GUI below.**
+The recommended profile sets up Claude Code and Codex without Docker or Windows
+WSL. v0.13.0 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+existing configuration. It doesn't provide automatic uninstall.
 
-The commands below explicitly clone `main` and run the local installer. This
-opts into unreleased changes; it isn't the release-pinned bootstrap route.
+<a id="gui-downloads"></a>
+
+### GUI downloads
+
+| OS | v0.13.0 GUI asset | Open after extracting |
+|---|---|---|
+| macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | No GUI package | Use the v0.13.0 source commands below or the [Linux guide](linux/README.md) |
+
+The GUI starts with **recommended + preview**. Review the selected components
+and preview log before turning preview off and applying. The recommended plan
+should omit `docker` and, on Windows, `wsl`. The CLI still defaults to **full**
+when no profile is passed. After installation, continue with
+[a new terminal, version checks and your first project](#first-project).
+A successful installer exit doesn't verify every tool or account sign-in.
+
+See the [v0.13.0 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0)
+for changes and all assets. Packaged GUIs pin their own release commit; the
+standard remote bootstrap resolves the newest release tag by default.
+Changes to `main` don't automatically update release ZIPs.
+
+Older **v0.12.0** has no `recommended` profile and its GUIs start with full +
+preview. It still installs gajae-code and lazycodex and includes the old automatic
+uninstall behavior. Don't use it for the setup described here.
+
+### Install from source (Linux or terminal users)
+
+The commands below clone the **v0.13.0 tag** and run the local installer.
 Install [Git](https://git-scm.com/downloads) first and open a new terminal, or
-download the [main source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip),
-extract it, and open a terminal in `lazy-starter-kit-main`. With the ZIP, skip
+download the [v0.13.0 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.13.0.zip),
+extract it, and open a terminal in `lazy-starter-kit-0.13.0`. With the ZIP, skip
 the clone and `cd` commands. Use a new folder rather than an existing checkout.
 
 ### 1. Inspect and preview
@@ -72,8 +97,8 @@ and, on Windows, `wsl` are absent from the plan.
 ### macOS
 
 ```bash
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # Inspect install.sh and scripts/, then preview:
 bash ./install.sh --profile recommended --dry-run
 ```
@@ -83,8 +108,8 @@ bash ./install.sh --profile recommended --dry-run
 Ubuntu/Debian, Fedora/RHEL, Arch, and openSUSE families:
 
 ```bash
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # Inspect linux/install.sh and linux/scripts/, then preview:
 bash ./linux/install.sh --profile recommended --dry-run
 ```
@@ -96,8 +121,8 @@ Platform details: [Linux guide](linux/README.md).
 In PowerShell (5.1 or newer):
 
 ```powershell
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # Inspect windows/install.ps1 and windows/scripts/, then preview:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile recommended -DryRun
 ```
@@ -122,36 +147,11 @@ and rerun the same command if asked. Review warnings and skipped steps. A
 successful installer exit isn't proof that every tool is installed or signed in.
 Continue with [a new terminal and your first project](#first-project).
 
-### GUI downloads and the standard release route
-
-These are the **released v0.12.0** packages, not the recommended source changes
-above. **Don't use them if avoiding retired-agent installation is required.**
-
-| OS | Released GUI asset | Open after extracting |
-|---|---|---|
-| macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | No GUI package | Use the [source commands above](#recommended-setup) or the [Linux guide](linux/README.md) |
-
-See the [latest release page](https://github.com/Heoooooon/lazy-starter-kit/releases/latest)
-for its version and all assets. The standard remote bootstrap resolves the
-newest release tag by default; packaged GUIs pin their own release commit. Neither
-route supplies untagged changes. The v0.12.0 GUIs start with **full + preview**;
-current-source GUIs start with **recommended + preview**. Review the selected
-components and preview log before turning preview off and applying. After
-installation, open a new terminal and check versions yourself.
-
-For a source checkout pinned to the current release, use
-`git clone --branch v0.12.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.12.0`.
-Inspect it, then run its OS installer with `--profile full --dry-run` or
-`-Profile full -DryRun`; remove only the preview flag to apply that older setup.
-The `recommended` profile isn't available in v0.12.0.
-
 ---
 
 ## Common options
 
-Current source, from the repository root (replace `./install.sh` with
+From the v0.13.0 source root (replace `./install.sh` with
 `./linux/install.sh` on Linux):
 
 ```bash
@@ -167,7 +167,7 @@ Current source, from the repository root (replace `./install.sh` with
 Windows uses `windows\install.ps1` with PowerShell-style flags such as `-DryRun`
 and `-Only` instead of `--dry-run` and `--only`.
 
-| Profile | Current-source selection |
+| Profile | v0.13.0 selection |
 |---|---|
 | `recommended` | Core tools, runtimes, shell, Git, Claude Code and Codex. No Docker or Windows WSL. |
 | `full` | All steps, including Docker and Windows WSL. Still the CLI default when no profile is passed. Windows installation prompts and prerequisites still apply. |
@@ -233,9 +233,9 @@ Review proposed file changes and commands before accepting them.
 
 ## Automatic uninstall is not supported
 
-**Current source doesn't provide automatic uninstall functionality.**
+**v0.13.0 doesn't provide automatic uninstall functionality.**
 
-The published v0.12.0 release still has the old removal behavior. Don't use an
+The older v0.12.0 release still has the old removal behavior. Don't use an
 old release uninstaller to clean up an existing machine.
 
 Older versions included uninstall scripts, but that behavior has been retired.
@@ -301,7 +301,7 @@ Get-Command python -All
 
 ## Corporate machines
 
-The current-source `work` profile excludes Docker and Windows WSL. It isn't a
+The v0.13.0 `work` profile excludes Docker and Windows WSL. It isn't a
 permission bypass. From the source root (use `./linux/install.sh` on Linux):
 
 ```bash

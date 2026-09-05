@@ -6,20 +6,19 @@ against and pin, and what a version number promises about it.
 
 ## Current source versus published releases
 
-The latest published release remains **v0.12.0**. It uses the older agent
-roster, defaults to the full profile, and includes automatic uninstall. The
-recommended profile and retirement policies below are unreleased source changes
+**v0.13.0** ships the recommended profile and retirement policies below,
 from [PR #6](https://github.com/Heoooooon/lazy-starter-kit/pull/6),
 [PR #21](https://github.com/Heoooooon/lazy-starter-kit/pull/21) and
-[PR #22](https://github.com/Heoooooon/lazy-starter-kit/pull/22). `VERSION` remains
-`0.12.0`; a local `--version` / `-Version` result alone doesn't identify these
-changes. Record the checkout commit when pinning source.
+[PR #22](https://github.com/Heoooooon/lazy-starter-kit/pull/22). `VERSION` is
+`0.13.0`. Older v0.12.0 archives retain the older agent roster, full GUI default
+and automatic uninstall. Download the new release rather than reusing those ZIPs.
 
 The standard remote bootstrap selects the newest release tag by default.
 Packaged GUIs pin their own release commit, so downloading v0.12.0 again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
-[recommended setup guide](README.en.md#recommended-setup) to explicitly clone
-`main` and preview the local installer before applying. Don't use an older
+[recommended setup guide](README.en.md#recommended-setup) to download the GUI
+or clone `v0.13.0` and preview the local installer before applying. Record the
+checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.
 
 ## The public interface (semver-covered)
@@ -30,7 +29,7 @@ Breaking any of these requires a **major** version bump:
 |---|---|
 | **CLI flags** | `--only`, `--skip`, `--dry-run`, `--yes`, `--profile`, `--doctor`, `--update`, `--list`, `--version` (Windows: the `-PascalCase` equivalents) |
 | **Step ids** | install steps (`prereqs`, `brew`/`packages`, `runtimes`, `shell`, `docker`, `git`, `agents`, `wsl`); the values accepted by `--only`/`--skip` |
-| **Profile names** | `recommended` (current source), `full`, `minimal`, `work` |
+| **Profile names** | `recommended` (since v0.13.0), `full`, `minimal`, `work` |
 | **Managed-block markers** | `# >>> lazy-starter-kit:<tag> >>>` … `# <<< lazy-starter-kit:<tag> <<<` in `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, PowerShell profiles; tools and users may key on these |
 | **Environment variables** | `STARTER_KIT_BRANCH` (bootstrap ref; unset selects the newest release tag), `STARTER_KIT_COMMIT` (macOS/Windows bootstrap only: require the ref to resolve to one full 40-character commit SHA), `HERMES=1` (opt in to the Hermes agent, macOS/Linux), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
 | **Installer exit codes** | `0` success / `1` failure; `--doctor` / `-Doctor` exits `0` when nothing in its full inventory is missing (PATH-only warnings don't fail) and `1` when something is missing |
@@ -45,7 +44,7 @@ manually check out a reviewed full commit SHA in a local clone, confirm it with
 `git rev-parse HEAD`, and run that checkout's `linux/install.sh` without
 `--update`. Setting the variable on the Linux bootstrap isn't a commit pin.
 
-## Profile and retirement policy (current source)
+## Profile and retirement policy (since v0.13.0)
 
 - `recommended` selects `prereqs`, `brew` (macOS) or `packages` (Linux/Windows),
   `runtimes`, `shell`, `git` and `agents`. Docker and Windows WSL are excluded.
@@ -64,7 +63,7 @@ manually check out a reviewed full commit SHA in a local clone, confirm it with
   is preserved. Hermes is opt-in on macOS/Linux, not a default requirement.
 - Automatic uninstall is retired. The old entrypoints stop with a nonzero exit and
   perform no deletion; uninstall flags and groups are no longer supported.
-  This pre-1.0 breaking change is recorded under Unreleased in the changelog.
+  This pre-1.0 breaking change is recorded under v0.13.0 in the changelog.
 
 ## Not covered (may change in any release)
 

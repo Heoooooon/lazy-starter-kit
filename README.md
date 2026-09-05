@@ -27,7 +27,7 @@ AI 코딩 에이전트 등을 하나씩 설치해야 합니다.
 lazy-starter-kit은 이 과정을 한 번에 구성하고, 설치가 끝난 뒤 제대로
 동작하는지 확인할 수 있게 만든 개발 환경 부트스트랩입니다.
 
-현재 소스의 추천 설치에 포함되는 항목:
+v0.13.0의 추천 설치에 포함되는 항목:
 
 - CLI: git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide
 - 런타임: Node.js, Python, Go, Rust
@@ -47,19 +47,44 @@ Windows 설치기는 없습니다. 현재 키트는 지원이 끝난 gajae-code 
 
 <a id="recommended-setup"></a>
 
-## 추천 설치 (현재 소스, 아직 미출시)
+## 추천 설치 (v0.13.0)
 
-**지원이 끝난 에이전트나 Docker/WSL 없이 Claude Code와 Codex로 시작하려면 이 경로를
-사용하세요.** 최신 릴리스는 아직 **v0.12.0**입니다. 이 릴리스는 이전 에이전트 구성
-(gajae-code, lazycodex 포함)과 full 기본 프로필을 사용하며 자동 제거 기능도 남아
-있습니다. 현재 소스의 정책과 다릅니다. 릴리스 ZIP은 해당 릴리스에 고정되므로
-`main`의 변경 사항이 자동으로 반영되지 않습니다.
+**처음이라면 macOS와 Windows에서는 아래 v0.13.0 GUI를 사용하세요.**
+추천 구성은 Docker와 Windows WSL 없이 Claude Code와 Codex를 준비합니다.
+v0.13.0은 gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을
+삭제하지 않으며, 자동 제거 기능도 제공하지 않습니다.
 
-아래 명령은 `main`을 명시적으로 clone한 뒤 로컬 설치기를 실행합니다. 미출시 변경을
-사용하는 경로이며 릴리스에 고정된 부트스트랩 경로가 아닙니다.
+<a id="gui-downloads"></a>
+
+### GUI 다운로드
+
+| OS | v0.13.0 GUI 파일 | 압축을 푼 뒤 열 파일 |
+|---|---|---|
+| macOS 14+, Apple Silicon 또는 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | GUI 패키지 없음 | 아래 v0.13.0 소스 명령 또는 [Linux 안내](linux/README.md) 사용 |
+
+GUI는 **recommended + 미리보기**로 시작합니다. 선택한 구성과 미리보기 로그를
+확인한 뒤 미리보기를 끄고 적용하세요. 추천 계획에는 `docker`가 없고 Windows에서는
+`wsl`도 없어야 합니다. CLI에서 프로필을 생략하면 여전히 **full**입니다.
+설치 후에는 [새 터미널에서 버전 확인과 첫 프로젝트](#first-project)로 이어집니다.
+설치 프로세스의 성공 종료만으로 모든 도구의 설치나 로그인이 확인되지는 않습니다.
+
+[v0.13.0 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0)에서
+변경 내역과 전체 파일을 확인하세요. 패키지 GUI는 자신의 릴리스 커밋에 고정되며,
+일반 원격 부트스트랩은 기본적으로 최신 릴리스 태그를 선택합니다.
+릴리스 ZIP에 `main`의 변경 사항이 자동으로 반영되지는 않습니다.
+
+이전 **v0.12.0**에는 `recommended`가 없고 GUI는 full + 미리보기로 시작합니다.
+gajae-code와 lazycodex 설치 및 이전 자동 제거 동작도 남아 있으므로,
+이 안내의 설치 경로로 사용하지 마세요.
+
+### 소스에서 설치 (Linux 또는 터미널 사용자)
+
+아래 명령은 **v0.13.0 태그**를 clone한 뒤 로컬 설치기를 실행합니다.
 먼저 [Git](https://git-scm.com/downloads)을 설치하고 새 터미널을 열어 주세요.
-Git 없이 시작하려면 [main 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip)을
-받아 압축을 풀고 `lazy-starter-kit-main` 폴더에서 터미널을 여세요. ZIP을 사용하면
+Git 없이 시작하려면 [v0.13.0 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.13.0.zip)을
+받아 압축을 풀고 `lazy-starter-kit-0.13.0` 폴더에서 터미널을 여세요. ZIP을 사용하면
 아래 clone과 `cd` 명령은 생략합니다. 기존 작업 폴더가 아닌 새 폴더를 사용하세요.
 
 ### 1. 내용을 읽고 미리보기
@@ -71,8 +96,8 @@ Git 없이 시작하려면 [main 소스 ZIP](https://github.com/Heoooooon/lazy-s
 ### macOS
 
 ```bash
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # install.sh와 scripts/를 읽은 뒤 미리보기:
 bash ./install.sh --profile recommended --dry-run
 ```
@@ -82,8 +107,8 @@ bash ./install.sh --profile recommended --dry-run
 Ubuntu/Debian, Fedora/RHEL, Arch, openSUSE 계열을 지원합니다.
 
 ```bash
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # linux/install.sh와 linux/scripts/를 읽은 뒤 미리보기:
 bash ./linux/install.sh --profile recommended --dry-run
 ```
@@ -95,8 +120,8 @@ bash ./linux/install.sh --profile recommended --dry-run
 PowerShell 5.1 이상에서:
 
 ```powershell
-git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0
 # windows/install.ps1과 windows/scripts/를 읽은 뒤 미리보기:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile recommended -DryRun
 ```
@@ -121,35 +146,11 @@ Tools와 Homebrew 준비가 필요할 수 있습니다. 안내에 따라 준비�
 설치 프로세스의 성공 종료가 모든 도구의 설치나 로그인 확인을 뜻하지는 않습니다.
 [새 터미널을 열고 첫 프로젝트 시작하기](#first-project)로 이어집니다.
 
-### GUI 다운로드와 일반 릴리스 경로
-
-아래는 **출시된 v0.12.0** 패키지이며 위의 추천 소스 변경을 포함하지 않습니다.
-**지원이 끝난 에이전트를 설치하지 않아야 한다면 이 패키지를 사용하지 마세요.**
-
-| OS | 출시된 GUI 파일 | 압축을 푼 뒤 열 파일 |
-|---|---|---|
-| macOS 14+, Apple Silicon 또는 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | GUI 패키지 없음 | [위의 소스 명령](#recommended-setup) 또는 [Linux 안내](linux/README.md) 사용 |
-
-[최신 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/latest)에서
-버전과 전체 파일을 확인할 수 있습니다. 일반 원격 부트스트랩은 기본적으로 최신
-릴리스 태그를 선택하고, 패키지 GUI는 자신의 릴리스 커밋에 고정됩니다. 어느 경로도
-태그가 없는 변경을 제공하지 않습니다. v0.12.0 GUI의 초기 선택은 **full + 미리보기**,
-현재 소스 GUI는 **recommended + 미리보기**입니다. 선택한 구성과 미리보기 로그를
-확인한 뒤 미리보기를 끄고 적용하세요. 설치 후에는 새 터미널에서 직접 버전을 확인하세요.
-
-현재 릴리스에 고정한 소스가 필요하다면
-`git clone --branch v0.12.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.12.0`을
-사용하세요. 내용을 확인한 뒤 해당 OS 설치기에 `--profile full --dry-run` 또는
-`-Profile full -DryRun`을 전달하고, 이전 구성을 적용하려면 미리보기 옵션만 빼세요.
-v0.12.0에는 `recommended` 프로필이 없습니다.
-
 ---
 
 ## 자주 쓰는 옵션
 
-현재 소스의 저장소 루트에서 실행합니다. Linux에서는 `./install.sh`를
+v0.13.0 소스의 저장소 루트에서 실행합니다. Linux에서는 `./install.sh`를
 `./linux/install.sh`로 바꾸세요.
 
 ```bash
@@ -165,7 +166,7 @@ v0.12.0에는 `recommended` 프로필이 없습니다.
 Windows에서는 `windows\install.ps1`에 `--dry-run` 대신 `-DryRun`, `--only`
 대신 `-Only`처럼 PowerShell 형식을 사용합니다.
 
-| 프로필 | 현재 소스의 설치 범위 |
+| 프로필 | v0.13.0 설치 범위 |
 |---|---|
 | `recommended` | 기본 도구, 런타임, 셸, Git, Claude Code와 Codex. Docker와 Windows WSL 제외. |
 | `full` | Docker와 Windows WSL을 포함한 전체 단계. CLI에서 프로필을 생략하면 여전히 이 범위를 사용합니다. Windows의 설치 확인과 사전 조건은 그대로 적용됩니다. |
@@ -232,9 +233,9 @@ Codex가 키트의 셸 안전 훅 승인을 요청하면 내용을 검토한 뒤
 
 ## 자동 제거(Uninstall)는 지원하지 않습니다
 
-**현재 소스는 자동 uninstall 기능을 제공하지 않습니다.**
+**v0.13.0은 자동 uninstall 기능을 제공하지 않습니다.**
 
-출시된 v0.12.0에는 이전 제거 동작이 남아 있습니다. 기존 컴퓨터를 정리하려고
+이전 v0.12.0에는 당시의 제거 동작이 남아 있습니다. 기존 컴퓨터를 정리하려고
 오래된 릴리스의 제거 스크립트를 사용하지 마세요.
 
 이전 버전에는 제거 스크립트가 있었지만 폐기했습니다. 이유는 설치 이후
@@ -299,7 +300,7 @@ Get-Command python -All
 
 ## 회사 PC
 
-현재 소스의 `work` 프로필은 Docker와 Windows WSL을 제외하지만 권한 제한을
+v0.13.0의 `work` 프로필은 Docker와 Windows WSL을 제외하지만 권한 제한을
 우회하지는 않습니다. 소스 루트에서 실행하세요. Linux는 `./linux/install.sh`를 사용합니다.
 
 ```bash

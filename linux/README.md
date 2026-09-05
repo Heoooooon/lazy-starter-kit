@@ -10,34 +10,42 @@ _Build tools · CLI · runtimes · shell · Git · Codex and Claude Code. Contai
 
 ---
 
-> **🇰🇷 한국어 빠른 시작**: Git이 설치된 터미널에서 `main` 소스를 새 폴더에
-> 복제하고 추천 구성을 미리 확인하세요. `lazy-starter-kit-source` 폴더가 이미
-> 있다면 다른 작업 폴더에서 시작하세요. 복제에 실패하면 다음 단계로 진행하지 마세요.
+> **🇰🇷 한국어 빠른 시작**: Linux는 GUI 없이 소스로 설치합니다. Git이 설치된
+> 터미널에서 `v0.13.0` 태그를 새 폴더에 복제하고 추천 구성을 미리 확인하세요.
+> `lazy-starter-kit-v0.13.0` 폴더가 이미 있다면 다른 작업 폴더에서 시작하세요.
+> 복제에 실패하면 다음 단계로 진행하지 마세요.
 > ```sh
-> git clone --branch main --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-source &&
->   cd lazy-starter-kit-source/linux &&
+> git clone --branch v0.13.0 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0 &&
+>   cd lazy-starter-kit-v0.13.0/linux &&
 >   ./install.sh --profile recommended --dry-run
 > ```
 > 로그를 확인한 뒤 같은 터미널에서 아래 명령을 실행하면 Docker 없이 설치합니다:
 > ```sh
 > ./install.sh --profile recommended
 > ```
+> Git이 없다면 [v0.13.0 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.13.0.zip)을
+> 풀고 `lazy-starter-kit-0.13.0/linux`에서 미리보기와 적용 명령을 실행하세요.
+> CLI 기본값은 여전히 full입니다. v0.13.0은 자동 제거를 지원하지 않으며,
+> gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
 > apt·dnf·pacman·zypper를 자동 감지합니다 (glibc 배포판; Alpine/musl 미지원).
 > [한국어 추천 설치 안내](../README.md#recommended-setup)
 
 ## Quick start
 
-With Git available, clone `main` into a fresh directory and preview the
-recommended profile. This uses source, not the latest release (`v0.12.0`).
-Start in a folder without an existing `lazy-starter-kit-source` directory.
+Linux has no GUI package. With Git available, clone the **v0.13.0 tag** into a
+fresh directory and preview the recommended profile.
+Start in a folder without an existing `lazy-starter-kit-v0.13.0` directory.
 The `&&` chain stops if cloning or changing directories fails:
 
 ```sh
-git clone --branch main --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-source &&
-  cd lazy-starter-kit-source/linux &&
+git clone --branch v0.13.0 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0 &&
+  cd lazy-starter-kit-v0.13.0/linux &&
   ./install.sh --profile recommended --dry-run
 ```
 
+Without Git, download the [v0.13.0 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.13.0.zip),
+extract it, and open a terminal in `lazy-starter-kit-0.13.0/linux`. Inspect
+`install.sh` and `scripts/`, then run `./install.sh --profile recommended --dry-run`.
 After reviewing the preview, apply from the same terminal and directory:
 
 ```sh
@@ -48,8 +56,14 @@ After reviewing the preview, apply from the same terminal and directory:
 The CLI default is still `full` when no profile is specified. `minimal` also
 omits agents; `work` selects the same steps as `recommended`.
 
+v0.13.0 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+existing configuration. Automatic uninstall isn't supported. Older v0.12.0
+doesn't have the recommended profile or these policies; don't use it for this setup.
+For macOS or Windows, the [v0.13.0 GUI downloads](../README.en.md#gui-downloads)
+start with recommended + preview.
+
 **Supported distros** (auto-detected package manager): Debian/Ubuntu (`apt`),
-Fedora/RHEL (`dnf`/`yum`), Arch (`pacman`), openSUSE (`zypper`) — all **glibc**.
+Fedora/RHEL (`dnf`/`yum`), Arch (`pacman`), openSUSE (`zypper`), all **glibc**.
 Alpine/musl (`apk`) is **not supported** (upstream node, ast-grep and bun ship
 no musl builds). CI includes installation and verification jobs for Ubuntu,
 Fedora, openSUSE and Arch. It doesn't run automatic uninstall.
@@ -96,7 +110,7 @@ Doctor checks its full tool/config inventory regardless of the selected profile.
 Tools you intentionally skipped can be reported missing; don't install them just
 to make the report green. Use explicit version checks for the tools you selected.
 
-Every step is **idempotent** — safe to re-run. `${ZDOTDIR-$HOME}/.zshrc` is edited via clearly
+Every step is **idempotent**, safe to re-run. `${ZDOTDIR-$HOME}/.zshrc` is edited via clearly
 marked managed blocks (`# >>> lazy-starter-kit:* >>>`) that get replaced (never
 duplicated) on re-runs. Existing files you own are preserved.
 
@@ -114,7 +128,7 @@ physical containment and refuses root, HOME, boundary, outside, and symlink targ
 - **sudo** is only used for system packages (`prereqs`, CLI utilities, Docker).
   On a rootless box without `sudo`, those installs are skipped with a warning;
   the user-space tools still install fine.
-- **Debian/Ubuntu quirks**: `fd`/`bat` ship as `fdfind`/`batcat` — the shell
+- **Debian/Ubuntu quirks**: `fd`/`bat` ship as `fdfind`/`batcat`; the shell
   block aliases them back to `fd`/`bat` automatically.
 - **Runtimes shadow, never replace.** node/python/go from another source (system
   package, `nvm`, `asdf`) are left alone; mise installs its own and wins on PATH.
@@ -125,7 +139,7 @@ physical containment and refuses root, HOME, boundary, outside, and symlink targ
 
 ## Automatic uninstall is not supported
 
-The current source doesn't provide automatic uninstall. The legacy
+v0.13.0 doesn't provide automatic uninstall. The legacy
 `linux/uninstall.sh` entrypoint stops with an explanation and exit code 2,
 without changing or removing anything. The kit can't reliably distinguish tools
 it installed from tools you already had. For individual removals, follow the
@@ -133,21 +147,21 @@ tool's official instructions and review your shell configuration manually.
 
 ## Troubleshooting
 
-- **No `sudo` / not root** — system packages (build tools, CLI utils, Docker) are
+- **No `sudo` / not root**: system packages (build tools, CLI utils, Docker) are
   skipped with a warning, but the per-user tools (mise, starship, uv, bun, rustup)
   still install fine into `$HOME`.
-- **`fd` / `bat` "command not found"** — on Debian/Ubuntu they're `fdfind`/`batcat`;
+- **`fd` / `bat` "command not found"**: on Debian/Ubuntu they're `fdfind`/`batcat`;
   the shell block aliases them back once you open a new shell.
-- **Python install slow or failing** — the kit forces mise's **precompiled** Python
+- **Python install slow or failing**: the kit forces mise's **precompiled** Python
   (`MISE_PYTHON_COMPILE=0`), so no source build. If your CPU/arch has no prebuilt
   release, install dev headers (`build-essential libssl-dev zlib1g-dev libffi-dev`)
   and re-run `--only runtimes`.
-- **`docker: permission denied`** — log out/in (or `newgrp docker`) so your new
+- **`docker: permission denied`**: log out/in (or `newgrp docker`) so your new
   `docker` group membership applies.
-- **`gh` not found** — a few distros lack it in default repos; the kit adds GitHub's
+- **`gh` not found**: a few distros lack it in default repos; the kit adds GitHub's
   apt repo on Debian/Ubuntu. Elsewhere install your distro's `gh`/`github-cli`.
-- **Re-run anytime** — every step is idempotent (use `--only <step>` to redo one).
+- **Re-run anytime**: every step is idempotent (use `--only <step>` to redo one).
 
 ## License
 
-MIT — see [../LICENSE](../LICENSE).
+MIT. See [../LICENSE](../LICENSE).

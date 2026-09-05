@@ -1,6 +1,6 @@
 <div align="center">
 
-### One command turns a fresh Windows PC into a complete dev environment.
+### Set up a Windows development environment with a preview first.
 
 _winget packages · runtimes · PowerShell profile · Git · Codex and Claude Code. Docker and WSL are optional._
 
@@ -10,48 +10,58 @@ _winget packages · runtimes · PowerShell profile · Git · Codex and Claude Co
 
 ---
 
-> **🇰🇷 한국어 빠른 시작**: 아래 소스 설치 예제에서 `-Profile recommended -DryRun`으로
-> 먼저 확인하고, `-DryRun`을 빼고 설치하세요. 추천 구성은 Docker와 WSL을 제외합니다.
+> **🇰🇷 한국어 빠른 시작**: [v0.13.0 GUI ZIP](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip)을
+> 풀고 `Lazy-Starter-Kit-Installer.cmd`를 여세요. 기본값은 recommended + 미리보기입니다.
+> 로그를 확인한 뒤 미리보기를 끄고 적용하세요. 추천 구성은 Docker와 WSL을 제외합니다.
+> CLI 기본값은 여전히 full이며, 아래 소스 예제는 v0.13.0 태그를 사용합니다.
+> v0.13.0은 자동 제거를 지원하지 않고 gajae-code (`gjc`), lazycodex를
+> 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
 > 설치가 끝나면 PowerShell을 새로 여세요. [한국어 추천 설치 안내](../README.md#recommended-setup)
 
 ## Quick start
 
-### Prefer a normal app?
+### Recommended: v0.13.0 GUI
 
-- [Download the guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip)
-- [Download the small double-click launcher](https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-double-click.zip)
+- [Download the v0.13.0 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip)
 
-The latest release is **v0.12.0**. These ZIPs contain that release's launchers,
-not the untagged source changes described below. Extract the ZIP and double-click
-the included `.cmd` file. Release launchers use their pinned release, not mutable
-`main`; don't assume they include the current source's recommended profile or
-preview defaults.
+Extract the ZIP and double-click `Lazy-Starter-Kit-Installer.cmd`. The GUI starts
+with **recommended + preview**. Review the selected components and preview log,
+then turn preview off to install. After installation, open a new PowerShell
+window and check versions before starting your [first project](../README.en.md#first-project).
+Release GUIs use their pinned release commit, not mutable `main`. See the
+[v0.13.0 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0)
+for changes and all assets.
 
-### Current source: recommended setup
-
-The source GUI (`gui/windows/installer.ps1`) starts with **recommended** and
-**preview on**. It runs the shared PowerShell installer with `-Yes`.
+The GUI runs the shared PowerShell installer with `-Yes`.
 `recommended` excludes Docker and WSL. Choosing `full` adds those steps, but
 `-Yes` skips **new Docker Desktop and WSL/Ubuntu installations**. Existing Ubuntu
 can still be initialized or receive the Linux kit as root. Review the preview
 log before applying that profile.
 
+v0.13.0 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+existing configuration. Automatic uninstall isn't supported. Older v0.12.0
+still installs those agents, has no recommended profile, and retains the old
+uninstall behavior. Its GUI starts with full + preview; don't use it for this setup.
+
+### v0.13.0 source: recommended setup
+
 For a local source copy, open **PowerShell** (Windows PowerShell 5.1 or PowerShell
-7). If Git is already available:
+7) in a fresh folder. If Git is already available:
 
 ```powershell
-git clone https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit\windows
+git clone --branch v0.13.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.13.0
+cd lazy-starter-kit-v0.13.0\windows
+# Inspect install.ps1 and scripts/ before running:
 .\install.ps1 -Profile recommended -DryRun # preview
 .\install.ps1 -Profile recommended         # apply without Docker or WSL
 ```
 
-Without Git, [download the main source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip),
-extract it, and open PowerShell in its `windows` folder. Run the same preview
-and apply commands above. This source archive is different from a release
-launcher ZIP.
+Without Git, [download the v0.13.0 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.13.0.zip),
+extract it, and open PowerShell in `lazy-starter-kit-0.13.0\windows`. Inspect the
+installer and scripts, then run the same preview and apply commands above.
+This source archive is different from the GUI ZIP.
 
-These source commands use `main`, not the latest release ZIP. The recommended
+These source commands pin v0.13.0, the same release as the GUI above. The recommended
 steps are `prereqs,packages,runtimes,shell,git,agents`. With no profile switch, the
 CLI still selects `full`.
 
@@ -184,7 +194,7 @@ next run picks up from wherever it left off (initialize → run the Linux kit).
 
 ## Automatic uninstall is not supported
 
-The current source doesn't provide automatic uninstall. The legacy
+v0.13.0 doesn't provide automatic uninstall. The legacy
 `windows/uninstall.ps1` entrypoint stops with an explanation and exit code 2,
 without changing or removing anything. The kit can't reliably distinguish tools
 it installed from tools you already had. For individual removals, follow the
@@ -192,7 +202,7 @@ tool's official instructions and review your PowerShell profile manually.
 
 ## Troubleshooting
 
-- **`winget` not recognized** — install *App Installer* from the Microsoft Store
+- **`winget` not recognized**: install *App Installer* from the Microsoft Store
   ([link](https://apps.microsoft.com/detail/9nblggh4nns1)), then reopen PowerShell.
 - **"running scripts is disabled on this system"**: preview the local copy with
   `powershell -ExecutionPolicy Bypass -File .\install.ps1 -Profile recommended -DryRun`.
@@ -201,17 +211,17 @@ tool's official instructions and review your PowerShell profile manually.
   only tries to set CurrentUser `RemoteSigned` for Restricted or Undefined
   policies; changing AllSigned needs consent. Policy adjustment can fail, so
   contact your administrator if scripts remain blocked.
-- **Autosuggestions don't appear** — you're likely on Windows PowerShell 5.1 with
+- **Autosuggestions don't appear**: you're likely on Windows PowerShell 5.1 with
   the old PSReadLine still loaded. Restart PowerShell once, or use **PowerShell 7**
   (`winget install Microsoft.PowerShell`) + **Windows Terminal**.
-- **Behind a corporate proxy** — set `$env:HTTP_PROXY`/`$env:HTTPS_PROXY` before
-  running; winget honors them. Some networks block winget's CDN — then install the
+- **Behind a corporate proxy**: set `$env:HTTP_PROXY`/`$env:HTTPS_PROXY` before
+  running; winget honors them. Some networks block winget's CDN; then install the
   few tools from your internal software portal instead.
-- **Docker** — Docker Desktop is paid for larger orgs; prefer Docker/Podman inside
+- **Docker**: Docker Desktop is paid for larger orgs; prefer Docker/Podman inside
   WSL2 (see the Containers row). `wsl --install` needs virtualization enabled in BIOS.
-- **Re-run anytime** — every step is idempotent; safe to run again after fixing a
+- **Re-run anytime**: every step is idempotent; safe to run again after fixing a
   blocker (or use `-Only <step>` to redo just one).
 
 ## License
 
-MIT — see [../LICENSE](../LICENSE).
+MIT. See [../LICENSE](../LICENSE).
