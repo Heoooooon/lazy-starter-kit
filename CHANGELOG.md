@@ -7,6 +7,55 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+The latest published release remains **v0.12.0**. The changes below are in
+current source only; existing release archives don't include them. `VERSION`
+remains `0.12.0` until a separate release is prepared.
+
+### Added
+- **Recommended profiles across macOS, Linux and Windows** ([PR #22](https://github.com/Heoooooon/lazy-starter-kit/pull/22)).
+  `--profile recommended` / `-Profile recommended` selects prerequisites,
+  core packages, runtimes, shell, Git, Claude Code and Codex. It excludes
+  Docker and, on Windows, WSL. Existing `full`, `minimal` and `work` profiles
+  remain available; the CLI default is still `full`.
+- **Bilingual beginner setup and first-project guidance.** Root READMEs now
+  separate the explicit `main` clone and local recommended installer from
+  release-pinned setup, link the actual macOS and Windows GUI assets, and
+  explain inspection, preview, apply, new-terminal version checks and sign-in.
+  Stable `#recommended-setup` and `#first-project` anchors are provided in both
+  READMEs. The profile and release/source policies are recorded in VERSIONING.md.
+
+### Changed
+- **Supported agents are Claude Code and Codex** ([PR #21](https://github.com/Heoooooon/lazy-starter-kit/pull/21)).
+  Agent installation, doctor inventory and CI no longer require gajae-code
+  (`gjc`) or lazycodex. Existing installations and their configuration are
+  left alone. Hermes remains opt-in on macOS/Linux with `HERMES=1`.
+- **GUIs start with recommended + preview** (PR #22). Completion guidance
+  distinguishes a successful process exit from verified tool availability,
+  asks users to open a new terminal and check selected tools, and explains
+  starting an agent in a project. Doctor remains a full inventory, not a
+  profile-aware check; omitted Docker/Colima can still produce missing results.
+- **Selected macOS runtimes are no longer omitted when agents are excluded**
+  (PR #22, commit `d947feb`). Step selection now returns success even when the
+  final agents step is skipped, so the selected runtime Brewfile stays included.
+  Profile regression coverage checks the selected steps and Brewfile scope
+  across supported platforms.
+
+### Removed
+- **Automatic uninstall** ([PR #6](https://github.com/Heoooooon/lazy-starter-kit/pull/6),
+  commit `344c025`). The macOS, Linux and Windows uninstall
+  entrypoints now stop with an explanation and a nonzero exit without deleting tools
+  or settings. The kit can't reliably infer ownership of existing software.
+  This retirement isn't present in the v0.12.0 release archives.
+
+## [0.12.0] - 2026-08-13
+
+This released snapshot still uses the older agent roster and full default
+profile, and includes automatic uninstall. It doesn't include the current-source
+recommended setup or removal policy described above.
+
+The following notes were previously left under Unreleased, but describe
+behavior already shipped by v0.12.0.
+
 ### Security
 - **Released GUIs and double-click packages execute an authenticated bootstrap.**
   macOS and Windows packages now include the reviewed installer, pin the exact
@@ -19,7 +68,7 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   installer code runs; stale or locally modified code is never a fallback.
 - **The one-liner installs the newest release tag instead of `main`.** A fresh
   machine now gets a ref that CI verified end-to-end across six platforms,
-  rather than whatever landed on `main` minutes earlier — a push no longer
+  rather than whatever landed on `main` minutes earlier; a push no longer
   reaches new users before it is released. The chosen ref is printed at startup
   (`==> Using v0.9.0`). `STARTER_KIT_BRANCH` still pins an explicit ref and now
   also accepts `main` to opt back into the development branch.
@@ -38,16 +87,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   installer tree and clean temporary artifacts before quitting.
 - **macOS GUI releases are universal binaries** for Apple Silicon and Intel.
 - **Antigravity CLI is no longer installed by `install.sh`.** It has its own
-  Google account flow and a small free tier, so it joins Grok Build as a
-  documented manual one-liner instead of a kit-managed agent. The agents step
-  now installs exactly one set — Claude Code, gajae-code, codex, lazycodex —
-  plus the opt-in Hermes Agent on macOS/Linux.
+  Google account flow and isn't a kit-managed agent. In this released snapshot,
+  the agents step installs Claude Code, gajae-code, codex and lazycodex,
+  plus opt-in Hermes Agent on macOS/Linux. See Unreleased for the current roster.
 
 ### Removed
 - **`ANTIGRAVITY=1` no longer does anything.** The env var is gone from all
   three platforms and from the [VERSIONING.md](./VERSIONING.md) contract table.
-  Install `agy` with the one-liner in the README instead. Both uninstallers
-  still remove a manually installed `agy`, so teardown is unchanged.
+  This released snapshot still includes the old uninstall behavior for manually
+  installed `agy`; current source has retired automatic uninstall entirely.
 
 ### Fixed
 - **A failed bootstrap refresh no longer installs from a stale checkout in
@@ -406,7 +454,9 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.10.7...v0.11.0
 [0.9.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.1...v0.9.0
 [0.8.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.7.0...v0.8.0
