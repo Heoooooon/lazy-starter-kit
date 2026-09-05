@@ -1,8 +1,8 @@
 <div align="center">
 
-### One command turns a fresh Linux box into a complete dev environment.
+### Set up a Linux development environment with a preview first.
 
-_Build tools · CLI · runtimes · shell · containers · and AI coding agents — installed and verified._
+_Build tools · CLI · runtimes · shell · Git · Codex and Claude Code. Containers are optional._
 
 **[← Back to repo root](../README.md)** · [macOS kit](../README.md) · [Windows kit](../windows/README.md)
 
@@ -10,32 +10,49 @@ _Build tools · CLI · runtimes · shell · containers · and AI coding agents �
 
 ---
 
-> **🇰🇷 한국어 빠른 시작** — 터미널을 열고 아래 한 줄을 붙여넣고 Enter:
+> **🇰🇷 한국어 빠른 시작**: Git이 설치된 터미널에서 `main` 소스를 새 폴더에
+> 복제하고 추천 구성을 미리 확인하세요. `lazy-starter-kit-source` 폴더가 이미
+> 있다면 다른 작업 폴더에서 시작하세요. 복제에 실패하면 다음 단계로 진행하지 마세요.
 > ```sh
-> curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
+> git clone --branch main --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-source &&
+>   cd lazy-starter-kit-source/linux &&
+>   ./install.sh --profile recommended --dry-run
 > ```
-> apt·dnf·pacman·zypper를 자동 감지합니다 (glibc 배포판; Alpine/musl 미지원). (한국어 전체 안내: [저장소 메인 README](../README.md#-linux-설치))
+> 로그를 확인한 뒤 같은 터미널에서 아래 명령을 실행하면 Docker 없이 설치합니다:
+> ```sh
+> ./install.sh --profile recommended
+> ```
+> apt·dnf·pacman·zypper를 자동 감지합니다 (glibc 배포판; Alpine/musl 미지원).
+> [한국어 추천 설치 안내](../README.md#recommended-setup)
 
 ## Quick start
 
+With Git available, clone `main` into a fresh directory and preview the
+recommended profile. This uses source, not the latest release (`v0.12.0`).
+Start in a folder without an existing `lazy-starter-kit-source` directory.
+The `&&` chain stops if cloning or changing directories fails:
+
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
+git clone --branch main --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-source &&
+  cd lazy-starter-kit-source/linux &&
+  ./install.sh --profile recommended --dry-run
 ```
 
-Prefer to read before you run (recommended):
+After reviewing the preview, apply from the same terminal and directory:
 
 ```sh
-git clone https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit/linux
-./install.sh --dry-run     # see exactly what it would do
-./install.sh               # apply
+./install.sh --profile recommended # apply without Docker
 ```
+
+`recommended` selects `prereqs,packages,runtimes,shell,git,agents`.
+The CLI default is still `full` when no profile is specified. `minimal` also
+omits agents; `work` selects the same steps as `recommended`.
 
 **Supported distros** (auto-detected package manager): Debian/Ubuntu (`apt`),
 Fedora/RHEL (`dnf`/`yum`), Arch (`pacman`), openSUSE (`zypper`) — all **glibc**.
 Alpine/musl (`apk`) is **not supported** (upstream node, ast-grep and bun ship
-no musl builds). Ubuntu, Fedora, openSUSE and Arch are all verified
-end-to-end (install → verify → uninstall) in CI on every change.
+no musl builds). CI includes installation and verification jobs for Ubuntu,
+Fedora, openSUSE and Arch. It doesn't run automatic uninstall.
 
 ## What you get
 
@@ -47,7 +64,12 @@ end-to-end (install → verify → uninstall) in CI on every change.
 | **Runtimes** | **mise** → node (LTS), python, go, **ast-grep** · **rustup** → rust + rust-analyzer · **uv** · **bun** |
 | **Containers** | **Docker Engine** + compose/buildx (official `get.docker.com`, opt-in) |
 | **Git/GitHub** | identity (GitHub noreply email), HTTPS credential helper, sane defaults |
-| **AI agents** | **Claude Code** (`claude`), **gajae-code** (`gjc`), **codex**, **lazycodex** (OmO), opt-in **Hermes Agent** (`hermes`, `HERMES=1`). Grok and Antigravity are manual one-liners — see the [main README](../README.en.md#manual-install-grok--antigravity). |
+| **AI agents** | **Claude Code** (`claude`) and **Codex** (`codex`). **Hermes Agent** (`hermes`) is optional, enabled only with `HERMES=1`. |
+
+After installation, open a new terminal and check `codex --version` and
+`claude --version`. Then follow the [first-project guide](../README.en.md#first-project)
+and complete the chosen agent's own sign-in flow. An installer exit code alone
+doesn't verify every tool or authenticate your accounts.
 
 ## Steps & flags
 
@@ -64,10 +86,15 @@ prereqs  packages  runtimes  shell  docker  git  agents
 ./install.sh --skip agents         # run all but one
 ./install.sh --no-agents           # alias for --skip agents
 ./install.sh --list                # print step ids
-./install.sh --doctor              # health report: ok / missing / off-PATH per tool
+./install.sh --doctor              # full inventory, not a profile-specific check
 ./install.sh --update              # pull the latest kit, then re-run
-./install.sh --profile work        # presets: full · minimal · work (corporate PCs)
+./install.sh --profile recommended # no Docker; full remains the CLI default
+./install.sh --profile work        # corporate PCs; same steps as recommended
 ```
+
+Doctor checks its full tool/config inventory regardless of the selected profile.
+Tools you intentionally skipped can be reported missing; don't install them just
+to make the report green. Use explicit version checks for the tools you selected.
 
 Every step is **idempotent** — safe to re-run. `${ZDOTDIR-$HOME}/.zshrc` is edited via clearly
 marked managed blocks (`# >>> lazy-starter-kit:* >>>`) that get replaced (never
@@ -75,7 +102,7 @@ duplicated) on re-runs. Existing files you own are preserved.
 
 The agents step also installs a Codex/Claude Code `PreToolUse` guard that blocks
 recursive `rm` and provides `lazy-safe-rm` for strict descendants of the current
-Git workspace. Recursive installer/uninstaller cleanup independently validates
+Git workspace. Recursive installer cleanup independently validates
 physical containment and refuses root, HOME, boundary, outside, and symlink targets.
 
 ## Design notes
@@ -96,23 +123,13 @@ physical containment and refuses root, HOME, boundary, outside, and symlink targ
   installs docker-ce + compose + buildx and adds you to the `docker` group
   (effective after re-login).
 
-## Uninstall
+## Automatic uninstall is not supported
 
-```sh
-./uninstall.sh --dry-run     # preview the teardown
-./uninstall.sh               # run it (destructive groups are confirm-gated)
-./uninstall.sh --yes         # non-interactive, accept every removal
-./uninstall.sh --only agents # remove just one group
-```
-
-Groups (reverse order): `agents shell docker runtimes packages`.
-
-Safe by design:
-- **Never auto-removed**: your **git identity**, and the compiler/build tools.
-- **gajae-code (`gjc`) is kept** unless you pass `--with-gajae`.
-- Removing codex backs up `~/.codex/auth.json` first; `--keep-codex-home` leaves
-  `~/.codex` intact.
-- Only the kit's own managed blocks are stripped from `${ZDOTDIR-$HOME}/.zshrc`.
+The current source doesn't provide automatic uninstall. The legacy
+`linux/uninstall.sh` entrypoint stops with an explanation and exit code 2,
+without changing or removing anything. The kit can't reliably distinguish tools
+it installed from tools you already had. For individual removals, follow the
+tool's official instructions and review your shell configuration manually.
 
 ## Troubleshooting
 

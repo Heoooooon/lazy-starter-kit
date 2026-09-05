@@ -913,7 +913,7 @@
         </p>
         <div class="actions">
           <a class="button button-primary" href="#start">무료로 시작</a>
-          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases">릴리스 보기</a>
+          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">릴리스 노트</a>
         </div>
         <p class="source-note">by CMORE · Powered by lazy-starter-kit</p>
       </div>
@@ -930,25 +930,25 @@
             <img src="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" width="64" height="64" alt="">
             <div>
               <strong>설치 계획 미리보기</strong>
-              <span>실행 전에 확인하게 될 설치 흐름의 예시입니다.</span>
+              <span>현재 소스 기준 예시이며, 공개 ZIP과는 다릅니다.</span>
             </div>
           </div>
           <div class="setup-choice">
             <div>
-              <b>전체 개발 환경</b>
-              <span>런타임 · 셸 · 컨테이너 · AI 코딩 도구</span>
+              <b>추천 설치 · Docker 제외</b>
+              <span>런타임 · 셸 · Git · Claude Code · Codex</span>
             </div>
-            <div class="choice-status">5 / 7 steps</div>
+            <div class="choice-status">5 / 6 steps</div>
           </div>
-          <progress class="progress" aria-label="설치 계획 예시: 일곱 단계 중 다섯 단계" value="5" max="7">5 / 7</progress>
+          <progress class="progress" aria-label="설치 계획 예시: 여섯 단계 중 다섯 단계" value="5" max="6">5 / 6</progress>
           <div class="terminal">
             <p class="terminal-label">Example plan</p>
-            <p><span class="done">01</span>&nbsp;&nbsp;기존 Git 설정 확인</p>
+            <p><span class="done">01</span>&nbsp;&nbsp;기본 개발 도구 준비</p>
             <p><span class="done">02</span>&nbsp;&nbsp;Node.js · Python · Go 준비</p>
-            <p><span class="done">03</span>&nbsp;&nbsp;셸 환경과 프롬프트 연결</p>
-            <p><span class="working">04</span>&nbsp;&nbsp;Docker와 AI 코딩 도구 확인</p>
+            <p><span class="done">03</span>&nbsp;&nbsp;셸 환경과 Git 설정 연결</p>
+            <p><span class="working">04</span>&nbsp;&nbsp;Claude Code · Codex 준비</p>
             <p>&nbsp;</p>
-            <p>실제 실행에서는 단계별 결과와 로그가 표시됩니다.</p>
+            <p>미리보기는 설치가 아닙니다. 적용 후 직접 확인하세요.</p>
           </div>
         </div>
       </div>
@@ -965,7 +965,7 @@
       </li>
       <li class="proof">
         <strong>6 environments in CI</strong>
-        <span>설치부터 제거까지 자동으로 검증합니다.</span>
+        <span>설치·상태 확인과 주요 회귀 검증을 자동 실행합니다.</span>
       </li>
     </ul>
 
@@ -983,21 +983,21 @@
           <span class="step-number">01</span>
           <div>
             <h3>내 운영체제에서 시작</h3>
-            <p>다운로드한 설치 앱 또는 플랫폼별 안내에서 같은 설치 흐름을 시작합니다.</p>
+            <p>새 추천 구성을 쓰려면 <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">현재 소스 기준 추천 설치 안내</a>에서 시작하세요. 공개 ZIP은 이전 릴리스입니다.</p>
           </div>
         </article>
         <article class="step">
           <span class="step-number">02</span>
           <div>
             <h3>구성을 고르고 미리보기</h3>
-            <p>전체·최소·회사 PC용 프로필을 고르고, 실제 변경 전에 작업 목록을 확인합니다.</p>
+            <p>현재 소스의 GUI는 추천 설치·미리보기로 시작합니다. Docker와 Windows WSL은 제외됩니다. CLI 기본값은 전체 설치이므로 추천 프로필을 명시하세요.</p>
           </div>
         </article>
         <article class="step">
           <span class="step-number">03</span>
           <div>
-            <h3>설치하고 바로 검증</h3>
-            <p>필요한 도구를 공식 배포처에서 설치하고 버전·경로·설정 상태까지 확인합니다.</p>
+            <h3>설치 후 직접 확인하고 첫 프로젝트로</h3>
+            <p>미리보기 후 실제 설치를 실행하고 로그의 경고를 확인하세요. 새 터미널에서 선택한 도구의 버전을 확인한 뒤, 프로젝트 폴더에서 Git을 초기화하고 Claude Code 또는 Codex를 실행해 로그인하세요. 설치 종료만으로 사용 준비가 검증되지는 않습니다.</p>
           </div>
         </article>
       </div>
@@ -1007,10 +1007,10 @@
       <div class="shell section-grid">
         <div>
           <p class="section-kicker">Safety by design</p>
-          <h2 id="safety-title">빠른 것보다, 되돌릴 수 있는 것이 먼저.</h2>
+          <h2 id="safety-title">빠른 것보다, 기존 환경 보호가 먼저.</h2>
           <p class="section-intro">
             새 컴퓨터뿐 아니라 이미 사용 중인 컴퓨터에서도 실행할 수 있도록
-            보존·검증·복구를 설치 과정의 일부로 만들었습니다.
+            기존 설정 보존과 실행 전 확인을 우선합니다.
           </p>
         </div>
         <div class="safety-list">
@@ -1027,8 +1027,8 @@
             <span>같은 설치를 다시 실행해도 설정 블록이 중복되거나 손상되지 않습니다.</span>
           </div>
           <div class="safety-item">
-            <strong>제거와 수동 복구</strong>
-            <span>키트가 관리하는 설정을 정리하고 백업은 수동 복구용으로 남깁니다. Homebrew·Git 정보·폰트 같은 외부 상태는 유지합니다.</span>
+            <strong>자동 제거 미지원</strong>
+            <span>기존 도구와 키트가 설치한 도구를 확실히 구분할 수 없어 자동 제거는 지원하지 않습니다. 개별 도구의 공식 제거 안내를 따르고, 설정과 백업은 직접 확인하세요.</span>
           </div>
         </div>
       </div>
@@ -1042,8 +1042,9 @@
         </div>
         <div>
           <p class="section-intro">
-            런타임, 셸, 컨테이너, Git, AI 코딩 도구가 서로 맞는 경로와 순서로
-            동작하도록 연결하고 설치 결과를 검증합니다.
+            추천 구성은 런타임, 셸, Git, Claude Code와 Codex를 준비합니다.
+            Docker는 별도 선택이며, Hermes는 macOS·Linux에서 선택 설치합니다.
+            설치 후 새 터미널에서 선택한 도구를 확인하세요. doctor는 추천 구성만이 아닌 전체 도구 목록을 점검합니다.
           </p>
           <ul class="tool-band" aria-label="지원 도구">
             <li>Git</li>
@@ -1054,10 +1055,10 @@
             <li>Go</li>
             <li>Rust</li>
             <li>starship</li>
-            <li>Docker</li>
+            <li>Docker (선택)</li>
             <li>Claude Code</li>
             <li>Codex</li>
-            <li>gajae-code</li>
+            <li>Hermes (macOS·Linux 선택)</li>
           </ul>
         </div>
       </div>
@@ -1085,29 +1086,31 @@
         <p class="section-kicker">Start free</p>
         <h2 id="start-title">오늘, 같은 출발선에서 시작하세요.</h2>
         <p>
-          운영체제를 고르면 최신 공개 릴리스 또는 플랫폼별 설치 안내로 이동합니다.
-          실행 전에 릴리스 내용과 소스 코드를 먼저 확인할 수 있습니다.
+          <strong>주의: 최신 공개 릴리스 v0.12.0은 추천 설치 도입과 레거시 에이전트 설치 중단 이전 버전입니다.</strong>
+          아래 GUI ZIP에는 이 변경이 없습니다. 새 구성을 쓰려면
+          <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">현재 소스 기준 추천 설치 안내</a>를 따르세요.
+          공개 버전의 변경 내역은 <a href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">릴리스 노트</a>에서 별도로 확인하세요.
         </p>
         <ul class="download-list" aria-label="운영체제별 시작 방법">
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-macos-gui.zip">
               <strong>macOS</strong>
-              <span>버전과 릴리스 내용을 확인한 뒤 GUI 앱을 받습니다.</span>
-              <b>릴리스에서 받기</b>
+              <span>공개 GUI ZIP · 현재 v0.12.0<br>새 추천 구성은 포함되지 않습니다.</span>
+              <b>macOS ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/latest/download/lazy-starter-kit-windows-gui.zip">
               <strong>Windows</strong>
-              <span>버전과 릴리스 내용을 확인한 뒤 GUI 앱을 받습니다.</span>
-              <b>릴리스에서 받기</b>
+              <span>공개 GUI ZIP · 현재 v0.12.0<br>새 추천 구성은 포함되지 않습니다.</span>
+              <b>Windows ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/linux/README.md">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/main/README.md#recommended-setup">
               <strong>Linux</strong>
-              <span>배포판별 설치와 Dry Run 안내를 확인합니다.</span>
-              <b>가이드 보기</b>
+              <span>현재 소스에서 추천 구성의 미리보기·설치·확인 순서를 안내합니다.</span>
+              <b>추천 설치 안내</b>
             </a>
           </li>
         </ul>

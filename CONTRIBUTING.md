@@ -60,9 +60,9 @@ PRs that add non-core tools to the base will be asked to move them to
   pipeline chains; `Set-StrictMode -Version Latest` must pass, and native
   commands that write stderr are wrapped (`Invoke-NativeSilently`) because
   scripts run with `$ErrorActionPreference = 'Stop'`.
-- **Preview first** — verify with `./install.sh --dry-run` (and `--dry-run` for
-  uninstall).
-- **CI must pass** — lint + macOS dry-run + a real install→uninstall run.
+- **Preview first**: verify with `./install.sh --profile recommended --dry-run`.
+  Automatic uninstall is retired; legacy entrypoints stop without deletion.
+- **CI must pass**: lint, macOS dry-run, and real installation/verification jobs.
 - **Versioning** — user-visible changes bump [`VERSION`](./VERSION) and get a
   note in [`CHANGELOG.md`](./CHANGELOG.md). The flags, step ids, managed-block
   markers, and env vars are a **semver contract** — see
@@ -100,10 +100,12 @@ docker run --rm -v "$PWD":/src ubuntu:24.04 bash -c \
    cp -r /src /kit && cd /kit && bash linux/install.sh --yes --skip docker'
 ```
 
-CI then runs the full install → verify → idempotency → doctor → uninstall cycle
-on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE Tumbleweed, plus an
-upgrade-path test — the checks above are enough to make a PR worth opening;
-the matrix catches the rest.
+CI runs installation, verification, and doctor on macOS, Ubuntu, Fedora, Arch,
+and openSUSE Tumbleweed. macOS and Ubuntu also repeat the real installation to
+check idempotency, and Linux has an upgrade-path test. Windows runs regressions,
+one real installation, and inline tool/profile verification; that job doesn't
+run `-Doctor` or repeat the real installation. CI doesn't run automatic uninstall.
+The checks above are enough to make a PR worth opening; the matrix catches the rest.
 
 ## Releases (maintainers)
 

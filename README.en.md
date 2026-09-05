@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit — One line. Ready to build." width="100%" />
+<img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit. Ready to build." width="100%" />
+
+*This illustration shows an older release's full-profile preview, not an installed or verified current recommended setup. Follow the [current recommended setup](#recommended-setup) below.*
 
 ### Different machines, one starting line.
 
@@ -11,7 +13,7 @@ The fastest way to start AI coding on your own machine.
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-[한국어](./README.md) · **English** · [Changelog](./CHANGELOG.md)
+[한국어](./README.md) · **English** · [Recommended setup](#recommended-setup) · [First project](#first-project) · [Changelog](./CHANGELOG.md)
 
 </div>
 
@@ -25,13 +27,17 @@ Docker, and AI coding agents one by one.
 lazy-starter-kit bootstraps that development environment in one pass and gives
 you a way to verify the result afterwards.
 
-Main components include:
+The current-source recommended setup includes:
 
 - CLI: git, gh, jq, ripgrep, fd, fzf, bat, tree, ast-grep, zoxide
 - Runtimes: Node.js, Python, Go, Rust
-- Shell/prompt: zsh, oh-my-zsh, starship, Nerd Font
-- Containers: Colima on macOS, Docker Engine on Linux, optional Docker Desktop on Windows
-- AI agents: Claude Code, gajae-code, Codex, lazycodex
+- Shell/prompt: zsh and oh-my-zsh on macOS/Linux, PowerShell on Windows, starship, Nerd Font
+- AI agents: Claude Code (`claude`) and Codex (`codex`)
+
+Docker is excluded, as is WSL on Windows. Hermes is opt-in on macOS/Linux
+with `HERMES=1`, not part of the beginner setup; there's no native Windows
+Hermes installer. The current kit neither installs nor deletes retired agents
+such as gajae-code (`gjc`) and lazycodex, or their existing configuration.
 
 Existing tools are left alone where practical, and managed configuration files
 are edited only inside clearly marked blocks. Use `--doctor` to inspect the
@@ -39,106 +45,198 @@ current state and `--dry-run` to preview changes before applying them.
 
 ---
 
-## Install
+<a id="recommended-setup"></a>
+
+## Recommended setup (current source, not yet released)
+
+**Start here if you want Claude Code and Codex without retired agents or
+Docker/WSL.** The latest release is still **v0.12.0**. Its installers include
+the older agent roster (gajae-code and lazycodex), start with the full profile,
+and still include automatic uninstall. They don't provide the current-source
+policy. Release ZIPs are pinned to their release, not updated by changes to
+`main`.
+
+The commands below explicitly clone `main` and run the local installer. This
+opts into unreleased changes; it isn't the release-pinned bootstrap route.
+Install [Git](https://git-scm.com/downloads) first and open a new terminal, or
+download the [main source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/heads/main.zip),
+extract it, and open a terminal in `lazy-starter-kit-main`. With the ZIP, skip
+the clone and `cd` commands. Use a new folder rather than an existing checkout.
+
+### 1. Inspect and preview
+
+Open the installer and its `scripts/` folder in an editor before running it.
+Preview prints the selected steps without installing them. Check that `docker`
+and, on Windows, `wsl` are absent from the plan.
 
 ### macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh | bash
+git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit
+# Inspect install.sh and scripts/, then preview:
+bash ./install.sh --profile recommended --dry-run
 ```
 
 ### Linux
 
-Supports Ubuntu/Debian, Fedora/RHEL, Arch, and openSUSE families.
+Ubuntu/Debian, Fedora/RHEL, Arch, and openSUSE families:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/linux/install.sh | bash
+git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
+cd lazy-starter-kit
+# Inspect linux/install.sh and linux/scripts/, then preview:
+bash ./linux/install.sh --profile recommended --dry-run
 ```
 
-Details: [linux/README.md](linux/README.md)
+Platform details: [Linux guide](linux/README.md).
 
 ### Windows
 
-From PowerShell:
+In PowerShell (5.1 or newer):
 
 ```powershell
-irm https://raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/windows/install.ps1 | iex
-```
-
-Details: [windows/README.md](windows/README.md)
-
-GUI and double-click installers are available from
-[Releases](https://github.com/Heoooooon/lazy-starter-kit/releases).
-
----
-
-## Prefer to inspect it first?
-
-If you do not want to execute a remote script immediately, clone the repository
-and run a dry run first.
-
-```bash
-git clone https://github.com/Heoooooon/lazy-starter-kit.git
+git clone --branch main --single-branch https://github.com/Heoooooon/lazy-starter-kit.git
 cd lazy-starter-kit
-./install.sh --dry-run
+# Inspect windows/install.ps1 and windows/scripts/, then preview:
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile recommended -DryRun
 ```
 
-Windows:
+`-ExecutionPolicy Bypass` applies only to this child process, not your saved
+PowerShell policy. Company policy can still block execution; don't change it
+to work around IT restrictions. Platform details: [Windows guide](windows/README.md).
 
-```powershell
-git clone https://github.com/Heoooooon/lazy-starter-kit.git
-cd lazy-starter-kit\windows
-.\install.ps1 -DryRun
-```
+### 2. Apply the reviewed plan
+
+Stay in the same source folder and run **only your OS's command**:
+
+| OS | Apply |
+|---|---|
+| macOS | `bash ./install.sh --profile recommended` |
+| Linux | `bash ./linux/install.sh --profile recommended` |
+| Windows | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile recommended` |
+
+Approve required system prompts only after reviewing them. macOS may require
+Xcode Command Line Tools and Homebrew setup; follow the prerequisite guidance
+and rerun the same command if asked. Review warnings and skipped steps. A
+successful installer exit isn't proof that every tool is installed or signed in.
+Continue with [a new terminal and your first project](#first-project).
+
+### GUI downloads and the standard release route
+
+These are the **released v0.12.0** packages, not the recommended source changes
+above. **Don't use them if avoiding retired-agent installation is required.**
+
+| OS | Released GUI asset | Open after extracting |
+|---|---|---|
+| macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.12.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | No GUI package | Use the [source commands above](#recommended-setup) or the [Linux guide](linux/README.md) |
+
+See the [latest release page](https://github.com/Heoooooon/lazy-starter-kit/releases/latest)
+for its version and all assets. The standard remote bootstrap resolves the
+newest release tag by default; packaged GUIs pin their own release commit. Neither
+route supplies untagged changes. The v0.12.0 GUIs start with **full + preview**;
+current-source GUIs start with **recommended + preview**. Review the selected
+components and preview log before turning preview off and applying. After
+installation, open a new terminal and check versions yourself.
+
+For a source checkout pinned to the current release, use
+`git clone --branch v0.12.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.12.0`.
+Inspect it, then run its OS installer with `--profile full --dry-run` or
+`-Profile full -DryRun`; remove only the preview flag to apply that older setup.
+The `recommended` profile isn't available in v0.12.0.
 
 ---
 
 ## Common options
 
-macOS/Linux:
+Current source, from the repository root (replace `./install.sh` with
+`./linux/install.sh` on Linux):
 
 ```bash
-./install.sh --dry-run
+./install.sh --profile recommended --dry-run
 ./install.sh --doctor
-./install.sh --update
+./install.sh --update --profile recommended
 ./install.sh --only agents
 ./install.sh --skip docker
 ./install.sh --profile minimal
 ./install.sh --profile work
 ```
 
-Windows uses PowerShell-style flags such as `-DryRun` and `-Only` instead of
-`--dry-run` and `--only`.
+Windows uses `windows\install.ps1` with PowerShell-style flags such as `-DryRun`
+and `-Only` instead of `--dry-run` and `--only`.
+
+| Profile | Current-source selection |
+|---|---|
+| `recommended` | Core tools, runtimes, shell, Git, Claude Code and Codex. No Docker or Windows WSL. |
+| `full` | All steps, including Docker and Windows WSL. Still the CLI default when no profile is passed. Windows installation prompts and prerequisites still apply. |
+| `minimal` | Core tools, runtimes, shell and Git. No agents, Docker or Windows WSL. |
+| `work` | Same steps as recommended; check your employer's policy before installing. |
+
+Profiles combine with `--skip` / `-Skip`, not `--only` / `-Only`. On a source
+ZIP, `--update` / `-Update` isn't available because it requires a Git checkout.
 
 Install steps are designed to be idempotent: re-running the installer should not
 duplicate its managed configuration blocks.
 
 ---
 
-## Verify after install
+<a id="first-project"></a>
+
+## First project
+
+### 1. Open a new terminal and check versions
+
+Open a **new Terminal window** on macOS/Linux, or a **new PowerShell window** on
+Windows, so the installed PATH and shell configuration load. For recommended:
 
 ```bash
-./install.sh --doctor
+git --version
+node --version
+python --version
+go version
+rustc --version
+codex --version
+claude --version
 ```
 
-`--doctor` reports whether each tool is:
+These commands also work in PowerShell. They check command availability, not
+account access. If one fails, review that install step's log before rerunning
+it from the source folder. For example, use `--only runtimes` or `--only agents`
+on the macOS/Linux installer, or `-Only runtimes` / `-Only agents` on Windows.
+Don't add `--profile` / `-Profile` to an `--only` / `-Only` command.
 
-- installed and available
-- installed but not on PATH
-- missing
+`--doctor` / `-Doctor` is an optional **full inventory**, not a profile-specific
+success check. It reports installed, off-PATH and missing tools. A recommended,
+minimal or work setup can report intentionally omitted Docker/Colima as missing
+and exit 1. You don't need to install those tools just to make doctor green.
 
-You can re-run only the affected step when needed.
+### 2. Start in a project folder
+
+In a folder where you keep projects, choose an unused folder name:
 
 ```bash
-./install.sh --only runtimes
-./install.sh --only agents
+mkdir my-first-project
+cd my-first-project
+git init
+codex
 ```
+
+Run `claude` instead if you prefer Claude Code. Follow that tool's own sign-in
+prompts; installing the kit doesn't create an account or provide API credits.
+If Codex asks to approve the kit's shell-safety hook, review it before approving.
+Try asking: "Create a simple hello-world page and explain how to run it."
+Review proposed file changes and commands before accepting them.
 
 ---
 
 ## Automatic uninstall is not supported
 
-**lazy-starter-kit does not provide automatic uninstall functionality.**
+**Current source doesn't provide automatic uninstall functionality.**
+
+The published v0.12.0 release still has the old removal behavior. Don't use an
+old release uninstaller to clean up an existing machine.
 
 Older versions included uninstall scripts, but that behavior has been retired.
 After installation, the kit cannot reliably determine which tools it installed
@@ -171,7 +269,7 @@ record and enforce ownership of everything it creates.
 - **Config backup**: a `.bak` backup is created before the first managed edit of a file.
 - **Recursive-delete boundaries**: internal cleanup rejects HOME, filesystem root, paths outside the allowed boundary, and symlink traversal.
 - **AI shell guard**: an additional defense layer blocks recursive `rm` calls from Codex and Claude Code hooks.
-- **Release-based install**: after bootstrap, installation code resolves against the newest release tag by default.
+- **Explicit source or release**: a local checkout runs that source; the standard remote bootstrap resolves the newest release tag by default. Release GUIs pin their own commit.
 - **CI**: install and health verification run on macOS, Windows, Ubuntu, Fedora, Arch, and openSUSE.
 
 This project still relies on external supply chains including Homebrew,
@@ -203,7 +301,8 @@ Get-Command python -All
 
 ## Corporate machines
 
-Use the work profile for a lighter setup.
+The current-source `work` profile excludes Docker and Windows WSL. It isn't a
+permission bypass. From the source root (use `./linux/install.sh` on Linux):
 
 ```bash
 ./install.sh --profile work
@@ -212,7 +311,7 @@ Use the work profile for a lighter setup.
 Windows:
 
 ```powershell
-.\install.ps1 -Profile work
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile work
 ```
 
 Items that cannot be installed because of missing admin rights or company policy
@@ -241,4 +340,4 @@ doctor behavior, upgrade paths, and key safety regressions.
 
 ## License
 
-MIT — [LICENSE](LICENSE)
+MIT. [LICENSE](LICENSE)
