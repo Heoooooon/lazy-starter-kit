@@ -1,22 +1,44 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd -P)"
 # shellcheck source=lib/common.sh
 source "$ROOT/lib/common.sh"
-TMP_ROOT="$ROOT/.tmp-tests"
-mkdir -p "$TMP_ROOT"
-TMP="$(mktemp -d "$TMP_ROOT/install-entrypoints.XXXXXX")"
-cleanup() {
-  safe_rm_rf_under "$TMP_ROOT" "$TMP"
-  rmdir "$TMP_ROOT" 2>/dev/null || true
-}
-trap cleanup EXIT
-
 fail() {
   printf 'FAIL %s\n' "$*" >&2
   exit 1
 }
+TMP_ROOT="$ROOT/.tmp-tests"
+[[ ! -L "$TMP_ROOT" ]] || fail 'fixture base must not be a symlink'
+mkdir -p "$TMP_ROOT"
+[[ "$(cd "$TMP_ROOT" && pwd -P)" == "$TMP_ROOT" ]] || fail 'fixture base escapes worktree'
+TMP="$(mktemp -d "$TMP_ROOT/install-entrypoints.XXXXXX")"
+OWNER_TOKEN="entrypoints:$:$RANDOM:$RANDOM"
+readonly ROOT TMP_ROOT TMP OWNER_TOKEN
+printf '%s\n' "$OWNER_TOKEN" > "$TMP/.entrypoints-owner"
+validate_fixture() {
+  [[ "$TMP" == "$TMP_ROOT"/install-entrypoints.* && ! -L "$TMP_ROOT" \
+    && ! -L "$TMP" && -O "$TMP" && -d "$TMP" \
+    && ! -L "$TMP/.entrypoints-owner" && -f "$TMP/.entrypoints-owner" ]] || return 1
+  [[ "$(cd "$TMP" && pwd -P)" == "$TMP" ]] || return 1
+  printf '%s\n' "$OWNER_TOKEN" | cmp -s - "$TMP/.entrypoints-owner"
+}
+cleanup() {
+  local status=$?
+  validate_fixture || { printf 'FAIL refusing unsafe fixture cleanup: %s\n' "$TMP" >&2; return 1; }
+  DRY_RUN=0 safe_rm_rf_under "$TMP_ROOT" "$TMP" || return 1
+  return "$status"
+}
+trap cleanup EXIT
+validate_fixture || fail 'invalid fixture ownership'
+mkdir "$TMP/home" "$TMP/tmp" "$TMP/cache"
+export HOME="$TMP/home" USERPROFILE="$TMP/home" CFFIXED_USER_HOME="$TMP/home"
+export TMPDIR="$TMP/tmp/" XDG_CACHE_HOME="$TMP/cache"
+export CLANG_MODULE_CACHE_PATH="$TMP/cache/clang" SWIFT_MODULECACHE_PATH="$TMP/cache/swift"
+export HOMEBREW_CACHE="$TMP/cache/brew" HOMEBREW_LOGS="$TMP/cache/brew-logs"
+export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1
+unset BASH_ENV ENV
+printf 'fixtures: root=%s HOME=%s TMPDIR=%s cache=%s\n' "$TMP" "$HOME" "$TMPDIR" "$XDG_CACHE_HOME"
 
 # shellcheck disable=SC2016
 printf '%s\n' '#!/usr/bin/env bash' \
@@ -206,8 +228,12 @@ iconutil -c iconset "$APP/Contents/Resources/AppIcon.icns" -o "$TMP/AppIcon.icon
 [[ "$(sips -g pixelWidth "$TMP/AppIcon.iconset/icon_16x16.png" | awk '/pixelWidth/ {print $2}')" == "16" ]] \
   || fail "macOS GUI bundle does not contain a native 16 px icon representation"
 self_test="$("$APP/Contents/MacOS/LazyStarterKitInstaller" --self-test)"
-[[ "$self_test" == *'"profiles":["full","minimal","work"]'* ]] \
+[[ "$self_test" == *'"profiles":["recommended","full","minimal","work"]'* ]] \
   || fail "macOS GUI self-test did not expose all supported profiles"
+[[ "$self_test" == *'"defaultProfile":"recommended"'* ]] \
+  || fail "macOS GUI initial profile is not recommended"
+[[ "$self_test" == *'"recommended":["prereqs","brew","runtimes","shell","git","agents"]'* ]] \
+  || fail "macOS GUI recommended profile does not match the installer steps"
 [[ "$self_test" == *'"full":["prereqs","brew","runtimes","shell","docker","git","agents"]'* ]] \
   || fail "macOS GUI full profile does not match the installer steps"
 [[ "$self_test" == *'"minimal":["prereqs","brew","runtimes","shell","git"]'* ]] \
@@ -247,6 +273,10 @@ printf '%s' "$self_test" | grep -Eq '"releaseCommit":"[0-9a-f]{40}"' \
 # controller must still be retained long enough to create the real window.
 WINDOW_READY="$TMP/gui-window-ready.txt"
 open -W -n \
+  --env "HOME=$HOME" --env "USERPROFILE=$USERPROFILE" \
+  --env "CFFIXED_USER_HOME=$CFFIXED_USER_HOME" --env "TMPDIR=$TMPDIR" \
+  --env "XDG_CACHE_HOME=$XDG_CACHE_HOME" --env "HOMEBREW_CACHE=$HOMEBREW_CACHE" \
+  --env "HOMEBREW_NO_AUTO_UPDATE=1" --env "HOMEBREW_NO_ANALYTICS=1" \
   --env "STARTER_KIT_GUI_WINDOW_READY=$WINDOW_READY" \
   "$APP"
 [[ "$(<"$WINDOW_READY")" == "window-ready" ]] \
@@ -272,8 +302,10 @@ STARTER_KIT_GUI_AUTOSTART=1 \
 STARTER_KIT_GUI_EXIT_ON_FINISH=1 \
 STARTER_KIT_GUI_RESULT="$GUI_RESULT" \
 STARTER_KIT_GUI_LOG_RESULT="$GUI_LOG_RESULT" \
+STARTER_KIT_GUI_SNAPSHOT="$TMP/live-preview.png" \
   "$APP/Contents/MacOS/LazyStarterKitInstaller"
 [[ -f "$GUI_RESULT" ]] || fail "macOS GUI did not emit its completion signal"
+[[ -s "$TMP/live-preview.png" ]] || fail "macOS GUI did not capture its live preview window"
 IFS= read -r gui_status < "$GUI_RESULT"
 [[ "$gui_status" == "0" ]] \
   || fail "macOS GUI installer path did not complete successfully"
@@ -282,10 +314,47 @@ gui_action="$(sed -n '3p' "$GUI_RESULT")"
   || fail "macOS GUI preview completion does not offer the installation action"
 grep -qxF "payload-final" "$GUI_LOG_RESULT" \
   || fail "macOS GUI dropped the payload's final log output"
-grep -qxF "payload:--yes --only prereqs,brew,runtimes,shell,docker,git,agents --dry-run" \
+grep -qxF "payload:--yes --only prereqs,brew,runtimes,shell,git,agents --dry-run" \
   "$GUI_LOG_RESULT" \
-  || fail "macOS GUI did not pass the selected full component set"
-printf 'ok   macOS GUI runs a payload through its real controller\n'
+  || fail "macOS GUI did not default to the recommended component set"
+printf 'ok   macOS GUI defaults to recommended through its real controller\n'
+
+# Explicit legacy presets retain their semantic arrays, including full Docker.
+for legacy in full work; do
+  legacy_steps=prereqs,brew,runtimes,shell,git,agents
+  [[ "$legacy" != full ]] || legacy_steps=prereqs,brew,runtimes,shell,docker,git,agents
+  STARTER_KIT_INSTALL_URL="file://$TMP/payload.sh" \
+  STARTER_KIT_INSTALL_SHA256="$PAYLOAD_SHA256" \
+  STARTER_KIT_GUI_PROFILE="$legacy" \
+  STARTER_KIT_GUI_AUTOSTART=1 STARTER_KIT_GUI_EXIT_ON_FINISH=1 \
+  STARTER_KIT_GUI_RESULT="$TMP/$legacy-result" \
+  STARTER_KIT_GUI_LOG_RESULT="$TMP/$legacy-log" \
+    "$APP/Contents/MacOS/LazyStarterKitInstaller"
+  [[ "$(head -n 1 "$TMP/$legacy-result")" == 0 ]] || fail "$legacy preview failed"
+  grep -qxF "payload:--yes --only $legacy_steps --dry-run" "$TMP/$legacy-log" \
+    || fail "$legacy profile changed its selected steps"
+done
+printf 'ok   macOS GUI preserves explicit full and work selections\n'
+
+# A nonzero installer exit is a retry, never successful completion.
+printf '%s\n' '#!/usr/bin/env bash' 'printf "payload-failed\n"' 'exit 42' > "$TMP/failing-payload.sh"
+FAIL_SHA256="$(shasum -a 256 "$TMP/failing-payload.sh" | awk '{print $1}')"
+for preview in 1 0; do
+  STARTER_KIT_INSTALL_URL="file://$TMP/failing-payload.sh" \
+  STARTER_KIT_INSTALL_SHA256="$FAIL_SHA256" \
+  STARTER_KIT_GUI_DRY_RUN="$preview" STARTER_KIT_GUI_ADMIN_STATUS=1 \
+  STARTER_KIT_GUI_PREREQUISITES=ready \
+  STARTER_KIT_GUI_AUTOSTART=1 STARTER_KIT_GUI_EXIT_ON_FINISH=1 \
+  STARTER_KIT_GUI_RESULT="$TMP/failure-$preview-result" \
+  STARTER_KIT_GUI_LOG_RESULT="$TMP/failure-$preview-log" \
+    "$APP/Contents/MacOS/LazyStarterKitInstaller"
+  [[ "$(head -n 1 "$TMP/failure-$preview-result")" == 42 \
+    && "$(sed -n '3p' "$TMP/failure-$preview-result")" == retry ]] \
+    || fail "macOS GUI reported success after an installer failure"
+  grep -qxF payload-failed "$TMP/failure-$preview-log" \
+    || fail "macOS GUI lost failing installer output"
+done
+printf 'ok   macOS GUI preserves nonzero preview and install failures\n'
 
 # Given a payload whose declared digest is wrong, when the GUI prepares it,
 # then execution must stop before any payload code runs.
@@ -363,7 +432,7 @@ IFS= read -r minimal_status < "$MINIMAL_RESULT"
 grep -qxF "payload:--yes --only prereqs,brew,runtimes,shell,git --dry-run" \
   "$MINIMAL_LOG_RESULT" \
   || fail "macOS GUI did not pass the selected minimal component set"
-printf 'ok   macOS GUI passes custom component selections\n'
+printf 'ok   macOS GUI preserves the minimal component selection\n'
 
 # Given a standard user account, when an actual install is requested, then the
 # GUI must explain the administrator requirement before running the payload.
@@ -422,7 +491,7 @@ handoff_guidance="$(sed -n '4p' "$HANDOFF_RESULT")"
   || fail "macOS GUI ran the payload before interactive prerequisites"
 [[ -x "$HANDOFF_COMMAND" ]] \
   || fail "macOS GUI did not create an executable Terminal handoff"
-grep -q -- "--only prereqs,brew,runtimes,shell,docker,git,agents" "$HANDOFF_COMMAND" \
+grep -q -- "--only prereqs,brew,runtimes,shell,git,agents" "$HANDOFF_COMMAND" \
   || fail "Terminal handoff lost the selected component steps"
 if grep -Eqi 'password|sudo[[:space:]]+-S|SUDO_ASKPASS' "$HANDOFF_COMMAND"; then
   fail "Terminal handoff contains credential capture logic"
@@ -433,6 +502,7 @@ printf 'ok   macOS GUI creates a credential-safe Terminal handoff\n'
 # succeeds, then completion must expose the one remaining manual action.
 INSTALL_RESULT="$TMP/gui-install-result.txt"
 INSTALL_MARKER="$TMP/gui-install-payload-ran"
+INSTALL_LOG="$TMP/gui-install-log.txt"
 STARTER_KIT_INSTALL_URL="file://$TMP/payload.sh" \
 STARTER_KIT_INSTALL_SHA256="$PAYLOAD_SHA256" \
 STARTER_KIT_PAYLOAD_MARKER="$INSTALL_MARKER" \
@@ -442,6 +512,7 @@ STARTER_KIT_GUI_DRY_RUN=0 \
 STARTER_KIT_GUI_AUTOSTART=1 \
 STARTER_KIT_GUI_EXIT_ON_FINISH=1 \
 STARTER_KIT_GUI_RESULT="$INSTALL_RESULT" \
+STARTER_KIT_GUI_LOG_RESULT="$INSTALL_LOG" \
   "$APP/Contents/MacOS/LazyStarterKitInstaller"
 IFS= read -r install_status < "$INSTALL_RESULT"
 [[ "$install_status" == "0" ]] \
@@ -451,6 +522,8 @@ install_action="$(sed -n '3p' "$INSTALL_RESULT")"
   || fail "macOS GUI completion did not expose the terminal reload action"
 [[ -f "$INSTALL_MARKER" ]] \
   || fail "macOS GUI did not run the actual installer payload"
+grep -qxF "payload:--yes --only prereqs,brew,runtimes,shell,git,agents" "$INSTALL_LOG" \
+  || fail "actual install did not use recommended steps without preview"
 printf 'ok   macOS GUI exposes the post-install terminal action\n'
 
 # Given an installer process tree that announces it is ready, when the GUI

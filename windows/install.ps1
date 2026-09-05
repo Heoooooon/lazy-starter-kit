@@ -14,7 +14,8 @@
 .PARAMETER Yes
   Non-interactive: accept defaults, never prompt.
 .PARAMETER Profile
-  Preset step selection (full|minimal|work):
+  Preset step selection (recommended|full|minimal|work):
+    recommended  prereqs packages runtimes shell git agents (no docker/wsl).
     full     everything (same as no switch).
     minimal  prereqs packages runtimes shell git (skips docker, agents, wsl).
     work     everything except docker and wsl.
@@ -440,8 +441,9 @@ if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 # ($Profile is bound in $PSBoundParameters, so it survives the -Update
 # re-invoke's param rebuild and the bootstrap hand-off's splat automatically.)
 # ---------------------------------------------------------------------------
-$ProfileNames = @('full', 'minimal', 'work')
+$ProfileNames = @('recommended', 'full', 'minimal', 'work')
 $ProfileSkip  = @{
+  recommended = @('docker', 'wsl')
   full    = @()
   minimal = @('docker', 'agents', 'wsl')
   work    = @('docker', 'wsl')
@@ -498,13 +500,19 @@ Write-Step "Done."
 if ($script:DryRun) {
   Write-Info "That was a dry run -- re-run without -DryRun to apply."
 } else {
+  Write-Info "Installer steps finished; this is not verification that every tool is ready."
   Write-Step "Next steps"
   Write-Info "1) Open a NEW PowerShell window so the profile loads (autosuggestions, prompt)."
+  if ($selected -contains 'agents') {
+    Write-Info "2) In that NEW window, verify:  codex --version  and  claude --version"
+    Write-Info "   If either command fails, review the agents log and re-run:  .\install.ps1 -Only agents"
+    Write-Info "3) Start a project:  cd path\to\your-project  then  codex  or  claude (sign in when prompted)."
+  }
   if ((Test-HasCommand gh)) {
     Invoke-NativeSilently 'gh' @('auth', 'status') | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)" }
+    if ($LASTEXITCODE -ne 0) { Write-Info "Sign in to GitHub:  gh auth login   (also sets your git identity)" }
   }
-  Write-Info "3) Set your terminal font to 'JetBrainsMono Nerd Font' (Windows Terminal > Settings > Appearance)."
+  Write-Info "Set your terminal font to 'JetBrainsMono Nerd Font' (Windows Terminal > Settings > Appearance)."
   Write-Info "Note: on Windows PowerShell 5.1, restart it once if PSReadLine was upgraded. PowerShell 7 is smoother."
 
   # --- optional: ask for a GitHub star (opt-in, default No) ---------------

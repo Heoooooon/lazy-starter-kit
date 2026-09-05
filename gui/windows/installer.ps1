@@ -2,7 +2,49 @@
 [CmdletBinding()]
 param([switch]$SelfTest)
 
-$Profiles = @('full', 'minimal', 'work')
+$Profiles = @('recommended', 'full', 'minimal', 'work')
+$DefaultProfileIndex = 0
+$PreviewByDefault = $true
+$ProfileTitles = @('권장 설치', '전체 단계', '최소 설치', '회사 PC용')
+$ProfileDescriptions = @{
+  recommended = '권장: 기본 도구, 런타임, PowerShell, Git, Codex + Claude Code. Docker/WSL 제외.'
+  full = '전체 단계: 권장 구성 + Docker/WSL 단계. GUI는 -Yes로 실행하므로 신규 Docker/WSL 설치는 건너뜁니다. 기존 Ubuntu는 초기화하거나 Linux 설치기를 실행할 수 있습니다. 미리보기 로그를 확인하세요.'
+  minimal = '최소: 기본 도구, 런타임, PowerShell, Git. AI 에이전트와 Docker/WSL 제외.'
+  work = '회사 PC용: 기본 도구, 런타임, PowerShell, Git, Codex + Claude Code. Docker/WSL 제외. 회사 정책을 먼저 확인하세요.'
+}
+$VerificationCommands = @('codex --version', 'claude --version')
+$ProjectCommand = 'codex'
+
+function Get-InstallerSwitches([string]$ProfileName, [bool]$Preview) {
+  $switches = "-Yes -Profile '$ProfileName'"
+  if ($Preview) { $switches += ' -DryRun' }
+  return $switches
+}
+
+function Get-InstallerCompletion([int]$ExitCode, [bool]$Preview, [bool]$Cancelled) {
+  if ($Cancelled) {
+    return @{ State = 'cancelled'; Status = '설치가 취소되었습니다.'; Guidance = '' }
+  }
+  if ($ExitCode -ne 0) {
+    return @{ State = 'failed'; Status = '설치가 완료되지 않았습니다. 아래 로그를 확인해 주세요.'; Guidance = '' }
+  }
+  if ($Preview) {
+    return @{ State = 'preview'; Status = '미리보기가 끝났습니다.'; Guidance = '아직 설치하지 않았습니다. 로그와 선택 범위를 확인한 뒤 실제 설치를 시작하세요.' }
+  }
+  return @{
+    State = 'finished-unverified'
+    Status = '설치 단계가 끝났습니다. 새 PowerShell에서 도구를 확인하세요.'
+    Guidance = @"
+프로세스 종료 코드 0은 모든 도구의 설치/로그인 확인을 뜻하지 않습니다. 경고와 건너뛴 항목을 로그에서 확인하세요.
+1) 새 PowerShell 창을 여세요. 현재 창에는 새 PATH와 프로필이 반영되지 않을 수 있습니다.
+2) AI 에이전트를 선택했다면 다음 명령으로 확인하세요 (최소 설치에는 포함되지 않습니다):
+   $($VerificationCommands -join ([Environment]::NewLine + '   '))
+   실패하면 로그에서 실패한 단계를 확인하고 같은 설치 범위로 다시 실행하세요.
+3) 프로젝트 폴더로 이동: cd path\to\your-project
+   $ProjectCommand 또는 claude를 실행하고 안내에 따라 로그인하세요.
+"@
+  }
+}
 $ReleasesUrl = 'https://github.com/Heoooooon/lazy-starter-kit/releases/latest'
 $CanonicalRepositoryUrl = 'https://github.com/Heoooooon/lazy-starter-kit.git'
 $BundledInstallerPath = Join-Path $PSScriptRoot 'bootstrap-install.ps1'
@@ -54,6 +96,18 @@ if ($SelfTest) {
     installerSource = $InstallerSource
     previewActionTitle = '미리보기 시작'
     profiles = $Profiles
+    defaultProfile = $Profiles[$DefaultProfileIndex]
+    previewByDefault = $PreviewByDefault
+    previewSwitches = Get-InstallerSwitches $Profiles[$DefaultProfileIndex] $true
+    installSwitches = Get-InstallerSwitches $Profiles[$DefaultProfileIndex] $false
+    verificationCommands = $VerificationCommands
+    projectCommand = $ProjectCommand
+    completionStates = @{
+      preview = (Get-InstallerCompletion 0 $true $false).State
+      success = (Get-InstallerCompletion 0 $false $false).State
+      failure = (Get-InstallerCompletion 1 $false $false).State
+      cancelled = (Get-InstallerCompletion 0 $false $true).State
+    }
     releaseRef = $ReleaseRef
     releaseCommit = $ReleaseCommit
     releasesURL = $ReleasesUrl
@@ -93,14 +147,14 @@ $profileLabel.Location = New-Object System.Drawing.Point(31, 109)
 
 $profile = New-Object System.Windows.Forms.ComboBox
 $profile.DropDownStyle = 'DropDownList'
-$null = $profile.Items.AddRange(@('전체 설치', '최소 설치', '회사 PC용'))
-$profile.SelectedIndex = 0
+$null = $profile.Items.AddRange($ProfileTitles)
+$profile.SelectedIndex = $DefaultProfileIndex
 $profile.Location = New-Object System.Drawing.Point(105, 105)
 $profile.Size = New-Object System.Drawing.Size(170, 28)
 
 $dryRun = New-Object System.Windows.Forms.CheckBox
 $dryRun.Text = '설치 전 변경 내용을 미리 보기'
-$dryRun.Checked = $true
+$dryRun.Checked = $PreviewByDefault
 $dryRun.AutoSize = $true
 $dryRun.Location = New-Object System.Drawing.Point(295, 108)
 
@@ -140,18 +194,18 @@ $log = New-Object System.Windows.Forms.TextBox
 $log.Multiline = $true
 $log.ReadOnly = $true
 $log.ScrollBars = 'Vertical'
-$log.WordWrap = $false
+$log.WordWrap = $true
 $log.Font = New-Object System.Drawing.Font('Consolas', 9)
 $log.BackColor = [System.Drawing.Color]::White
 $log.Location = New-Object System.Drawing.Point(31, 180)
 $log.Size = New-Object System.Drawing.Size(694, 395)
 $log.Anchor = 'Top,Bottom,Left,Right'
-$log.Text = @'
-준비가 되었습니다.
-
-처음이라면 '설치 전 변경 내용을 미리 보기'를 켠 채 시작하세요.
-미리보기가 끝나면 체크를 끄고 다시 눌러 실제 설치를 진행할 수 있습니다.
-'@
+function Show-ProfileSelection {
+  $log.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]] + [Environment]::NewLine + [Environment]::NewLine +
+    '처음이라면 미리보기로 변경 내용을 확인하세요. 미리보기가 끝나면 버튼을 다시 눌러 실제 설치할 수 있습니다.'
+}
+Show-ProfileSelection
+$profile.Add_SelectedIndexChanged({ Show-ProfileSelection })
 
 $form.Controls.AddRange(@(
   $title, $subtitle, $profileLabel, $profile, $dryRun,
@@ -255,12 +309,17 @@ $timer.Add_Tick({
     $code = $script:InstallerProcess.ExitCode
     $script:InstallerProcess.Dispose()
     $script:InstallerProcess = $null
-    if ($script:CancelRequested) {
-      $status.Text = '설치가 취소되었습니다.'
+    $completion = Get-InstallerCompletion $code $script:WasDryRun $script:CancelRequested
+    $status.Text = $completion.Status
+    if ($completion.Guidance) {
+      $log.AppendText([Environment]::NewLine + [Environment]::NewLine + $completion.Guidance + [Environment]::NewLine)
+      $log.SelectionStart = $log.TextLength
+      $log.ScrollToCaret()
+    }
+    if ($completion.State -eq 'cancelled') {
       $status.ForeColor = [System.Drawing.Color]::DimGray
       $installButton.Text = if ($dryRun.Checked) { '미리보기 시작' } else { '설치 시작' }
-    } elseif ($code -eq 0) {
-      $status.Text = if ($script:WasDryRun) { '미리보기가 끝났습니다.' } else { '설치가 끝났습니다.' }
+    } elseif ($completion.State -in @('preview', 'finished-unverified')) {
       $status.ForeColor = [System.Drawing.Color]::ForestGreen
       if ($script:WasDryRun) {
         $dryRun.Checked = $false
@@ -269,7 +328,6 @@ $timer.Add_Tick({
         $installButton.Text = '다시 실행'
       }
     } else {
-      $status.Text = '설치가 완료되지 않았습니다. 아래 로그를 확인해 주세요.'
       $status.ForeColor = [System.Drawing.Color]::Firebrick
       $installButton.Text = '다시 실행'
     }
@@ -292,7 +350,7 @@ $installButton.Add_Click({
   $dryRun.Enabled = $false
   $status.Text = '설치 파일을 내려받는 중...'
   $status.ForeColor = [System.Drawing.Color]::DimGray
-  $log.Clear()
+  $log.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]] + [Environment]::NewLine + [Environment]::NewLine
 
   try {
     Remove-InstallerArtifacts
@@ -340,8 +398,7 @@ $installButton.Add_Click({
     $script:WasDryRun = $dryRun.Checked
     $payloadQuoted = $script:InstallerPayload.Replace("'", "''")
     $logQuoted = $script:InstallerLog.Replace("'", "''")
-    $switches = "-Yes -Profile '$profileName'"
-    if ($script:WasDryRun) { $switches += ' -DryRun' }
+    $switches = Get-InstallerSwitches $profileName $script:WasDryRun
     $command =
       "trap { `$_ | Out-File -FilePath '$logQuoted' -Encoding utf8 -Append; exit 1 }; " +
       "& '$payloadQuoted' $switches *>&1 | Out-File -FilePath '$logQuoted' -Encoding utf8; " +

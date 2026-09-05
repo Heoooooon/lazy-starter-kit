@@ -2,6 +2,22 @@
 
 $Root = Split-Path -Parent $PSScriptRoot
 
+function Assert-GuiOnboardingContract($Contract) {
+  if (($Contract.profiles -join ',') -ne 'recommended,full,minimal,work' -or
+      $Contract.defaultProfile -ne 'recommended' -or
+      -not $Contract.previewByDefault -or
+      $Contract.previewSwitches -ne "-Yes -Profile 'recommended' -DryRun" -or
+      $Contract.installSwitches -ne "-Yes -Profile 'recommended'" -or
+      ($Contract.verificationCommands -join ',') -ne 'codex --version,claude --version' -or
+      $Contract.projectCommand -ne 'codex' -or
+      $Contract.completionStates.preview -ne 'preview' -or
+      $Contract.completionStates.success -ne 'finished-unverified' -or
+      $Contract.completionStates.failure -ne 'failed' -or
+      $Contract.completionStates.cancelled -ne 'cancelled') {
+    throw "Windows GUI onboarding machine contract failed: $($Contract | ConvertTo-Json -Depth 5 -Compress)"
+  }
+}
+
 $guiInstallerPath = Join-Path $Root 'gui\windows\installer.ps1'
 $guiInstallerBytes = [System.IO.File]::ReadAllBytes($guiInstallerPath)
 if ($guiInstallerBytes.Length -lt 3 -or
@@ -47,7 +63,8 @@ if ($env:OS -ne 'Windows_NT') {
 
   $gui = & $guiInstallerPath -SelfTest | Out-String
   $contract = $gui | ConvertFrom-Json
-  if (($contract.profiles -join ',') -ne 'full,minimal,work' -or
+  Assert-GuiOnboardingContract $contract
+  if (($contract.profiles -join ',') -ne 'recommended,full,minimal,work' -or
       -not $contract.supportsDryRun -or
       -not $contract.supportsCancellation) {
     throw "Windows GUI portable self-test contract failed: $gui"
@@ -261,13 +278,14 @@ $gui = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File `
   $guiInstallerPath -SelfTest | Out-String
 if ($LASTEXITCODE -ne 0) { throw "Windows GUI self-test failed: $gui" }
 $contract = $gui | ConvertFrom-Json
+Assert-GuiOnboardingContract $contract
 $guiSource = Get-Content (Join-Path $Root 'gui\windows\installer.ps1') -Raw
 $bootstrapSource = Get-Content (Join-Path $Root 'windows\install.ps1') -Raw
 if ($bootstrapSource -notmatch
     '(?s)if \(\$Doctor\).+?\$global:LASTEXITCODE\s*=\s*\$code') {
   throw 'Windows bootstrap does not preserve Doctor status through hand-off cleanup'
 }
-if (($contract.profiles -join ',') -ne 'full,minimal,work') {
+if (($contract.profiles -join ',') -ne 'recommended,full,minimal,work') {
   throw "Windows GUI profiles are incomplete: $gui"
 }
 if (-not $contract.supportsDryRun) { throw "Windows GUI does not report dry-run support: $gui" }
@@ -337,6 +355,7 @@ try {
     throw "Packaged Windows GUI self-test failed: $packagedGui"
   }
   $packagedContract = $packagedGui | ConvertFrom-Json
+  Assert-GuiOnboardingContract $packagedContract
   $kitVersion = (Get-Content (Join-Path $Root 'VERSION') -Raw).Trim()
   if ($packagedContract.appVersion -ne $kitVersion) {
     throw "Packaged Windows GUI version is not $kitVersion`: $packagedGui"

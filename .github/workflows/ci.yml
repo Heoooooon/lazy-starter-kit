@@ -43,6 +43,8 @@ jobs:
         run: tests/ai-shell-guard.sh
       - name: supported AI agents regression
         run: bash tests/agents.sh
+      - name: installation profiles regression
+        run: bash tests/profiles.sh
 
   lint-linux:
     name: linux shellcheck + syntax
@@ -201,7 +203,7 @@ jobs:
         run: |
           $fail = 0
           @(Get-ChildItem -Path windows,gui/windows -Recurse -Include *.ps1) + @(
-            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1
+            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1,tests/windows-profiles.ps1
           ) | ForEach-Object {
             $tokens = $null; $errors = $null
             $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
@@ -297,6 +299,10 @@ jobs:
       - name: supported AI agents regression (Windows PowerShell 5.1)
         shell: powershell
         run: .\tests\windows-agents.ps1
+
+      - name: installation profiles regression (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\tests\windows-profiles.ps1
 
       - name: safe recursive delete regression (PowerShell 7)
         shell: pwsh

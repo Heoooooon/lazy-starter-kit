@@ -13,7 +13,7 @@
 #   --yes, -y        Non-interactive: accept defaults, never prompt.
 #   --only  a,b,c    Run only these steps.
 #   --skip  a,b,c    Run all steps except these.
-#   --profile NAME   Preset step set: full · minimal · work.
+#   --profile NAME   Preset step set: recommended (no Docker) · full · minimal · work.
 #   --no-agents      Shortcut for --skip agents.
 #   --doctor         Diagnose the install (health report), change nothing, exit.
 #   --update         Git-pull the latest kit, then continue the run.
@@ -226,12 +226,20 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)   export DRY_RUN=1 ;;
     -y|--yes)    export ASSUME_YES=1 ;;
-    --only)      ONLY="${2:-}"; shift ;;
-    --only=*)    ONLY="${1#*=}" ;;
-    --skip)      SKIP="${2:-}"; shift ;;
-    --skip=*)    SKIP="${1#*=}" ;;
-    --profile)   PROFILE="${2:-}"; shift ;;
-    --profile=*) PROFILE="${1#*=}" ;;
+    --only|--skip|--profile|--only=*|--skip=*|--profile=*)
+      option="${1%%=*}"
+      if [[ "$1" == *=* ]]; then
+        value="${1#*=}"
+      else
+        [[ $# -ge 2 && "${2:-}" != -* ]] || die "$option requires a value"
+        value="$2"; shift
+      fi
+      [[ -n "${value// /}" ]] || die "$option requires a non-empty value"
+      case "$option" in
+        --only) ONLY="$value" ;;
+        --skip) SKIP="$value" ;;
+        --profile) PROFILE="$value" ;;
+      esac ;;
     --no-agents) SKIP="${SKIP:+$SKIP,}agents" ;;
     --doctor)    DOCTOR=1 ;;
     --list)      printf '%s\n' "${STEP_IDS[@]}"; exit 0 ;;
@@ -258,18 +266,19 @@ if [[ -n "$PROFILE" ]]; then
   case "$PROFILE" in
     full)    PRESET_SKIP="" ;;
     minimal) PRESET_SKIP="docker,agents" ;;
-    work)    PRESET_SKIP="docker" ;;
-    *) die "unknown profile: '$PROFILE' (valid: full minimal work)" ;;
+    recommended|work) PRESET_SKIP="docker" ;;
+    *) die "unknown profile: '$PROFILE' (valid: recommended full minimal work)" ;;
   esac
   [[ -n "$PRESET_SKIP" ]] && SKIP="${SKIP:+$SKIP,}$PRESET_SKIP"
 fi
 
 _validate_ids() {
   local list="$1" tok id found valid="${STEP_IDS[*]}"
+  [[ "$list" != ,* && "$list" != *, && "$list" != *,,* ]] \
+    || die "empty step id in selector: '$list'"
   while [[ -n "$list" ]]; do
     tok="${list%%,*}"
     if [[ "$list" == *,* ]]; then list="${list#*,}"; else list=""; fi
-    [[ -z "$tok" ]] && continue
     found=0
     for id in "${STEP_IDS[@]}"; do [[ "$id" == "$tok" ]] && found=1; done
     [[ "$found" == 1 ]] || die "unknown step id: '$tok' (valid: $valid)"
@@ -290,6 +299,7 @@ selected() {
       [[ "$keep" == 1 ]] && echo "$id"
     fi
   done
+  return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -323,6 +333,10 @@ else
   step "Next steps"
   zshrc="$(zsh_config_file .zshrc)"
   info "1) Open a NEW terminal (or: source $(shell_quote "$zshrc")) so PATH + prompt load."
+  if [[ "$KIT_INSTALL_FAILED" == "0" ]] && selected | grep -x agents >/dev/null; then
+    info "Check the agents in that terminal: codex --version and claude --version."
+    info "Then cd into a project you trust and run codex or claude; follow its sign-in prompts."
+  fi
   if command -v gh >/dev/null 2>&1 && ! gh auth status >/dev/null 2>&1; then
     info "2) Sign in to GitHub:  gh auth login   (also sets your git identity)"
   fi

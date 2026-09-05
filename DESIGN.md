@@ -92,13 +92,14 @@ Custom vector `NSImage`; rendered at runtime and packaged as `AppIcon.icns`. It 
 
 ### Profile selector
 
-Native `NSPopUpButton` with `slider.horizontal.3` context icon and three localized presets:
+Native `NSPopUpButton` with `slider.horizontal.3` context icon and four localized presets:
 
-- 전체 설치 — complete environment
+- 추천 설치 — initial selection: `prereqs,brew,runtimes,shell,git,agents`; supported Claude Code and Codex, without Docker
+- 전체 설치 — complete environment (unchanged, including Docker)
 - 최소 설치 — essentials only
 - 회사 PC용 — no Docker
 
-The profile is a starting point. A fourth `사용자 지정` state appears when users change the runtime, Docker, or AI-agent component checkboxes.
+The profile is a starting point. A fifth `사용자 지정` state appears when users change the runtime, Docker, or AI-agent component checkboxes.
 
 ### Component selection and permissions
 
@@ -132,6 +133,8 @@ An active run adds a contextual secondary action (`미리보기 취소` or
 while work is active; choosing Quit cancels the complete installer process tree,
 waits for cleanup, and only then terminates the app. Cancellation restores every
 setup control and reports a neutral mode-specific cancellation state.
+
+Successful installation means the installer process exited successfully, not that every tool was verified. The existing selectable log gives concise first-use steps: open a new terminal, run explicit version checks for the selected components, and initialize a project before starting Claude Code or Codex and completing their own authentication. Preview, failure, cancellation, and Terminal handoff do not claim installation or verification. The doctor remains a full inventory; recommended users are directed to explicit versions rather than promised a green doctor. No new controls, visual tokens, or layout are introduced.
 
 ### Version and updates
 
