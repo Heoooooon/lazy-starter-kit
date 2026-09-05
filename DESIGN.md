@@ -220,9 +220,12 @@ at 1180 px.
   live installer session.
 - **Proof rail:** unboxed, bordered facts for platform coverage, preservation,
   and CI verification.
-- **Platform actions:** separate macOS, Windows, and Linux destinations. Primary
-  actions point to a release detail page that exposes the resolved version or
-  to platform documentation rather than executing a mutable branch directly.
+- **Platform actions:** separate macOS and Windows GUI ZIP downloads and a Linux
+  setup guide. Show the published version and source/release distinction before
+  the download choices, with a separate release-notes link. When the release
+  predates recommended setup, prominently direct users to the current-source
+  guide instead of presenting the old ZIP as the new configuration. Links never
+  execute installer code directly.
 - **Editorial section:** left-aligned heading paired with asymmetric supporting
   content; avoid generic three-card feature rows.
 
