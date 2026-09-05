@@ -66,25 +66,34 @@ printf 'ok   macOS launcher normalizes its temporary checkout path\n'
 # Given an existing bootstrap checkout, when the requested ref cannot prove the
 # pinned commit or the checkout is dirty, then installation must fail closed.
 PINNED_COMMIT="$(git -C "$ROOT" rev-parse HEAD)"
+# Own the fetched ref: caller main may differ from HEAD or not exist at all.
+BOOTSTRAP_ORIGIN="$TMP/bootstrap-origin"
+git init --quiet "$BOOTSTRAP_ORIGIN"
+git -C "$BOOTSTRAP_ORIGIN" fetch --quiet --depth 1 "$ROOT" "$PINNED_COMMIT"
+git -C "$BOOTSTRAP_ORIGIN" checkout --quiet -b entrypoint-fixture FETCH_HEAD
 BOOTSTRAP_CHECKOUT="$TMP/bootstrap-checkout"
-git clone --quiet --no-hardlinks "$ROOT" "$BOOTSTRAP_CHECKOUT"
-if STARTER_KIT_REPO="$ROOT" \
+git clone --quiet --no-hardlinks --branch entrypoint-fixture "$BOOTSTRAP_ORIGIN" "$BOOTSTRAP_CHECKOUT"
+if STARTER_KIT_REPO="$BOOTSTRAP_ORIGIN" \
   STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-  STARTER_KIT_BRANCH=main \
+  STARTER_KIT_BRANCH=entrypoint-fixture \
   STARTER_KIT_COMMIT=0000000000000000000000000000000000000000 \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null 2>&1
 then
   fail "bootstrap accepted a ref that did not match its pinned commit"
 fi
-STARTER_KIT_REPO="$ROOT" \
+[[ "$(git -C "$BOOTSTRAP_CHECKOUT" rev-parse FETCH_HEAD)" == "$PINNED_COMMIT" ]] \
+  || fail "wrong-pin rejection did not fetch the tested commit"
+STARTER_KIT_REPO="$BOOTSTRAP_ORIGIN" \
 STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-STARTER_KIT_BRANCH=main \
+STARTER_KIT_BRANCH=entrypoint-fixture \
 STARTER_KIT_COMMIT="$PINNED_COMMIT" \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null
+[[ "$(git -C "$BOOTSTRAP_CHECKOUT" rev-parse HEAD)" == "$PINNED_COMMIT" ]] \
+  || fail "bootstrap did not check out the tested commit"
 printf 'local change\n' > "$BOOTSTRAP_CHECKOUT/untracked-change"
-if STARTER_KIT_REPO="$ROOT" \
+if STARTER_KIT_REPO="$BOOTSTRAP_ORIGIN" \
   STARTER_KIT_DIR="$BOOTSTRAP_CHECKOUT" \
-  STARTER_KIT_BRANCH=main \
+  STARTER_KIT_BRANCH=entrypoint-fixture \
   STARTER_KIT_COMMIT="$PINNED_COMMIT" \
   bash -s -- --list < "$ROOT/install.sh" >/dev/null 2>&1
 then
