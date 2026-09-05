@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   From a fresh machine -> winget packages, runtimes, PowerShell profile, Docker,
-  and AI coding agents (gajae-code + codex + lazycodex).
+  and AI coding agents (codex + Claude Code).
 
   Steps (in order): prereqs packages runtimes shell docker git agents wsl
 
@@ -337,7 +337,7 @@ function Invoke-Doctor {
     git = 'packages'; gh = 'packages'; jq = 'packages'; rg = 'packages'
     fd = 'packages'; bat = 'packages'; fzf = 'packages'; starship = 'packages'
     mise = 'packages'; uv = 'packages'; rustup = 'packages'; bun = 'packages'
-    gjc = 'agents'; codex = 'agents'; claude = 'agents'
+    codex = 'agents'; claude = 'agents'
   }
 
   # user-local install dirs to probe when a tool isn't resolvable on PATH.

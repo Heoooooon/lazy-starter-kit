@@ -1,27 +1,15 @@
 #!/usr/bin/env bash
-# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Claude Code
+# 07-agents.sh — AI coding agents: codex, Claude Code, opt-in Hermes
 
 step_agents() {
-  step "AI agents: gajae-code + codex + lazycodex + Claude Code"
+  step "AI agents: codex + Claude Code"
   load_brew
   load_mise
-  export PATH="$HOME/.bun/bin:$PATH"   # bun global bins (gjc) live here
+  export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
   # ~/.local/bin hosts claude (Claude Code) and hermes; exporting it up front
   # also makes the Hermes installer detect PATH and skip editing ~/.zshrc
   # (the kit's managed block owns that PATH entry instead).
   export PATH="$HOME/.local/bin:$PATH"
-
-  # --- gajae-code (gjc) via bun -----------------------------------------
-  if have bun; then
-    if have gjc; then
-      ok "gajae-code present (gjc $(gjc --version 2>/dev/null | head -1))"
-    else
-      info "Installing gajae-code (bun add -g gajae-code)…"
-      run bun add -g gajae-code
-    fi
-  else
-    warn "bun not found — skipping gajae-code (install bun via the 'brew' step)"
-  fi
 
   # --- Claude Code (Anthropic) ------------------------------------------
   # Official installer drops the `claude` binary into ~/.local/bin and then
@@ -46,13 +34,12 @@ step_agents() {
     rm -f "$cc_tmp"
   fi
 
-  # --- codex (base harness that lazycodex extends) ----------------------
+  # --- codex -----------------------------------------------------------
   if ! have npm; then
     if [[ "$DRY_RUN" == "1" ]]; then
       info "[dry-run] npm install -g @openai/codex"
-      info "[dry-run] npx --yes lazycodex-ai install"
     else
-      warn "npm not found — skipping codex + lazycodex (run the 'runtimes' step first)"
+      warn "npm not found — skipping codex (run the 'runtimes' step first)"
     fi
     return 0
   fi
@@ -64,20 +51,6 @@ step_agents() {
     # mise-managed node needs a reshim so the `codex` shim appears on PATH
     have mise && run mise reshim
   fi
-
-  # --- lazycodex (OmO agent harness for codex) --------------------------
-  # No global install by design — always run via npx.
-  if [[ "$DRY_RUN" == "1" ]]; then
-    info "[dry-run] npx --yes lazycodex-ai install"
-  elif is_tty && [[ "$ASSUME_YES" != "1" ]]; then
-    info "Installing lazycodex (npx lazycodex-ai install)…"
-    npx --yes lazycodex-ai install || warn "lazycodex installer did not complete"
-  else
-    info "Installing lazycodex (non-interactive, autonomous)…"
-    npx --yes lazycodex-ai install --no-tui --codex-autonomous || \
-      warn "lazycodex installer did not complete"
-  fi
-  info "lazycodex: on first 'codex' launch, APPROVE the omo hooks in the startup review."
 
   if have node; then
     if [[ "$DRY_RUN" == "1" ]]; then
@@ -123,6 +96,4 @@ step_agents() {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  curl -fsSL https://antigravity.google/cli/install.sh | bash
-  # uninstall.sh still removes ~/.local/bin/agy when present, so a manually
-  # installed copy is torn down with the rest of the kit.
 }

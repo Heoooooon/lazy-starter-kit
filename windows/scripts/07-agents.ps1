@@ -1,31 +1,17 @@
-# 07-agents.ps1 -- AI coding agents: gajae-code (gjc), codex, lazycodex (OmO),
-# Claude Code (claude)
+# 07-agents.ps1 -- AI coding agents: codex, Claude Code (claude)
 
 function Step-Agents {
-  Write-Step "AI agents: gajae-code + codex + lazycodex + Claude Code"
+  Write-Step "AI agents: codex + Claude Code"
   Update-SessionPath
 
-  # --- gajae-code (gjc) via bun -----------------------------------------
-  if (Test-HasCommand bun) {
-    if (Test-HasCommand gjc) {
-      Write-Ok "gajae-code present (gjc $(Invoke-NativeSilently 'gjc' @('--version') | Select-Object -First 1))"
-    } else {
-      Write-Info "Installing gajae-code (bun add -g gajae-code)..."
-      Invoke-Run -Exe 'bun' -Arguments @('add', '-g', 'gajae-code') | Out-Null
-      Update-SessionPath
-    }
-  } else {
-    Write-Warn "bun not found -- skipping gajae-code (install bun via the 'packages' step)"
-  }
-
-  # --- codex (base harness that lazycodex extends) ----------------------
+  # --- codex via npm ---------------------------------------------------
   $haveNpm = Test-HasCommand npm
   if (-not $haveNpm -and (Test-HasCommand mise)) {
     # npm may only be reachable through mise's node shim
     $haveNpm = $true
   }
   if (-not $haveNpm) {
-    Write-Warn "npm not found -- skipping codex + lazycodex (run the 'runtimes' step first)"
+    Write-Warn "npm not found -- skipping codex (run the 'runtimes' step first)"
     return
   }
 
@@ -45,20 +31,6 @@ function Step-Agents {
     }
     Update-SessionPath
   }
-
-  # --- lazycodex (OmO harness for codex) -- always via npx ----------------
-  if ($script:DryRun) {
-    Write-Info "[dry-run] npx --yes lazycodex-ai install"
-  } elseif (-not [Console]::IsInputRedirected) {
-    Write-Info "Installing lazycodex (npx lazycodex-ai install)..."
-    & npx --yes lazycodex-ai install
-    if ($LASTEXITCODE -ne 0) { Write-Warn "lazycodex installer did not complete" }
-  } else {
-    Write-Info "Installing lazycodex (non-interactive, autonomous)..."
-    & npx --yes lazycodex-ai install --no-tui --codex-autonomous
-    if ($LASTEXITCODE -ne 0) { Write-Warn "lazycodex installer did not complete" }
-  }
-  Write-Info "lazycodex: on first 'codex' launch, APPROVE the omo hooks in the startup review."
 
   # --- Claude Code (claude) via the official installer ------------------
   # https://claude.ai/install.ps1 is non-interactive, works on WinPS 5.1+/7,
@@ -111,6 +83,4 @@ function Step-Agents {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  irm https://antigravity.google/cli/install.ps1 | iex
-  # uninstall.ps1 still removes %LOCALAPPDATA%\agy when present, so a manually
-  # installed copy is torn down with the rest of the kit.
 }
