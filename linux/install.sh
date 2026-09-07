@@ -13,9 +13,10 @@
 #   --yes, -y        Non-interactive: accept defaults, never prompt.
 #   --only  a,b,c    Run only these steps.
 #   --skip  a,b,c    Run all steps except these.
-#   --profile NAME   Preset step set: recommended (no Docker) · full · minimal · work.
+#   --profile NAME   Preset: ai (default) · recommended · full · minimal · work.
+#                    Explicit --only/--skip without a profile keep legacy steps.
 #   --no-agents      Shortcut for --skip agents.
-#   --doctor         Diagnose the install (health report), change nothing, exit.
+#   --doctor         Check AI commands; --profile full keeps the full inventory.
 #   --update         Git-pull the latest kit, then continue the run.
 #   --list           List step ids and exit.
 #   --version, -V    Print the kit version and exit.
@@ -218,12 +219,14 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-# --doctor: health report, then exit (like --list — before any step runs).
-[[ "$DOCTOR" == "1" ]] && doctor
-
 # Normalize --only/--skip (strip spaces so `--only "brew, shell"` works), then
 # reject any unknown token up front instead of silently selecting nothing.
 ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
+
+# Only ordinary no-profile runs default to AI. Explicit selectors, including
+# --no-agents, retain the original full/custom step behavior.
+if [[ -z "$PROFILE" && -z "$ONLY" && -z "$SKIP" ]]; then PROFILE=ai; fi
+export PROFILE
 
 # --profile NAME — expand a named preset into extra SKIP steps (unioned with any
 # --skip), reusing the SKIP machinery below. Mutually exclusive with --only. The
@@ -232,10 +235,11 @@ ONLY="${ONLY// /}"; SKIP="${SKIP// /}"
 if [[ -n "$PROFILE" ]]; then
   [[ -n "$ONLY" ]] && die "choose either --profile or --only"
   case "$PROFILE" in
+    ai)      PRESET_SKIP="docker" ;;
     full)    PRESET_SKIP="" ;;
     minimal) PRESET_SKIP="docker,agents" ;;
     recommended|work) PRESET_SKIP="docker" ;;
-    *) die "unknown profile: '$PROFILE' (valid: recommended full minimal work)" ;;
+    *) die "unknown profile: '$PROFILE' (valid: ai recommended full minimal work)" ;;
   esac
   [[ -n "$PRESET_SKIP" ]] && SKIP="${SKIP:+$SKIP,}$PRESET_SKIP"
 fi
@@ -270,6 +274,39 @@ selected() {
   return 0
 }
 
+# Probe actual execution, not just PATH presence. Partial AI runs check only
+# commands owned by the selected steps; account access remains a manual check.
+verify_ai_tools() {
+  load_ai_bins
+  local active tool version failed=0
+  local tools=()
+  active=",$(selected | tr '\n' ',')"
+  if [[ "$active" == *,prereqs,* || "$active" == *,git,* ]]; then tools+=(git); fi
+  if [[ "$active" == *,runtimes,* ]]; then tools+=(node npm); fi
+  if [[ "$active" == *,agents,* ]]; then tools+=(claude codex); fi
+  step "Checking installed commands (accounts are not checked)"
+  for tool in ${tools[@]+"${tools[@]}"}; do
+    if have "$tool" && version="$("$tool" --version 2>&1)"; then
+      ok "$tool: ${version%%$'\n'*}"
+    else
+      err "Action needed: $tool is missing or '$tool --version' failed. Fix it, then re-run the selected installation."
+      failed=1
+    fi
+  done
+  [[ "$failed" == 0 ]]
+}
+
+ai_account_steps() {
+  info "Claude Code needs an Anthropic account and eligible subscription or API billing."
+  info "Codex needs an OpenAI account and eligible ChatGPT plan or API billing. Provider terms and charges apply."
+  info "The installer does not sign in, verify subscriptions, or submit prompts."
+}
+
+# Doctor validates selectors too, then probes without sourcing any install step.
+if [[ "$DOCTOR" == 1 ]]; then
+  if [[ "$PROFILE" == ai ]]; then verify_ai_tools; exit $?; else doctor; fi
+fi
+
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
@@ -278,6 +315,7 @@ is_linux || die "This kit targets Linux only (macOS users: use the repo root ins
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION ==$_C_RESET"
 info "steps: $(selected | tr '\n' ' ')${PROFILE:+(profile: $PROFILE)}"
+if [[ "$PROFILE" == ai ]]; then ai_account_steps; fi
 
 # ---------------------------------------------------------------------------
 # Execute
@@ -291,9 +329,22 @@ for id in $(selected); do
   "$fn"
 done
 
+if [[ "$PROFILE" == ai && "$DRY_RUN" != 1 ]]; then
+  verify_ai_tools || exit 1
+fi
 step "Done."
 if [[ "$DRY_RUN" == "1" ]]; then
   info "That was a dry run — re-run without --dry-run to apply."
+elif [[ "$PROFILE" == ai ]]; then
+  ok "Selected tools passed executable checks; account access is not verified."
+  step "First use"
+  info "Open a NEW terminal so the minimal PATH settings load."
+  if selected | grep -x agents >/dev/null; then
+    info "Create a new, empty practice folder, then change into it. Leave existing projects untouched."
+    info "Choose 'claude' or 'codex', then follow that tool's sign-in instructions."
+    info "Review the safety hook when asked. Type a starter prompt yourself; nothing has been sent."
+    ai_account_steps
+  fi
 else
   step "Next steps"
   zshrc="$(zsh_config_file .zshrc)"

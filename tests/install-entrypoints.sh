@@ -37,6 +37,8 @@ export TMPDIR="$TMP/tmp/" XDG_CACHE_HOME="$TMP/cache"
 export CLANG_MODULE_CACHE_PATH="$TMP/cache/clang" SWIFT_MODULECACHE_PATH="$TMP/cache/swift"
 export HOMEBREW_CACHE="$TMP/cache/brew" HOMEBREW_LOGS="$TMP/cache/brew-logs"
 export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ANALYTICS=1
+# Existing preview scenarios explicitly request the now-secondary preview action.
+export STARTER_KIT_GUI_DRY_RUN=1
 unset BASH_ENV ENV
 printf 'fixtures: root=%s HOME=%s TMPDIR=%s cache=%s\n' "$TMP" "$HOME" "$TMPDIR" "$XDG_CACHE_HOME"
 
@@ -174,7 +176,7 @@ session_source="$(<"$ROOT/gui/macos/InstallerProcessSession.swift")"
   || fail "macOS GUI does not hide initial guidance when execution begins"
 [[ "$macos_source" != *"raw.githubusercontent.com/Heoooooon/lazy-starter-kit/main/install.sh"* ]] \
   || fail "macOS GUI still downloads a mutable main bootstrap"
-[[ "$macos_source" == *"@objc private func dryRunDidChange()"* ]] \
+[[ "$macos_source" == *"@objc private func startPreview()"* ]] \
   || fail "macOS GUI does not synchronize its primary action with preview state"
 [[ "$macos_source" == *"private let cancelButton"* ]] \
   || fail "macOS GUI does not expose an in-app installation cancel action"
@@ -228,10 +230,10 @@ iconutil -c iconset "$APP/Contents/Resources/AppIcon.icns" -o "$TMP/AppIcon.icon
 [[ "$(sips -g pixelWidth "$TMP/AppIcon.iconset/icon_16x16.png" | awk '/pixelWidth/ {print $2}')" == "16" ]] \
   || fail "macOS GUI bundle does not contain a native 16 px icon representation"
 self_test="$("$APP/Contents/MacOS/LazyStarterKitInstaller" --self-test)"
-[[ "$self_test" == *'"profiles":["recommended","full","minimal","work"]'* ]] \
+[[ "$self_test" == *'"profiles":["ai","recommended","full","minimal","work"]'* ]] \
   || fail "macOS GUI self-test did not expose all supported profiles"
-[[ "$self_test" == *'"defaultProfile":"recommended"'* ]] \
-  || fail "macOS GUI initial profile is not recommended"
+[[ "$self_test" == *'"defaultProfile":"ai"'* ]] \
+  || fail "macOS GUI initial profile is not ai"
 [[ "$self_test" == *'"recommended":["prereqs","brew","runtimes","shell","git","agents"]'* ]] \
   || fail "macOS GUI recommended profile does not match the installer steps"
 [[ "$self_test" == *'"full":["prereqs","brew","runtimes","shell","docker","git","agents"]'* ]] \
@@ -250,7 +252,7 @@ self_test="$("$APP/Contents/MacOS/LazyStarterKitInstaller" --self-test)"
   || fail "macOS GUI self-test did not expose the CMORE tool guide"
 [[ "$self_test" == *'"hasApplicationIcon":true'* ]] \
   || fail "macOS GUI self-test did not expose its icon contract"
-[[ "$self_test" == *'"interfaceVersion":4'* ]] \
+[[ "$self_test" == *'"interfaceVersion":5'* ]] \
   || fail "macOS GUI self-test did not expose the redesigned interface version"
 [[ "$self_test" == *'"supportsAppearanceSnapshots":true'* ]] \
   || fail "macOS GUI self-test did not expose light and dark appearance QA"
@@ -314,13 +316,13 @@ gui_action="$(sed -n '3p' "$GUI_RESULT")"
   || fail "macOS GUI preview completion does not offer the installation action"
 grep -qxF "payload-final" "$GUI_LOG_RESULT" \
   || fail "macOS GUI dropped the payload's final log output"
-grep -qxF "payload:--yes --only prereqs,brew,runtimes,shell,git,agents --dry-run" \
+grep -qxF "payload:--yes --profile ai --dry-run" \
   "$GUI_LOG_RESULT" \
-  || fail "macOS GUI did not default to the recommended component set"
-printf 'ok   macOS GUI defaults to recommended through its real controller\n'
+  || fail "macOS GUI did not default to the AI profile"
+printf 'ok   macOS GUI defaults to ai through its real controller\n'
 
 # Explicit legacy presets retain their semantic arrays, including full Docker.
-for legacy in full work; do
+for legacy in recommended full work; do
   legacy_steps=prereqs,brew,runtimes,shell,git,agents
   [[ "$legacy" != full ]] || legacy_steps=prereqs,brew,runtimes,shell,docker,git,agents
   STARTER_KIT_INSTALL_URL="file://$TMP/payload.sh" \
@@ -334,7 +336,7 @@ for legacy in full work; do
   grep -qxF "payload:--yes --only $legacy_steps --dry-run" "$TMP/$legacy-log" \
     || fail "$legacy profile changed its selected steps"
 done
-printf 'ok   macOS GUI preserves explicit full and work selections\n'
+printf 'ok   macOS GUI preserves explicit recommended, full and work selections\n'
 
 # A nonzero installer exit is a retry, never successful completion.
 printf '%s\n' '#!/usr/bin/env bash' 'printf "payload-failed\n"' 'exit 42' > "$TMP/failing-payload.sh"
@@ -469,6 +471,7 @@ HANDOFF_COMMAND="$TMP/lazy-starter-kit-handoff.command"
 STARTER_KIT_INSTALL_URL="file://$TMP/payload.sh" \
 STARTER_KIT_INSTALL_SHA256="$PAYLOAD_SHA256" \
 STARTER_KIT_PAYLOAD_MARKER="$HANDOFF_MARKER" \
+STARTER_KIT_GUI_PROFILE=recommended \
 STARTER_KIT_GUI_ADMIN_STATUS=1 \
 STARTER_KIT_GUI_PREREQUISITES=missing-homebrew \
 STARTER_KIT_GUI_DRY_RUN=0 \
@@ -506,6 +509,7 @@ INSTALL_LOG="$TMP/gui-install-log.txt"
 STARTER_KIT_INSTALL_URL="file://$TMP/payload.sh" \
 STARTER_KIT_INSTALL_SHA256="$PAYLOAD_SHA256" \
 STARTER_KIT_PAYLOAD_MARKER="$INSTALL_MARKER" \
+STARTER_KIT_GUI_PROFILE=recommended \
 STARTER_KIT_GUI_ADMIN_STATUS=1 \
 STARTER_KIT_GUI_PREREQUISITES=ready \
 STARTER_KIT_GUI_DRY_RUN=0 \

@@ -213,7 +213,7 @@ space_expected="$(HOME="$zshenv_home" ROOT="$ROOT" VALUE="$space_zdot/.zshrc" /b
 doctor_output="$(
   env -u ZDOTDIR HOME="$zshenv_home" SHELL=/bin/zsh \
     PATH="$zshenv_home/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
-    /bin/bash "$platform_root/install.sh" --doctor 2>&1 || true
+    /bin/bash "$platform_root/install.sh" --profile full --doctor 2>&1 || true
 )"
 grep -q "has 'lazy-starter-kit:main' block" <<< "$doctor_output" \
   || fail "doctor: active ZDOTDIR/.zshrc was reported missing"

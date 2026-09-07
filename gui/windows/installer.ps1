@@ -2,11 +2,12 @@
 [CmdletBinding()]
 param([switch]$SelfTest)
 
-$Profiles = @('recommended', 'full', 'minimal', 'work')
+$Profiles = @('ai', 'recommended', 'full', 'minimal', 'work')
 $DefaultProfileIndex = 0
-$PreviewByDefault = $true
-$ProfileTitles = @('권장 설치', '전체 단계', '최소 설치', '회사 PC용')
+$PreviewByDefault = $false
+$ProfileTitles = @('AI 코딩 시작 — 추천', '개발 도구 추천', '전체 단계', '최소 설치', '회사 PC용')
 $ProfileDescriptions = @{
+  ai = 'AI 코딩 시작: Git, Node.js LTS/npm, Claude Code, Codex, 안전장치와 최소 PATH만 설치합니다. 추가 런타임, Docker, 셸 꾸미기는 제외합니다.'
   recommended = '권장: 기본 도구, 런타임, PowerShell, Git, Codex + Claude Code. Docker/WSL 제외.'
   full = '전체 단계: 권장 구성 + Docker/WSL 단계. GUI는 -Yes로 실행하므로 신규 Docker/WSL 설치는 건너뜁니다. 기존 Ubuntu는 초기화하거나 Linux 설치기를 실행할 수 있습니다. 미리보기 로그를 확인하세요.'
   minimal = '최소: 기본 도구, 런타임, PowerShell, Git. AI 에이전트와 Docker/WSL 제외.'
@@ -21,7 +22,7 @@ function Get-InstallerSwitches([string]$ProfileName, [bool]$Preview) {
   return $switches
 }
 
-function Get-InstallerCompletion([int]$ExitCode, [bool]$Preview, [bool]$Cancelled) {
+function Get-InstallerCompletion([int]$ExitCode, [bool]$Preview, [bool]$Cancelled, [bool]$Verified = $false) {
   if ($Cancelled) {
     return @{ State = 'cancelled'; Status = '설치가 취소되었습니다.'; Guidance = '' }
   }
@@ -30,6 +31,9 @@ function Get-InstallerCompletion([int]$ExitCode, [bool]$Preview, [bool]$Cancelle
   }
   if ($Preview) {
     return @{ State = 'preview'; Status = '미리보기가 끝났습니다.'; Guidance = '아직 설치하지 않았습니다. 로그와 선택 범위를 확인한 뒤 실제 설치를 시작하세요.' }
+  }
+  if ($Verified) {
+    return @{ State = 'ready'; Status = '도구 실행 확인 완료. 이제 AI를 고르고 직접 로그인하세요.'; Guidance = '' }
   }
   return @{
     State = 'finished-unverified'
@@ -44,6 +48,41 @@ function Get-InstallerCompletion([int]$ExitCode, [bool]$Preview, [bool]$Cancelle
    $ProjectCommand 또는 claude를 실행하고 안내에 따라 로그인하세요.
 "@
   }
+}
+$StarterPrompt = '이 폴더에서 작은 자기소개 웹페이지를 만들어 보고 싶어요. 먼저 어떤 파일을 만들지 설명하고, 제 확인을 받은 뒤 진행해 주세요. 삭제, 계정 연결, 유료 서비스 사용은 하지 마세요.'
+
+function Test-OnboardingReady {
+  param([int]$ExitCode, [bool]$Preview, [bool]$Cancelled, [string]$Profile, [string]$Log)
+  return ($ExitCode -eq 0 -and -not $Preview -and -not $Cancelled -and
+    $Profile -eq 'ai' -and $Log -match '(?m)^\[starter-kit:ai-ready\]\s*$')
+}
+
+function New-PracticeDirectory {
+  param([Parameter(Mandatory)][string]$Parent)
+  # No Force: a collision or inaccessible parent fails instead of reusing files.
+  $path = Join-Path $Parent ('AI-practice-' + [Guid]::NewGuid().ToString('N'))
+  $null = New-Item -ItemType Directory -Path $path -ErrorAction Stop
+  return $path
+}
+
+function Get-AgentLaunchCommand {
+  param([ValidateSet('claude','codex')][string]$Agent, [string]$Directory)
+  $quoted = $Directory.Replace("'", "''")
+  $command = @'
+$ErrorActionPreference = 'Stop'
+# A GUI started before installation has a stale environment. Read persisted
+# paths in this new terminal; keep portable/process entries too.
+$paths = @(@([Environment]::GetEnvironmentVariable('Path','Machine'), [Environment]::GetEnvironmentVariable('Path','User')) | Where-Object { $_ })
+if ($paths.Count -gt 0) { $env:Path = (($paths + @($env:Path)) -join ';') }
+foreach ($tool in @('git','node','npm','claude','codex')) {
+  if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Action needed: $tool missing. Run install.ps1 -Doctor -Profile ai." }
+  $global:LASTEXITCODE = 0
+  & $tool --version
+  if (-not $? -or $LASTEXITCODE -ne 0) { throw "Action needed: $tool --version failed. No agent was launched." }
+}
+'@
+  $command += "`nSet-Location -LiteralPath '$quoted'`n& $Agent`n"
+  return [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
 }
 $ReleasesUrl = 'https://github.com/Heoooooon/lazy-starter-kit/releases/latest'
 $CanonicalRepositoryUrl = 'https://github.com/Heoooooon/lazy-starter-kit.git'
@@ -95,6 +134,9 @@ if ($SelfTest) {
     installerSHA256 = $InstallerSHA256
     installerSource = $InstallerSource
     previewActionTitle = '미리보기 시작'
+    separatePreviewAction = $true
+    requiresVerifiedReadiness = $true
+    profileTitles = $ProfileTitles
     profiles = $Profiles
     defaultProfile = $Profiles[$DefaultProfileIndex]
     previewByDefault = $PreviewByDefault
@@ -124,8 +166,8 @@ Add-Type -AssemblyName System.Drawing
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Lazy Starter Kit Installer - $AppVersion"
 $form.StartPosition = 'CenterScreen'
-$form.ClientSize = New-Object System.Drawing.Size(760, 610)
-$form.MinimumSize = New-Object System.Drawing.Size(700, 560)
+$form.ClientSize = New-Object System.Drawing.Size(760, 800)
+$form.MinimumSize = New-Object System.Drawing.Size(700, 750)
 $form.Font = New-Object System.Drawing.Font('Segoe UI', 10)
 
 $title = New-Object System.Windows.Forms.Label
@@ -135,7 +177,7 @@ $title.AutoSize = $true
 $title.Location = New-Object System.Drawing.Point(28, 24)
 
 $subtitle = New-Object System.Windows.Forms.Label
-$subtitle.Text = 'PowerShell 명령어를 입력할 필요가 없습니다. 설치 범위를 고른 뒤 버튼만 누르세요.'
+$subtitle.Text = 'Git · Node.js LTS/npm · Claude Code · Codex · 안전장치를 함께 준비합니다.'
 $subtitle.ForeColor = [System.Drawing.Color]::DimGray
 $subtitle.AutoSize = $true
 $subtitle.Location = New-Object System.Drawing.Point(31, 67)
@@ -150,16 +192,17 @@ $profile.DropDownStyle = 'DropDownList'
 $null = $profile.Items.AddRange($ProfileTitles)
 $profile.SelectedIndex = $DefaultProfileIndex
 $profile.Location = New-Object System.Drawing.Point(105, 105)
-$profile.Size = New-Object System.Drawing.Size(170, 28)
+$profile.Size = New-Object System.Drawing.Size(310, 28)
+$profile.Anchor = 'Top,Left,Right'
 
-$dryRun = New-Object System.Windows.Forms.CheckBox
-$dryRun.Text = '설치 전 변경 내용을 미리 보기'
-$dryRun.Checked = $PreviewByDefault
-$dryRun.AutoSize = $true
-$dryRun.Location = New-Object System.Drawing.Point(295, 108)
+$previewButton = New-Object System.Windows.Forms.Button
+$previewButton.Text = '미리보기'
+$previewButton.Size = New-Object System.Drawing.Size(100, 34)
+$previewButton.Location = New-Object System.Drawing.Point(495, 100)
+$previewButton.Anchor = 'Top,Right'
 
 $installButton = New-Object System.Windows.Forms.Button
-$installButton.Text = '미리보기 시작'
+$installButton.Text = '설치 시작'
 $installButton.Size = New-Object System.Drawing.Size(120, 34)
 $installButton.Location = New-Object System.Drawing.Point(605, 100)
 $installButton.Anchor = 'Top,Right'
@@ -172,10 +215,63 @@ $cancelButton.Anchor = 'Top,Right'
 $cancelButton.Visible = $false
 
 $status = New-Object System.Windows.Forms.Label
-$status.Text = '준비됨'
-$status.AutoSize = $true
+$status.Text = '설치할 준비가 되었습니다. 계정 로그인은 설치 후 직접 진행합니다.'
+$status.Size = New-Object System.Drawing.Size(510, 48)
+$status.Anchor = 'Top,Left,Right'
 $status.ForeColor = [System.Drawing.Color]::DimGray
-$status.Location = New-Object System.Drawing.Point(31, 151)
+$status.Location = New-Object System.Drawing.Point(31, 290)
+
+$profileDescription = New-Object System.Windows.Forms.Label
+$profileDescription.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]]
+$profileDescription.Location = New-Object System.Drawing.Point(31, 146)
+$profileDescription.Size = New-Object System.Drawing.Size(694, 70)
+$profileDescription.Anchor = 'Top,Left,Right'
+
+$accountNote = New-Object System.Windows.Forms.Label
+$accountNote.Text = 'Claude: Anthropic 계정과 지원 요금제 또는 API 결제가 필요합니다. Codex: ChatGPT 계정의 이용 권한 또는 API 결제가 필요합니다. 서비스별 요금이 적용될 수 있습니다. 자동 로그인이나 질문 전송은 하지 않습니다.'
+$accountNote.Location = New-Object System.Drawing.Point(31, 220)
+$accountNote.Size = New-Object System.Drawing.Size(694, 64)
+$accountNote.Anchor = 'Top,Left,Right'
+
+$details = New-Object System.Windows.Forms.CheckBox
+$details.Text = '자세한 실행 로그 보기'
+$details.AutoSize = $true
+$details.Location = New-Object System.Drawing.Point(31, 520)
+
+$firstRun = New-Object System.Windows.Forms.GroupBox
+$firstRun.Text = '설치 확인 후 첫 AI 코딩 시작'
+$firstRun.Location = New-Object System.Drawing.Point(31, 346)
+$firstRun.Size = New-Object System.Drawing.Size(694, 162)
+$firstRun.Anchor = 'Top,Left,Right'
+$firstRun.Enabled = $false
+
+$agentChoice = New-Object System.Windows.Forms.ComboBox
+$agentChoice.DropDownStyle = 'DropDownList'
+$null = $agentChoice.Items.AddRange(@('Claude Code', 'Codex'))
+$agentChoice.SelectedIndex = 0
+$agentChoice.AccessibleName = '시작할 AI 도구'
+$agentChoice.Location = New-Object System.Drawing.Point(16, 28)
+$agentChoice.Size = New-Object System.Drawing.Size(148, 28)
+
+$launchButton = New-Object System.Windows.Forms.Button
+$launchButton.Text = '새 연습 폴더에서 시작'
+$launchButton.Location = New-Object System.Drawing.Point(176, 24)
+$launchButton.Size = New-Object System.Drawing.Size(220, 36)
+
+$copyButton = New-Object System.Windows.Forms.Button
+$copyButton.Text = '첫 질문 복사'
+$copyButton.Location = New-Object System.Drawing.Point(408, 24)
+$copyButton.Size = New-Object System.Drawing.Size(148, 36)
+
+$prompt = New-Object System.Windows.Forms.TextBox
+$prompt.Multiline = $true
+$prompt.ReadOnly = $true
+$prompt.Text = $StarterPrompt
+$prompt.Location = New-Object System.Drawing.Point(16, 76)
+$prompt.Size = New-Object System.Drawing.Size(662, 68)
+$prompt.Anchor = 'Top,Left,Right'
+$prompt.ScrollBars = 'Vertical'
+$firstRun.Controls.AddRange(@($agentChoice, $launchButton, $copyButton, $prompt))
 
 $versionLink = New-Object System.Windows.Forms.LinkLabel
 $versionLink.Text = if ($AppVersion -eq 'dev') {
@@ -184,7 +280,7 @@ $versionLink.Text = if ($AppVersion -eq 'dev') {
   "v$AppVersion · 새 버전 확인"
 }
 $versionLink.AutoSize = $true
-$versionLink.Location = New-Object System.Drawing.Point(565, 151)
+$versionLink.Location = New-Object System.Drawing.Point(565, 290)
 $versionLink.Anchor = 'Top,Right'
 $versionLink.Add_LinkClicked({
   [System.Diagnostics.Process]::Start($ReleasesUrl)
@@ -196,20 +292,18 @@ $log.ReadOnly = $true
 $log.ScrollBars = 'Vertical'
 $log.WordWrap = $true
 $log.Font = New-Object System.Drawing.Font('Consolas', 9)
-$log.BackColor = [System.Drawing.Color]::White
-$log.Location = New-Object System.Drawing.Point(31, 180)
-$log.Size = New-Object System.Drawing.Size(694, 395)
+$log.BackColor = [System.Drawing.SystemColors]::Window
+$log.ForeColor = [System.Drawing.SystemColors]::WindowText
+$log.Location = New-Object System.Drawing.Point(31, 552)
+$log.Size = New-Object System.Drawing.Size(694, 213)
 $log.Anchor = 'Top,Bottom,Left,Right'
-function Show-ProfileSelection {
-  $log.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]] + [Environment]::NewLine + [Environment]::NewLine +
-    '처음이라면 미리보기로 변경 내용을 확인하세요. 미리보기가 끝나면 버튼을 다시 눌러 실제 설치할 수 있습니다.'
-}
-Show-ProfileSelection
-$profile.Add_SelectedIndexChanged({ Show-ProfileSelection })
+$log.Visible = $false
+$details.Add_CheckedChanged({ $log.Visible = $details.Checked })
 
 $form.Controls.AddRange(@(
-  $title, $subtitle, $profileLabel, $profile, $dryRun,
-  $cancelButton, $installButton, $status, $versionLink, $log
+  $title, $subtitle, $profileLabel, $profile, $previewButton,
+  $cancelButton, $installButton, $status, $versionLink, $log,
+  $accountNote, $profileDescription, $details, $firstRun
 ))
 $form.AcceptButton = $installButton
 
@@ -221,6 +315,42 @@ $script:InstallerPayloadOwned = $false
 $script:LogLength = 0
 $script:WasDryRun = $false
 $script:CancelRequested = $false
+$script:RunProfile = 'ai'
+$script:OnboardingReady = $false
+
+$profile.Add_SelectedIndexChanged({
+  $profileDescription.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]]
+  $script:OnboardingReady = $false
+  $firstRun.Enabled = $false
+})
+$copyButton.Add_Click({
+  if (-not $script:OnboardingReady -or $script:InstallerProcess) { return }
+  try {
+    [System.Windows.Forms.Clipboard]::SetText($StarterPrompt)
+    $status.Text = '첫 질문을 복사했습니다. 로그인 후 직접 붙여 넣고 전송하세요.'
+  } catch {
+    $status.Text = "복사하지 못했습니다: $($_.Exception.Message)"
+    $status.ForeColor = [System.Drawing.Color]::Firebrick
+  }
+})
+$launchButton.Add_Click({
+  if (-not $script:OnboardingReady -or $script:InstallerProcess) { return }
+  try {
+    $parent = [Environment]::GetFolderPath('MyDocuments')
+    if (-not $parent) { $parent = $env:USERPROFILE }
+    $directory = New-PracticeDirectory -Parent $parent
+    $agent = @('claude','codex')[$agentChoice.SelectedIndex]
+    $encoded = Get-AgentLaunchCommand -Agent $agent -Directory $directory
+    Start-Process -FilePath 'powershell.exe' -WorkingDirectory $directory `
+      -ArgumentList @('-NoProfile','-NoExit','-EncodedCommand',$encoded) -ErrorAction Stop | Out-Null
+    $status.Text = '새 터미널을 열었습니다. 계정 로그인과 폴더 신뢰 승인을 직접 진행하세요.'
+  } catch {
+    $status.Text = "AI를 시작하지 못했습니다: $($_.Exception.Message)"
+    $status.ForeColor = [System.Drawing.Color]::Firebrick
+    $script:OnboardingReady = $false
+    $firstRun.Enabled = $false
+  }
+})
 
 function Remove-InstallerArtifacts {
   if ($script:InstallerPayloadOwned -and $script:InstallerPayload -and
@@ -271,12 +401,6 @@ function Stop-InstallerTree {
   }
 }
 
-$dryRun.Add_CheckedChanged({
-  if (-not $script:InstallerProcess) {
-    $installButton.Text = if ($dryRun.Checked) { '미리보기 시작' } else { '설치 시작' }
-  }
-})
-
 $cancelButton.Add_Click({
   if (-not $script:InstallerProcess) { return }
   $cancelButton.Enabled = $false
@@ -302,6 +426,12 @@ $timer.Add_Tick({
       $script:LogLength = $text.Length
       $log.SelectionStart = $log.TextLength
       $log.ScrollToCaret()
+      $stages = [regex]::Matches($text, '\[starter-kit:stage:(\w+)\]')
+      if ($stages.Count -gt 0 -and -not $script:CancelRequested) {
+        $stageTitles = @{ prereqs='설치 조건 확인'; packages='Git과 선택한 도구 준비'; runtimes='Node.js와 선택한 실행 환경 준비'; shell='새 터미널 연결'; docker='Docker 준비'; git='Git 설정'; agents='AI 도구와 안전장치 준비'; wsl='Linux 환경 준비' }
+        $prefix = if ($script:WasDryRun) { '미리보기: ' } else { '설치 중: ' }
+        $status.Text = $prefix + $stageTitles[$stages[$stages.Count - 1].Groups[1].Value]
+      }
     }
   }
   if ($script:InstallerProcess -and $script:InstallerProcess.HasExited) {
@@ -309,45 +439,58 @@ $timer.Add_Tick({
     $code = $script:InstallerProcess.ExitCode
     $script:InstallerProcess.Dispose()
     $script:InstallerProcess = $null
-    $completion = Get-InstallerCompletion $code $script:WasDryRun $script:CancelRequested
+    # Read once more after exit so the final readiness line cannot race the timer.
+    if ($script:InstallerLog -and (Test-Path -LiteralPath $script:InstallerLog)) {
+      $log.Text = [System.IO.File]::ReadAllText($script:InstallerLog)
+    }
+    $script:OnboardingReady = Test-OnboardingReady -ExitCode $code -Preview $script:WasDryRun `
+      -Cancelled $script:CancelRequested -Profile $script:RunProfile -Log $log.Text
+    $firstRun.Enabled = $script:OnboardingReady
+    $completion = Get-InstallerCompletion $code $script:WasDryRun $script:CancelRequested $script:OnboardingReady
     $status.Text = $completion.Status
     if ($completion.Guidance) {
       $log.AppendText([Environment]::NewLine + [Environment]::NewLine + $completion.Guidance + [Environment]::NewLine)
-      $log.SelectionStart = $log.TextLength
-      $log.ScrollToCaret()
     }
     if ($completion.State -eq 'cancelled') {
-      $status.ForeColor = [System.Drawing.Color]::DimGray
-      $installButton.Text = if ($dryRun.Checked) { '미리보기 시작' } else { '설치 시작' }
-    } elseif ($completion.State -in @('preview', 'finished-unverified')) {
+      $status.ForeColor = [System.Drawing.SystemColors]::GrayText
+    } elseif ($completion.State -in @('ready', 'preview', 'finished-unverified')) {
       $status.ForeColor = [System.Drawing.Color]::ForestGreen
-      if ($script:WasDryRun) {
-        $dryRun.Checked = $false
-        $installButton.Text = '실제 설치 시작'
-      } else {
-        $installButton.Text = '다시 실행'
-      }
     } else {
       $status.ForeColor = [System.Drawing.Color]::Firebrick
-      $installButton.Text = '다시 실행'
     }
+    if ($completion.State -eq 'finished-unverified' -and $script:RunProfile -eq 'ai') {
+      $status.Text = '확인이 필요합니다. 실행 준비를 검증하지 못했습니다. 로그를 확인하세요.'
+    }
+    $installButton.Text = '설치 시작'
     $installButton.Enabled = $true
     $cancelButton.Visible = $false
     $cancelButton.Enabled = $true
     $profile.Enabled = $true
-    $dryRun.Enabled = $true
+    $previewButton.Enabled = $true
+    $previewButton.Visible = $true
+    if (-not $script:WasDryRun -and -not $script:CancelRequested -and
+        ($code -ne 0 -or ($script:RunProfile -eq 'ai' -and -not $script:OnboardingReady))) {
+      $details.Checked = $true
+      $status.ForeColor = [System.Drawing.Color]::Firebrick
+    }
     $script:CancelRequested = $false
     Remove-InstallerArtifacts
   }
 })
 
-$installButton.Add_Click({
+function Start-InstallerRun {
+  param([bool]$Preview)
   if ($script:InstallerProcess) { return }
+  $script:WasDryRun = $Preview
+  if ($Preview) { $details.Checked = $true }
+  $script:OnboardingReady = $false
+  $firstRun.Enabled = $false
   $installButton.Enabled = $false
   $cancelButton.Visible = $true
   $cancelButton.Enabled = $true
   $profile.Enabled = $false
-  $dryRun.Enabled = $false
+  $previewButton.Enabled = $false
+  $previewButton.Visible = $false
   $status.Text = '설치 파일을 내려받는 중...'
   $status.ForeColor = [System.Drawing.Color]::DimGray
   $log.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]] + [Environment]::NewLine + [Environment]::NewLine
@@ -395,7 +538,7 @@ $installButton.Add_Click({
     }
 
     $profileName = $Profiles[$profile.SelectedIndex]
-    $script:WasDryRun = $dryRun.Checked
+    $script:RunProfile = $profileName
     $payloadQuoted = $script:InstallerPayload.Replace("'", "''")
     $logQuoted = $script:InstallerLog.Replace("'", "''")
     $switches = Get-InstallerSwitches $profileName $script:WasDryRun
@@ -406,7 +549,8 @@ $installButton.Add_Click({
 
     $start = New-Object System.Diagnostics.ProcessStartInfo
     $start.FileName = 'powershell.exe'
-    $start.Arguments = "-NoProfile -ExecutionPolicy Bypass -Command `"$command`""
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+    $start.Arguments = "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encoded"
     $start.UseShellExecute = $false
     $start.CreateNoWindow = $true
     if (-not $DeveloperMode) {
@@ -432,19 +576,23 @@ $installButton.Add_Click({
     $status.Text = if ($script:WasDryRun) { '변경 내용을 미리 보는 중...' } else { '설치 중... 창을 닫지 마세요.' }
     $timer.Start()
   } catch {
+    $details.Checked = $true
     $status.Text = "설치기를 시작하지 못했습니다: $($_.Exception.Message)"
     $status.ForeColor = [System.Drawing.Color]::Firebrick
     $installButton.Enabled = $true
     $cancelButton.Visible = $false
     $profile.Enabled = $true
-    $dryRun.Enabled = $true
+    $previewButton.Enabled = $true
+    $previewButton.Visible = $true
     if ($script:InstallerProcess) {
       $script:InstallerProcess.Dispose()
       $script:InstallerProcess = $null
     }
     Remove-InstallerArtifacts
   }
-})
+}
+$installButton.Add_Click({ Start-InstallerRun -Preview $false })
+$previewButton.Add_Click({ Start-InstallerRun -Preview $true })
 
 $form.Add_FormClosing({
   param($sender, $eventArgs)

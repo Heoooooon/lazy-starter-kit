@@ -2,6 +2,22 @@
 # 01-prereqs.sh — base toolchain: compiler, git, curl, zsh, unzip …
 
 step_prereqs() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Preparing Git and download tools"
+    [[ -n "$PM" && "$PM" != apk ]] || die "AI setup needs a glibc Linux distro with apt/dnf/yum/pacman/zypper."
+    if [[ "$DRY_RUN" != 1 ]] && ! can_sudo; then
+      have git && have curl && have tar && have xz \
+        || die "Action needed: ask an administrator to install git, curl, ca-certificates, tar and xz."
+      info "Using existing system prerequisites (no administrator access)."
+    else
+      case "$PM" in
+        apt) pm_install git curl ca-certificates tar xz-utils ;;
+        *)   pm_install git curl ca-certificates tar xz ;;
+      esac
+    fi
+    load_ai_bins
+    return 0
+  fi
   step "Prerequisites: base build tools + git/curl/zsh"
 
   [[ -n "$PM" ]] || die "no supported package manager found (need apt/dnf/yum/pacman/zypper/apk)"

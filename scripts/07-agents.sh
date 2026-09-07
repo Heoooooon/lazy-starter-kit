@@ -4,8 +4,14 @@
 step_agents() {
   step "AI agents: codex + Claude Code"
   load_brew
-  load_mise
-  export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
+  if [[ "${PROFILE:-}" == ai ]]; then
+    local prefix
+    prefix="$(brew_prefix)"
+    export PATH="$prefix/opt/node@24/bin:$PATH"
+  else
+    load_mise
+    export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
+  fi
   # ~/.local/bin hosts claude (Claude Code) and hermes; exporting it up front
   # also makes the Hermes installer detect PATH and skip editing ~/.zshrc
   # (the kit's managed block owns that PATH entry instead).
@@ -47,22 +53,30 @@ step_agents() {
     ok "codex present ($(codex --version 2>/dev/null | head -1))"
   else
     info "Installing @openai/codex (npm -g)…"
-    run npm install -g @openai/codex
-    # mise-managed node needs a reshim so the `codex` shim appears on PATH
-    have mise && run mise reshim
+    if [[ "${PROFILE:-}" == ai ]]; then
+      run npm install -g --prefix "$HOME/.local" @openai/codex
+    else
+      run npm install -g @openai/codex
+      # mise-managed node needs a reshim so the `codex` shim appears on PATH
+      have mise && run mise reshim
+    fi
   fi
 
   if have node; then
     if [[ "$DRY_RUN" == "1" ]]; then
       node "$ROOT/scripts/ai/install-shell-guard.js" --home "$HOME" --dry-run
     else
-      node "$ROOT/scripts/ai/install-shell-guard.js" --home "$HOME" \
-        || warn "could not install the Codex/Claude recursive-rm guard"
+      if ! node "$ROOT/scripts/ai/install-shell-guard.js" --home "$HOME"; then
+        warn "could not install the Codex/Claude recursive-rm guard"
+        [[ "${PROFILE:-}" != ai ]] || export KIT_INSTALL_FAILED=1
+      fi
     fi
   else
     warn "node not found — could not install the Codex/Claude recursive-rm guard"
   fi
   info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks."
+
+  [[ "${PROFILE:-}" != ai ]] || return 0
 
   # --- Hermes Agent (Nous Research, OPT-IN only) -------------------------
   # Official installer: clones NousResearch/hermes-agent, self-manages Python/

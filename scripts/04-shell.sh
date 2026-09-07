@@ -31,6 +31,16 @@ step_shell() {
   local zshrc zshrc_q
   zshrc="$(zsh_config_file .zshrc)"
   zshrc_q="$(shell_quote "$zshrc")"
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Make AI commands available in new terminals"
+    local node_bin brew_bin
+    node_bin="$(shell_quote "$(brew_prefix)/opt/node@24/bin")"
+    brew_bin="$(shell_quote "$(brew_prefix)/bin")"
+    inject_block "$zshrc" "lazy-starter-kit:main" <<EOF
+export PATH=$node_bin:"\$HOME/.local/bin":$brew_bin:"\$PATH"
+EOF
+    return
+  fi
   step "Shell: oh-my-zsh + plugins + zsh config + prompt"
   load_brew
 

@@ -3,14 +3,21 @@
 function Step-Agents {
   Write-Step "AI agents: codex + Claude Code"
   Update-SessionPath
+  if ($script:DryRun -and $script:InstallProfile -eq 'ai') {
+    Write-Info '[dry-run] npm.cmd install -g @openai/codex'
+    Write-Info '[dry-run] official Claude Code installer: https://claude.ai/install.ps1'
+    Write-Info '[dry-run] install Codex/Claude safety hooks with Node; persist minimal AI PATH'
+    return
+  }
 
   # --- codex via npm ---------------------------------------------------
   $haveNpm = Test-HasCommand npm
-  if (-not $haveNpm -and (Test-HasCommand mise)) {
+  if (-not $haveNpm -and $script:InstallProfile -ne 'ai' -and (Test-HasCommand mise)) {
     # npm may only be reachable through mise's node shim
     $haveNpm = $true
   }
   if (-not $haveNpm) {
+    if ($script:InstallProfile -eq 'ai') { Stop-Kit 'npm missing -- action needed: install Node.js LTS/npm before AI agents.' }
     Write-Warn "npm not found -- skipping codex (run the 'runtimes' step first)"
     return
   }
@@ -22,7 +29,10 @@ function Step-Agents {
     if ($script:DryRun) {
       Write-Info "[dry-run] mise exec -- npm install -g @openai/codex; mise reshim"
     } else {
-      if (Test-HasCommand mise) {
+      if ($script:InstallProfile -eq 'ai') {
+        & npm.cmd install -g '@openai/codex'
+        if ($LASTEXITCODE -ne 0) { Stop-Kit "Codex install failed (exit $LASTEXITCODE)." }
+      } elseif (Test-HasCommand mise) {
         & mise exec -- npm install -g '@openai/codex'
         Invoke-NativeSilently 'mise' @('reshim')
       } else {
@@ -58,6 +68,7 @@ function Step-Agents {
         Write-Info "Claude Code installed -- open a new shell (or it's on ~/.local/bin) to use 'claude'."
       }
     } catch {
+      if ($script:InstallProfile -eq 'ai') { Stop-Kit "Claude Code install failed: $($_.Exception.Message)" }
       Write-Warn "Claude Code install did not complete -- re-run later: irm https://claude.ai/install.ps1 | iex"
     }
   }
@@ -67,11 +78,17 @@ function Step-Agents {
     $safetyArgs = @($safetyInstaller, '--home', $env:USERPROFILE)
     if ($script:DryRun) { $safetyArgs += '--dry-run' }
     & node @safetyArgs
-    if ($LASTEXITCODE -ne 0) { Write-Warn "could not install the Codex/Claude recursive-rm guard" }
+    if ($LASTEXITCODE -ne 0) {
+      if ($script:InstallProfile -eq 'ai') { Stop-Kit 'AI safety-hook installation failed; action needed.' }
+      Write-Warn "could not install the Codex/Claude recursive-rm guard"
+    }
     else { Write-Info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks." }
   } else {
+    if ($script:InstallProfile -eq 'ai') { Stop-Kit 'Node or the safety-hook installer is missing; action needed.' }
     Write-Warn "node not found -- could not install the Codex/Claude recursive-rm guard"
   }
+
+  if ($script:InstallProfile -eq 'ai') { Update-AiPath -Persist; return }
 
   # --- Hermes Agent (Nous Research) -------------------------------------
   # The official installer is a bash/curl script with no native Windows build.
@@ -83,4 +100,5 @@ function Step-Agents {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  irm https://antigravity.google/cli/install.ps1 | iex
+  # Automatic uninstall is retired; use the vendor's removal instructions.
 }

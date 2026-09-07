@@ -110,6 +110,13 @@ _install_gh() {
 }
 
 step_packages() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Preparing the Node LTS installer (mise only)"
+    load_ai_bins
+    _install_mise
+    [[ "$DRY_RUN" == 1 ]] || have mise || die "Action needed: mise installation failed."
+    return 0
+  fi
   step "CLI tools + developer toolchain installers"
 
   # --- plain CLI utilities from the distro ------------------------------

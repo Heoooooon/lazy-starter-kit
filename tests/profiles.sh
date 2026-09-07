@@ -138,7 +138,10 @@ for platform in macos linux; do
   minimal="prereqs $package runtimes shell git"
   run_case "$platform" recommended 0 "$recommended" 'core runtimes' --profile recommended
   run_case "$platform" recommended-equals 0 "$recommended" 'core runtimes' --profile=recommended
-  run_case "$platform" default 0 "$full" 'core runtimes docker'
+  # Default AI selection is covered here without provisioner effects; the
+  # platform onboarding suites exercise its real step bodies and readiness.
+  run_case "$platform" default 0 "$recommended" '' --dry-run
+  run_case "$platform" ai 0 "$recommended" '' --profile ai --dry-run
   run_case "$platform" full 0 "$full" 'core runtimes docker' --profile full
   run_case "$platform" minimal 0 "$minimal" 'core runtimes' --profile minimal
   run_case "$platform" work 0 "$recommended" 'core runtimes' --profile work

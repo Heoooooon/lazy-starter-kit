@@ -28,6 +28,33 @@ _clone_plugin() {
 }
 
 step_shell() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Making AI tools available in new terminals (PATH only)"
+    load_ai_bins
+    local file state
+    local files=("$HOME/.profile" "$HOME/.bashrc")
+    # Bash reads only the first existing login file, not necessarily .profile.
+    if [[ -f "$HOME/.bash_profile" ]]; then files+=("$HOME/.bash_profile")
+    elif [[ -f "$HOME/.bash_login" ]]; then files+=("$HOME/.bash_login"); fi
+    cache_zsh_config_dir
+    files+=("$(zsh_config_file .zshrc)")
+    for file in "${files[@]}"; do
+      state="$(_managed_block_state "$file" lazy-starter-kit:ai-path)"
+      [[ "$state" != damaged ]] || die "Action needed: repair the lazy-starter-kit:ai-path markers in $file; it was left untouched."
+      inject_block "$file" lazy-starter-kit:ai-path <<'EOF'
+export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+EOF
+    done
+    if [[ "${SHELL:-}" == */fish ]]; then
+      file="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d/lazy-starter-kit-ai.fish"
+      [[ "$(_managed_block_state "$file" lazy-starter-kit:ai-path)" != damaged ]] \
+        || die "Action needed: repair the lazy-starter-kit:ai-path markers in $file; it was left untouched."
+      inject_block "$file" lazy-starter-kit:ai-path <<'EOF'
+set -gx PATH "$HOME/.local/share/mise/shims" "$HOME/.local/bin" $PATH
+EOF
+    fi
+    return 0
+  fi
   local zshrc zshrc_q
   cache_zsh_config_dir
   zshrc="$(zsh_config_file .zshrc)"
