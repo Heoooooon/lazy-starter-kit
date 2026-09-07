@@ -4,20 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CMORE Ready · 새 컴퓨터, 개발 준비 끝.</title>
-  <meta name="description" content="macOS, Windows, Linux의 개발 도구와 AI 코딩 환경을 오픈소스 설치 로직으로 한 번에 준비하세요.">
+  <meta name="description" content="v0.14.0의 기본 ai 구성으로 macOS, Windows, Linux에 Git, Node LTS/npm, Claude Code, Codex와 안전 훅을 준비하세요.">
   <link rel="canonical" href="https://cmore.dev/lazy-starter-kit/">
   <meta name="theme-color" content="#070B12">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="CMORE Ready">
   <meta property="og:title" content="CMORE Ready · 새 컴퓨터, 개발 준비 끝.">
-  <meta property="og:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
+  <meta property="og:description" content="v0.14.0 기본 ai 구성: Git, Node LTS/npm, Claude Code, Codex, 안전 훅과 최소 PATH. 로그인과 첫 요청은 직접 진행합니다.">
   <meta property="og:url" content="https://cmore.dev/lazy-starter-kit/">
   <meta property="og:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
   <meta property="og:image:width" content="1280">
   <meta property="og:image:height" content="640">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="CMORE Ready · 새 컴퓨터, 개발 준비 끝.">
-  <meta name="twitter:description" content="오픈소스로 확인 가능한 크로스플랫폼 개발 환경 설치 도구.">
+  <meta name="twitter:description" content="v0.14.0 기본 ai 구성: Git, Node LTS/npm, Claude Code, Codex, 안전 훅과 최소 PATH. 로그인과 첫 요청은 직접 진행합니다.">
   <meta name="twitter:image" content="https://heoooooon.github.io/lazy-starter-kit/social-preview.svg">
   <link rel="icon" href="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" type="image/svg+xml">
   <style>
@@ -908,12 +908,12 @@
         <p class="eyebrow">CMORE Ready · Cross-platform dev setup</p>
         <h1 id="hero-title">새 컴퓨터, <em>개발 준비 끝.</em></h1>
         <p class="hero-copy">
-          macOS, Windows, Linux에 필요한 개발 도구와 AI 코딩 환경을
-          기존 설정을 지우지 않고 한 번에 준비하세요.
+          macOS, Windows, Linux에 Git, Node LTS/npm, Claude Code와 Codex를
+          준비하세요. 기본 ai 구성은 안전 훅과 최소 PATH를 더하며, 기존 설정은 보존합니다.
         </p>
         <div class="actions">
           <a class="button button-primary" href="#start">무료로 시작</a>
-          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0">v0.13.0 릴리스 노트</a>
+          <a class="button button-secondary" href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.0">v0.14.0 릴리스 노트</a>
         </div>
         <p class="source-note">by CMORE · Powered by lazy-starter-kit</p>
       </div>
@@ -930,23 +930,23 @@
             <img src="https://heoooooon.github.io/lazy-starter-kit/brand/app-icon.svg" width="64" height="64" alt="">
             <div>
               <strong>설치 계획 미리보기</strong>
-              <span>v0.13.0 추천 구성 예시이며, 실제 설치 결과는 아닙니다.</span>
+              <span>v0.14.0 기본 ai 구성 예시이며, 실제 설치 결과는 아닙니다.</span>
             </div>
           </div>
           <div class="setup-choice">
             <div>
-              <b>추천 설치 · Docker 제외</b>
-              <span>런타임 · 셸 · Git · Claude Code · Codex</span>
+              <b>기본 AI 설치 · Docker·WSL 제외</b>
+              <span>Git · Node LTS/npm · Claude Code · Codex · 안전 훅</span>
             </div>
             <div class="choice-status">5 / 6 steps</div>
           </div>
           <progress class="progress" aria-label="설치 계획 예시: 여섯 단계 중 다섯 단계" value="5" max="6">5 / 6</progress>
           <div class="terminal">
             <p class="terminal-label">Example plan</p>
-            <p><span class="done">01</span>&nbsp;&nbsp;기본 개발 도구 준비</p>
-            <p><span class="done">02</span>&nbsp;&nbsp;Node.js · Python · Go 준비</p>
-            <p><span class="done">03</span>&nbsp;&nbsp;셸 환경과 Git 설정 연결</p>
-            <p><span class="working">04</span>&nbsp;&nbsp;Claude Code · Codex 준비</p>
+            <p><span class="done">01</span>&nbsp;&nbsp;Git과 필수 선행 도구 준비</p>
+            <p><span class="done">02</span>&nbsp;&nbsp;Node.js LTS · npm 준비</p>
+            <p><span class="done">03</span>&nbsp;&nbsp;최소 PATH 설정 연결</p>
+            <p><span class="working">04</span>&nbsp;&nbsp;Claude Code · Codex · 안전 훅 준비</p>
             <p>&nbsp;</p>
             <p>미리보기는 설치가 아닙니다. 적용 후 직접 확인하세요.</p>
           </div>
@@ -965,7 +965,7 @@
       </li>
       <li class="proof">
         <strong>6 environments in CI</strong>
-        <span>설치·상태 확인과 주요 회귀 검증을 자동 실행합니다.</span>
+        <span>설치·상태 확인과 회귀 검사를 실행합니다. 이식 가능한 Windows 검사는 네이티브 WinForms/DPI E2E가 아닙니다.</span>
       </li>
     </ul>
 
@@ -983,21 +983,21 @@
           <span class="step-number">01</span>
           <div>
             <h3>내 운영체제에서 시작</h3>
-            <p>처음이라면 아래 <a href="#start">v0.13.0 GUI ZIP</a>을 받아 시작하세요. macOS와 Windows를 지원하며, Linux는 v0.13.0 소스로 설치합니다.</p>
+            <p>처음이라면 아래 <a href="#start">v0.14.0 GUI ZIP</a>을 받아 시작하세요. macOS와 Windows를 지원하며, Linux는 v0.14.0 소스로 설치합니다.</p>
           </div>
         </article>
         <article class="step">
           <span class="step-number">02</span>
           <div>
-            <h3>구성을 고르고 미리보기</h3>
-            <p>v0.13.0 GUI는 recommended + 미리보기로 시작합니다. Docker와 Windows WSL은 제외됩니다. CLI 기본값은 여전히 full이므로 recommended 프로필을 명시하세요.</p>
+            <h3>기본 AI 구성, 설치와 미리보기는 별도</h3>
+            <p>v0.14.0 GUI와 일반 무프로필 CLI 설치의 기본값은 ai입니다. GUI의 기본 동작은 설치이며, 미리보기는 별도 버튼입니다. recommended는 ai의 별칭이 아닌 더 넓은 개발 구성입니다. full, minimal, work도 명시적으로 선택할 수 있습니다.</p>
           </div>
         </article>
         <article class="step">
           <span class="step-number">03</span>
           <div>
             <h3>설치 후 직접 확인하고 첫 프로젝트로</h3>
-            <p>미리보기 후 실제 설치를 실행하고 로그의 경고를 확인하세요. 새 터미널에서 선택한 도구의 버전을 확인한 뒤, 프로젝트 폴더에서 Git을 초기화하고 Claude Code 또는 Codex를 실행해 로그인하세요. 설치 종료만으로 사용 준비가 검증되지는 않습니다.</p>
+            <p>설치와 실행 파일 검사를 마친 뒤 새 빈 연습 폴더에서 Claude Code 또는 Codex를 여세요. 미리보기·실패·취소만으로 첫 실행 기능이 열리지는 않습니다. 새 Mac에서 Terminal로 설치를 이어 했다면 GUI로 돌아와 설치 결과 확인을 실행하세요. 로그인과 첫 프롬프트 검토·전송은 직접 하며, 복사 버튼은 클립보드에만 넣습니다. <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.14.0/README.md#first-project">첫 프로젝트 안내</a>를 따르세요.</p>
           </div>
         </article>
       </div>
@@ -1028,7 +1028,7 @@
           </div>
           <div class="safety-item">
             <strong>자동 제거 미지원</strong>
-            <span>v0.13.0은 기존 도구와 키트가 설치한 도구를 확실히 구분할 수 없어 자동 제거를 지원하지 않습니다. 개별 도구의 공식 제거 안내를 따르고, 설정과 백업은 직접 확인하세요.</span>
+            <span>v0.14.0은 기존 도구와 키트가 설치한 도구를 확실히 구분할 수 없어 자동 제거를 지원하지 않습니다. 개별 도구의 공식 제거 안내를 따르고, 설정과 백업은 직접 확인하세요.</span>
           </div>
         </div>
       </div>
@@ -1042,24 +1042,28 @@
         </div>
         <div>
           <p class="section-intro">
-            추천 구성은 런타임, 셸, Git, Claude Code와 Codex를 준비합니다.
-            Docker는 별도 선택이며, Hermes는 macOS·Linux에서 선택 설치합니다.
-            v0.13.0은 gajae-code (gjc), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
-            설치 후 새 터미널에서 선택한 도구를 확인하세요. doctor는 추천 구성만이 아닌 전체 도구 목록을 점검합니다.
+            기본 ai는 Git, Node LTS/npm, Claude Code, Codex, 안전 훅과 최소 PATH를 준비합니다.
+            Python, Go, Rust, Docker, WSL, Bun, uv, 셸 꾸미기, 폰트와 선택 CLI 묶음은 제외합니다.
+            더 넓은 개발 도구는 recommended 등 명시적 프로필로 선택합니다.
+            Hermes는 macOS·Linux의 고급 에이전트 구성에서만 별도 선택하며, ai는 상속된 HERMES=1도 무시합니다.
+            v0.14.0은 gajae-code (gjc), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
+            설치 후 새 터미널에서 확인하세요. macOS doctor는 저장된 프로필을 추론하며 AI JSON은 --profile ai --doctor-json을 사용합니다.
+            Linux의 단독 --doctor는 AI 범위, Windows의 단독 -Doctor는 전체 범위이므로 AI 검사에는 -Profile ai -Doctor가 필요합니다.
+            명시적 개발 프로필의 doctor는 전체 도구 목록 점검을 유지하며, 어떤 로컬 검사도 제공자 인증을 확인하지 않습니다.
           </p>
           <ul class="tool-band" aria-label="지원 도구">
             <li>Git</li>
-            <li>Homebrew</li>
-            <li>mise</li>
-            <li>Node.js</li>
-            <li>Python</li>
-            <li>Go</li>
-            <li>Rust</li>
-            <li>starship</li>
+            <li>Homebrew (macOS)</li>
+            <li>mise (Linux AI·개발 구성)</li>
+            <li>Node LTS/npm</li>
+            <li>Python (개발 구성)</li>
+            <li>Go (개발 구성)</li>
+            <li>Rust (개발 구성)</li>
+            <li>starship (개발 구성)</li>
             <li>Docker (선택)</li>
             <li>Claude Code</li>
             <li>Codex</li>
-            <li>Hermes (macOS·Linux 선택)</li>
+            <li>Hermes (macOS·Linux 고급 선택)</li>
           </ul>
         </div>
       </div>
@@ -1087,30 +1091,33 @@
         <p class="section-kicker">Start free</p>
         <h2 id="start-title">오늘, 같은 출발선에서 시작하세요.</h2>
         <p>
-          <strong>v0.13.0 GUI는 추천 설치와 미리보기로 시작합니다.</strong>
-          내 운영체제의 ZIP을 풀고 설치기를 여세요. 로그를 확인한 뒤 미리보기를 끄고 적용하세요.
-          자세한 순서는 <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.13.0/README.md#recommended-setup">v0.13.0 추천 설치 안내</a>를 따르세요.
-          변경 내역은 <a href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.13.0">v0.13.0 릴리스 노트</a>에서 확인하세요.
+          <strong>v0.14.0 GUI의 기본 구성은 ai, 기본 동작은 설치입니다.</strong>
+          내 운영체제의 ZIP을 풀고 설치기를 여세요. 미리보기는 설치와 별도입니다.
+          릴리스 GUI의 부트스트랩은 해당 릴리스 커밋에 고정됩니다.
+          다운로드와 AI 서비스에는 인터넷이 필요하며, Claude Code와 Codex는 각각 이용 권한이 있는 계정 또는 지원되는 API 인증 정보가 필요합니다.
+          키트에 구독이나 크레딧은 포함되지 않습니다. 로그인과 첫 요청은 직접 진행하세요.
+          자세한 순서는 <a href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.14.0/README.md#recommended-setup">v0.14.0 추천 설치 안내</a>를 따르세요.
+          변경 내역은 <a href="https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.0">v0.14.0 릴리스 노트</a>에서 확인하세요.
         </p>
         <ul class="download-list" aria-label="운영체제별 시작 방법">
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-macos-gui.zip">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-macos-gui.zip">
               <strong>macOS</strong>
-              <span>v0.13.0 GUI ZIP · macOS 14+<br>압축을 풀고 Lazy Starter Kit Installer.app을 여세요.</span>
+              <span>v0.14.0 GUI ZIP · macOS 14+<br>압축을 풀고 Lazy Starter Kit Installer.app을 여세요.</span>
               <b>macOS ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.13.0/lazy-starter-kit-windows-gui.zip">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip">
               <strong>Windows</strong>
-              <span>v0.13.0 GUI ZIP · 추천 + 미리보기<br>압축을 풀고 Lazy-Starter-Kit-Installer.cmd를 여세요.</span>
+              <span>v0.14.0 GUI ZIP · 기본 ai 구성<br>압축을 풀고 Lazy-Starter-Kit-Installer.cmd를 여세요.</span>
               <b>Windows ZIP 받기</b>
             </a>
           </li>
           <li>
-            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.13.0/linux/README.md">
+            <a class="download-link" href="https://github.com/Heoooooon/lazy-starter-kit/blob/v0.14.0/linux/README.md">
               <strong>Linux</strong>
-              <span>GUI 없이 v0.13.0 소스로 설치합니다. 추천 구성의 미리보기·설치·확인 순서를 안내합니다.</span>
+              <span>GUI 없이 v0.14.0 소스로 설치합니다. 기본 ai 구성의 미리보기·설치·확인 순서를 안내합니다.</span>
               <b>추천 설치 안내</b>
             </a>
           </li>

@@ -7,6 +7,47 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-09-07
+
+### Added
+- **Minimal AI setup on macOS, Linux and Windows.** The `ai` profile prepares
+  Git, Node.js LTS/npm, Claude Code, Codex, shell safety hooks and the PATH needed
+  in a new terminal. Other runtimes, Docker and shell cosmetics remain optional.
+- **Verified first-run actions in the native installers.** Required commands must
+  execute successfully before practice-folder launch and prompt copying become
+  available. Login, folder trust and prompt submission remain manual; executable
+  checks do not verify provider subscriptions or account access.
+- **Separate Install and Preview actions.** Packaged macOS and Windows previews
+  work offline without installing prerequisites or creating practice folders.
+  The macOS first-time Terminal handoff has a read-only result-check continuation.
+- **Profile and first-use regression coverage.** Tests exercise legacy profiles,
+  invalid selectors, missing/broken commands, safety-hook failures, fresh-shell
+  PATH, quoted practice paths, clipboard copy and user-file preservation.
+
+### Changed
+- **Pre-1.0 breaking default change:** ordinary CLI, GUI and double-click installs
+  now start with `ai`, rather than the previous full CLI or recommended GUI
+  developer bundle. Explicit `recommended`, `full`, `minimal`, `work` and custom
+  step selections retain their existing meanings.
+- **AI-scoped diagnostics.** Use `--profile ai --doctor` or `-Profile ai -Doctor`.
+  macOS also provides `--doctor-json` for AI readiness and uses completed-profile
+  metadata for bare doctor; Linux bare doctor checks AI tools. Windows bare doctor
+  retains its full inventory. Explicit full diagnostics remain available.
+- **Optional agents stay outside the minimal setup.** An inherited `HERMES=1`
+  does not expand `ai`; use an explicit developer profile with its agents step
+  when opting into Hermes. Claude Code and Codex remain the supported defaults.
+
+### Fixed
+- GUI readiness and preview output stay within the native window, including
+  long failure details and minimum-size layouts.
+- Independent developer app builds have distinct bundle identities, and GUI
+  test captures use per-process directories rather than shared screenshot paths.
+
+Automatic uninstall remains retired. No removal UI or automatic removal of
+existing developer tools, gajae-code, lazycodex, or user settings is restored.
+macOS release apps remain universal and use the existing Developer ID signing
+and notarization workflow.
+
 ## [0.13.0] - 2026-09-05
 
 This release ships the recommended setup in the macOS and Windows GUI ZIPs,
@@ -456,7 +497,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.10.7...v0.11.0
