@@ -114,6 +114,24 @@ The profile is a starting point. A `사용자 지정` state appears when users c
 - First-time Xcode Command Line Tools or Homebrew setup is handed to a mode-0700 Terminal command carrying the selected installer steps. Homebrew remains under the logged-in user and owns any native `sudo` prompt.
 - Ready prerequisites remain in the GUI. Every terminal state restores the controls so the app can be used again.
 
+### Beginner tool explanation
+
+- Keep the selected tool list visible and explain the purpose of Node.js/npm in
+  one short sentence before installation. Do not ask beginners to choose a
+  runtime or package manager.
+- A native secondary `도구 용어 알아보기` action opens an informational sheet or
+  dialog using the existing help-control styling. The explanation is available
+  offline, does not change the installation selection, and returns to the
+  installer when dismissed with its close action or Escape.
+- Explain Node.js, npm, Bun, bunx, and mise in plain Korean, including the
+  distinction between installing a package and executing it. Bun-installed
+  packages can still require Node.js.
+- Describe the current payload accurately: the default AI profile does not
+  install Bun/bunx; it uses mise for Node on Linux, but not on macOS or Windows.
+  Definitions are not promises that every named tool is installed.
+- Reuse native typography, semantic colors, keyboard focus, and wrapped text.
+  Keep the primary action and account requirements legible at minimum size.
+
 ### Preview control
 
 A secondary native Preview button is separate from the primary Install action. Packaged preview works without installing prerequisites or creating a practice folder, and never unlocks first-run controls.

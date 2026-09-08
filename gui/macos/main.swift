@@ -375,6 +375,13 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       NSApplication.shared.terminate(nil)
       return
     }
+    if environment["STARTER_KIT_GUI_HELP_SNAPSHOT"] == "tool-terms" {
+      if environment["STARTER_KIT_GUI_HELP_MINIMUM_SIZE"] == "1" {
+        window.setFrame(NSRect(origin: window.frame.origin, size: window.minSize), display: true)
+      }
+      openToolTermsHelp()
+      return
+    }
     if
       let profileID = environment["STARTER_KIT_GUI_PROFILE"],
       let index = profilePlans.firstIndex(where: { $0.id == profileID })
@@ -439,7 +446,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     title.font = .systemFont(ofSize: 28, weight: .bold)
     let subtitle = NSTextField(
       wrappingLabelWithString:
-        "AI 코딩에 필요한 도구를 준비합니다. 계정 로그인은 설치 후 직접 진행하세요."
+        "npm은 Codex를 설치하고, Node.js는 안전 훅을 실행해요."
     )
     subtitle.textColor = .secondaryLabelColor
     subtitle.font = .systemFont(ofSize: 14)
@@ -531,13 +538,31 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       ]
     )
     permissionButton.toolTip = "관리자 계정과 비밀번호 처리 방식을 설명합니다."
+    let toolTermsButton = NSButton(
+      title: "도구 용어 알아보기",
+      target: self,
+      action: #selector(openToolTermsHelp)
+    )
+    toolTermsButton.bezelStyle = .inline
+    toolTermsButton.controlSize = .small
+    toolTermsButton.contentTintColor = Brand.cobalt
+    toolTermsButton.attributedTitle = NSAttributedString(
+      string: toolTermsButton.title,
+      attributes: [
+        .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
+        .foregroundColor: Brand.cobalt,
+      ]
+    )
+    toolTermsButton.toolTip = "Node.js, npm, Bun, bunx, mise를 오프라인으로 설명합니다."
     let componentRow = NSStackView(views: [componentChoices, componentSpacer])
     componentRow.orientation = .horizontal
     componentRow.alignment = .centerY
     componentRow.spacing = 10
     let helpSpacer = NSView()
     helpSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-    let helpRow = NSStackView(views: [helpSpacer, permissionButton, toolsButton])
+    let helpRow = NSStackView(
+      views: [helpSpacer, permissionButton, toolTermsButton, toolsButton]
+    )
     helpRow.orientation = .horizontal
     helpRow.alignment = .centerY
     helpRow.spacing = 10
@@ -901,6 +926,64 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     alert.alertStyle = .informational
     alert.addButton(withTitle: "확인")
     alert.beginSheetModal(for: window)
+  }
+
+  @objc private func openToolTermsHelp() {
+    let alert = NSAlert()
+    alert.messageText = "도구 용어 알아보기"
+    alert.informativeText = """
+      Node.js: 자바스크립트로 만든 프로그램을 실행하는 도구입니다.
+      npm: Node.js와 보통 함께 설치되며, 프로젝트에 필요한 패키지나 CLI 도구를 받습니다.
+      Bun: 패키지 설치와 자바스크립트·타입스크립트 프로그램 실행을 모두 할 수 있는 도구입니다.
+      bunx: Bun에 포함된 명령으로, CLI 도구를 찾아 실행하고 없으면 내려받기도 합니다.
+      mise: Node.js나 Bun 같은 개발 도구의 버전을 설치하고 선택하는 도구입니다.
+
+      설치와 실행은 다릅니다. npm으로 받는 많은 패키지를 Bun으로도 설치할 수 있지만, 실행할 때는 Node.js가 필요한 도구도 있습니다. Bun으로 설치했다고 모든 프로그램이 Node.js 없이 실행되는 것은 아닙니다.
+
+      이름이 나온 도구를 모두 설치하는 것은 아닙니다. 현재 기본 AI 구성은 Bun/bunx와 mise를 설치하지 않습니다. 고급 구성의 설치 범위는 다르므로 실행 전 미리보기에서 확인하세요.
+      """
+    alert.alertStyle = .informational
+    let closeButton = alert.addButton(withTitle: "닫기")
+    closeButton.keyEquivalent = "\u{1b}"
+    let environment = BuildInfo.developerMode ? ProcessInfo.processInfo.environment : [:]
+    let isHelpQA = environment["STARTER_KIT_GUI_HELP_SNAPSHOT"] == "tool-terms"
+    alert.beginSheetModal(for: window) { [self] _ in
+      guard isHelpQA else { return }
+      // NSAlert invokes its completion before AppKit detaches the sheet.
+      // Inspect the parent after that close event has finished processing.
+      DispatchQueue.main.async { [self] in
+        guard window.attachedSheet == nil else {
+          fputs("help QA: sheet did not dismiss\n", stderr)
+          exit(1)
+        }
+        do {
+          if let path = environment["STARTER_KIT_GUI_HELP_CLOSED_SNAPSHOT"] {
+            try renderSnapshot(to: path)
+          }
+          print("HELP_QA_CLOSED")
+          NSApplication.shared.terminate(nil)
+        } catch {
+          fputs("help QA closed snapshot failed: \(error.localizedDescription)\n", stderr)
+          exit(1)
+        }
+      }
+    }
+    if isHelpQA {
+      guard window.attachedSheet === alert.window else {
+        fputs("help QA: sheet did not open\n", stderr)
+        exit(1)
+      }
+      do {
+        if let path = environment["STARTER_KIT_GUI_HELP_OPEN_SNAPSHOT"] {
+          try renderSnapshot(to: path, of: alert.window)
+        }
+        print("HELP_QA_OPEN")
+        closeButton.performClick(nil)
+      } catch {
+        fputs("help QA open snapshot failed: \(error.localizedDescription)\n", stderr)
+        exit(1)
+      }
+    }
   }
 
   private func applyProfilePlan(_ plan: InstallerProfile) {
@@ -1707,9 +1790,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     try renderSnapshot(to: path)
   }
 
-  private func renderSnapshot(to path: String) throws {
-    window.center()
-    window.makeKeyAndOrderFront(nil)
+  private func renderSnapshot(to path: String, of targetWindow: NSWindow? = nil) throws {
+    let window = targetWindow ?? self.window
+    if targetWindow == nil {
+      window.center()
+      window.makeKeyAndOrderFront(nil)
+    }
     NSApplication.shared.activate(ignoringOtherApps: true)
     window.contentView?.layoutSubtreeIfNeeded()
     window.displayIfNeeded()

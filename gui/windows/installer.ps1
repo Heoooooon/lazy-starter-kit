@@ -216,10 +216,10 @@ $cancelButton.Visible = $false
 
 $status = New-Object System.Windows.Forms.Label
 $status.Text = '설치할 준비가 되었습니다. 계정 로그인은 설치 후 직접 진행합니다.'
-$status.Size = New-Object System.Drawing.Size(510, 48)
+$status.Size = New-Object System.Drawing.Size(510, 34)
 $status.Anchor = 'Top,Left,Right'
 $status.ForeColor = [System.Drawing.Color]::DimGray
-$status.Location = New-Object System.Drawing.Point(31, 290)
+$status.Location = New-Object System.Drawing.Point(31, 338)
 
 $profileDescription = New-Object System.Windows.Forms.Label
 $profileDescription.Text = $ProfileDescriptions[$Profiles[$profile.SelectedIndex]]
@@ -233,14 +233,73 @@ $accountNote.Location = New-Object System.Drawing.Point(31, 220)
 $accountNote.Size = New-Object System.Drawing.Size(694, 64)
 $accountNote.Anchor = 'Top,Left,Right'
 
+$ToolGlossaryText = @'
+도구 용어 알아보기
+
+Node.js — 자바스크립트로 만든 프로그램을 실행합니다.
+npm — Node.js와 보통 함께 설치되며, 프로젝트에 필요한 패키지나 CLI 도구를 받습니다.
+Bun — 패키지 설치와 자바스크립트·타입스크립트 프로그램 실행을 모두 할 수 있습니다.
+bunx — Bun에 포함된 명령으로, CLI 도구를 찾아 실행하고 없으면 내려받기도 합니다.
+mise — Node.js나 Bun 같은 개발 도구의 버전을 설치하고 선택합니다.
+
+설치와 실행은 다릅니다. npm으로 받는 많은 패키지를 Bun으로도 설치할 수 있지만, 추가 설정이 필요하거나 실행할 때 Node.js가 필요한 도구도 있습니다. Bun으로 설치했다고 모든 프로그램이 Node.js 없이 실행되는 것은 아닙니다.
+
+이름이 나온 도구를 모두 설치하는 것은 아닙니다. 이 Windows 설치기의 기본 AI 구성은 Bun/bunx와 mise를 설치하지 않습니다. 고급 구성의 설치 범위는 다르므로 실행 전 미리보기에서 확인하세요.
+'@
+
+$nodeNote = New-Object System.Windows.Forms.Label
+$nodeNote.Text = 'npm은 Codex를 설치하고, Node.js는 AI 도구의 안전 훅을 설치하고 실행하는 데 사용합니다.'
+$nodeNote.ForeColor = [System.Drawing.Color]::DimGray
+$nodeNote.Location = New-Object System.Drawing.Point(31, 290)
+$nodeNote.Size = New-Object System.Drawing.Size(505, 40)
+$nodeNote.Anchor = 'Top,Left,Right'
+
+$glossaryButton = New-Object System.Windows.Forms.Button
+$glossaryButton.Text = '도구 용어 알아보기'
+$glossaryButton.Size = New-Object System.Drawing.Size(150, 28)
+$glossaryButton.Location = New-Object System.Drawing.Point(548, 292)
+$glossaryButton.Anchor = 'Top,Right'
+$glossaryButton.Add_Click({
+  $dialog = New-Object System.Windows.Forms.Form
+  $dialog.Text = '도구 용어 알아보기'
+  $dialog.StartPosition = 'CenterParent'
+  $dialog.ClientSize = New-Object System.Drawing.Size(560, 430)
+  $dialog.MinimumSize = New-Object System.Drawing.Size(480, 360)
+  $dialog.MinimizeBox = $false
+  $dialog.MaximizeBox = $false
+  $dialog.ShowInTaskbar = $false
+  $dialog.Font = $form.Font
+  $dialogText = New-Object System.Windows.Forms.TextBox
+  $dialogText.Multiline = $true
+  $dialogText.ReadOnly = $true
+  $dialogText.ScrollBars = 'Vertical'
+  $dialogText.WordWrap = $true
+  $dialogText.BackColor = [System.Drawing.SystemColors]::Window
+  $dialogText.Text = ($ToolGlossaryText -replace "`r`n", "`n") -replace "`n", [Environment]::NewLine
+  $dialogText.Location = New-Object System.Drawing.Point(16, 16)
+  $dialogText.Size = New-Object System.Drawing.Size(528, 346)
+  $dialogText.Anchor = 'Top,Bottom,Left,Right'
+  $closeButton = New-Object System.Windows.Forms.Button
+  $closeButton.Text = '닫기'
+  $closeButton.Size = New-Object System.Drawing.Size(90, 32)
+  $closeButton.Location = New-Object System.Drawing.Point(454, 382)
+  $closeButton.Anchor = 'Bottom,Right'
+  $closeButton.Add_Click({ $dialog.Close() })
+  $dialog.Controls.AddRange(@($dialogText, $closeButton))
+  $dialog.CancelButton = $closeButton
+  $dialog.Add_Shown({ $closeButton.Focus() | Out-Null })
+  $dialog.ShowDialog($form) | Out-Null
+  $dialog.Dispose()
+})
+
 $details = New-Object System.Windows.Forms.CheckBox
 $details.Text = '자세한 실행 로그 보기'
 $details.AutoSize = $true
-$details.Location = New-Object System.Drawing.Point(31, 520)
+$details.Location = New-Object System.Drawing.Point(31, 552)
 
 $firstRun = New-Object System.Windows.Forms.GroupBox
 $firstRun.Text = '설치 확인 후 첫 AI 코딩 시작'
-$firstRun.Location = New-Object System.Drawing.Point(31, 346)
+$firstRun.Location = New-Object System.Drawing.Point(31, 380)
 $firstRun.Size = New-Object System.Drawing.Size(694, 162)
 $firstRun.Anchor = 'Top,Left,Right'
 $firstRun.Enabled = $false
@@ -280,7 +339,7 @@ $versionLink.Text = if ($AppVersion -eq 'dev') {
   "v$AppVersion · 새 버전 확인"
 }
 $versionLink.AutoSize = $true
-$versionLink.Location = New-Object System.Drawing.Point(565, 290)
+$versionLink.Location = New-Object System.Drawing.Point(565, 338)
 $versionLink.Anchor = 'Top,Right'
 $versionLink.Add_LinkClicked({
   [System.Diagnostics.Process]::Start($ReleasesUrl)
@@ -294,8 +353,8 @@ $log.WordWrap = $true
 $log.Font = New-Object System.Drawing.Font('Consolas', 9)
 $log.BackColor = [System.Drawing.SystemColors]::Window
 $log.ForeColor = [System.Drawing.SystemColors]::WindowText
-$log.Location = New-Object System.Drawing.Point(31, 552)
-$log.Size = New-Object System.Drawing.Size(694, 213)
+$log.Location = New-Object System.Drawing.Point(31, 584)
+$log.Size = New-Object System.Drawing.Size(694, 181)
 $log.Anchor = 'Top,Bottom,Left,Right'
 $log.Visible = $false
 $details.Add_CheckedChanged({ $log.Visible = $details.Checked })
@@ -303,7 +362,8 @@ $details.Add_CheckedChanged({ $log.Visible = $details.Checked })
 $form.Controls.AddRange(@(
   $title, $subtitle, $profileLabel, $profile, $previewButton,
   $cancelButton, $installButton, $status, $versionLink, $log,
-  $accountNote, $profileDescription, $details, $firstRun
+  $accountNote, $profileDescription, $details, $firstRun,
+  $nodeNote, $glossaryButton
 ))
 $form.AcceptButton = $installButton
 
