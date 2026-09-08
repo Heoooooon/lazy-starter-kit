@@ -5,6 +5,16 @@
 MISE_TOOLS=("node@lts" "python@latest" "go@latest")
 
 step_runtimes() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Node.js LTS + npm"
+    load_brew
+    # Node 24 is the supported LTS line; Homebrew's unversioned node is Current.
+    run brew install node@24
+    local prefix
+    prefix="$(brew_prefix)"
+    export PATH="$prefix/opt/node@24/bin:$PATH"
+    return
+  fi
   step "Runtimes: mise (node/python/go) + rustup (rust)"
   load_brew
   # In a full dry-run on a bare machine, mise/rustup aren't installed yet (the

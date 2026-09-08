@@ -4,6 +4,10 @@
 step_brew() {
   step "Homebrew packages (Brewfile)"
   load_brew
+  if [[ "${PROFILE:-}" == ai ]]; then
+    run brew install git
+    return
+  fi
   local brewfile
   local -a brewfiles
   brewfiles=("$ROOT/Brewfile.core")

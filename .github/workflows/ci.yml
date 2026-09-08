@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck zsh fish
       - name: bash syntax
         run: |
           for f in linux/install.sh linux/scripts/*.sh linux/config/zshrc.block.sh; do
@@ -60,6 +60,8 @@ jobs:
           done
       - name: shellcheck
         run: shellcheck -x -S warning -e SC2154 linux/install.sh linux/scripts/*.sh
+      - name: beginner AI setup and fresh-shell regression
+        run: bash tests/linux-beginner-onboarding.sh
 
   linux-e2e:
     name: linux install + verify (ubuntu)
@@ -71,7 +73,7 @@ jobs:
       - name: install (non-interactive; skip Docker)
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./linux/install.sh --yes --skip docker
+        run: ./linux/install.sh --profile full --yes --skip docker
 
       - name: verify installed
         run: |
@@ -92,7 +94,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          ./linux/install.sh --yes --skip docker
+          ./linux/install.sh --profile full --yes --skip docker
           fail=0
           for tag in 'lazy-starter-kit:main' 'lazy-starter-kit:ohmyzsh'; do
             n=$(grep -cxF "# >>> $tag >>>" "$HOME/.zshrc" || true)
@@ -101,7 +103,7 @@ jobs:
           exit $fail
 
       - name: doctor exits 0 on a healthy install (exit code is a contract)
-        run: ./linux/install.sh --doctor
+        run: ./linux/install.sh --profile full --doctor
 
   linux-e2e-distros:
     name: linux install + verify (${{ matrix.image }})
@@ -135,7 +137,7 @@ jobs:
       - name: install (non-interactive; skip Docker)
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./linux/install.sh --yes --skip docker
+        run: ./linux/install.sh --profile full --yes --skip docker
 
       - name: verify installed
         run: |
@@ -153,7 +155,7 @@ jobs:
           exit $fail
 
       - name: doctor exits 0 on a healthy install (exit code is a contract)
-        run: ./linux/install.sh --doctor
+        run: ./linux/install.sh --profile full --doctor
 
   linux-upgrade-path:
     name: linux upgrade path (latest tag -> main)
@@ -177,7 +179,7 @@ jobs:
       - name: upgrade — re-run the current (main) kit on top
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./linux/install.sh --yes --skip docker
+        run: ./linux/install.sh --profile full --yes --skip docker
 
       - name: verify upgraded state
         run: |
@@ -203,7 +205,7 @@ jobs:
         run: |
           $fail = 0
           @(Get-ChildItem -Path windows,gui/windows -Recurse -Include *.ps1) + @(
-            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1,tests/windows-profiles.ps1
+            Get-Item tests/windows-safe-remove.ps1,tests/windows-install-entrypoints.ps1,tests/windows-agents.ps1,tests/windows-profiles.ps1,tests/windows-beginner-onboarding.ps1
           ) | ForEach-Object {
             $tokens = $null; $errors = $null
             $null = [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
@@ -214,6 +216,9 @@ jobs:
             } else { Write-Host "ok   $($_.Name)" }
           }
           exit $fail
+      - name: portable beginner AI setup regression
+        shell: pwsh
+        run: ./tests/windows-beginner-onboarding.ps1
       - name: PSScriptAnalyzer (warnings+errors)
         shell: pwsh
         run: |
@@ -230,9 +235,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: beginner installer entrypoints
         run: tests/install-entrypoints.sh
+      - name: minimal AI setup regression
+        run: python3 tests/macos-beginner-onboarding.py
+      - name: beginner GUI first-run regression
+        run: |
+          build_dir="$(mktemp -d)"
+          STARTER_KIT_DEVELOPER_MODE=1 bash gui/macos/build-app.sh "$build_dir"
+          python3 tests/macos-beginner-gui.py "$build_dir/Lazy Starter Kit Installer.app/Contents/MacOS/LazyStarterKitInstaller"
       - name: release signing contract
         run: tests/release-signing.sh
-      - run: HERMES=1 ./install.sh --dry-run
+      - run: HERMES=1 ./install.sh --profile full --dry-run
 
   integration:
     name: macOS install + verify
@@ -247,7 +259,7 @@ jobs:
       - name: install (non-interactive)
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./install.sh
+        run: ./install.sh --profile full
 
       - name: verify installed
         run: |
@@ -269,7 +281,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          ./install.sh
+          ./install.sh --profile full
           fail=0
           for spec in "lazy-starter-kit:main:$HOME/.zshrc" "lazy-starter-kit:ohmyzsh:$HOME/.zshrc" "lazy-starter-kit:brew:$HOME/.zprofile"; do
             tag="${spec%:*}"; file="${spec##*:}"
@@ -279,7 +291,7 @@ jobs:
           exit $fail
 
       - name: doctor exits 0 on a healthy install (exit code is a contract)
-        run: ./install.sh --doctor
+        run: ./install.sh --profile full --doctor
 
   windows-e2e:
     name: windows install + verify
@@ -295,6 +307,9 @@ jobs:
       - name: beginner installer entrypoints
         shell: powershell
         run: .\tests\windows-install-entrypoints.ps1
+      - name: minimal AI setup regression (Windows PowerShell 5.1)
+        shell: powershell
+        run: .\tests\windows-beginner-onboarding.ps1
 
       - name: supported AI agents regression (Windows PowerShell 5.1)
         shell: powershell
@@ -316,7 +331,7 @@ jobs:
         shell: pwsh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .\windows\install.ps1 -Yes -Skip docker
+        run: .\windows\install.ps1 -Profile full -Yes -Skip docker
 
       - name: verify installed
         shell: pwsh

@@ -1,6 +1,11 @@
 # 04-shell.ps1 -- PowerShell profile: mise/starship/bun wiring + PSFzf + starship.toml
 
 function Step-Shell {
+  if ($script:InstallProfile -eq 'ai') {
+    Write-Step 'Make AI commands available in new terminals (no shell customizations)'
+    Update-AiPath -Persist
+    return
+  }
   Write-Step "Shell: PowerShell profile + prompt + fuzzy finder"
   Update-SessionPath
 

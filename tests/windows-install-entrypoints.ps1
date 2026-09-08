@@ -3,11 +3,13 @@
 $Root = Split-Path -Parent $PSScriptRoot
 
 function Assert-GuiOnboardingContract($Contract) {
-  if (($Contract.profiles -join ',') -ne 'recommended,full,minimal,work' -or
-      $Contract.defaultProfile -ne 'recommended' -or
-      -not $Contract.previewByDefault -or
-      $Contract.previewSwitches -ne "-Yes -Profile 'recommended' -DryRun" -or
-      $Contract.installSwitches -ne "-Yes -Profile 'recommended'" -or
+  if (($Contract.profiles -join ',') -ne 'ai,recommended,full,minimal,work' -or
+      $Contract.defaultProfile -ne 'ai' -or
+      $Contract.previewByDefault -or
+      -not $Contract.separatePreviewAction -or
+      -not $Contract.requiresVerifiedReadiness -or
+      $Contract.previewSwitches -ne "-Yes -Profile 'ai' -DryRun" -or
+      $Contract.installSwitches -ne "-Yes -Profile 'ai'" -or
       ($Contract.verificationCommands -join ',') -ne 'codex --version,claude --version' -or
       $Contract.projectCommand -ne 'codex' -or
       $Contract.completionStates.preview -ne 'preview' -or
@@ -64,7 +66,7 @@ if ($env:OS -ne 'Windows_NT') {
   $gui = & $guiInstallerPath -SelfTest | Out-String
   $contract = $gui | ConvertFrom-Json
   Assert-GuiOnboardingContract $contract
-  if (($contract.profiles -join ',') -ne 'recommended,full,minimal,work' -or
+  if (($contract.profiles -join ',') -ne 'ai,recommended,full,minimal,work' -or
       -not $contract.supportsDryRun -or
       -not $contract.supportsCancellation) {
     throw "Windows GUI portable self-test contract failed: $gui"
@@ -285,7 +287,7 @@ if ($bootstrapSource -notmatch
     '(?s)if \(\$Doctor\).+?\$global:LASTEXITCODE\s*=\s*\$code') {
   throw 'Windows bootstrap does not preserve Doctor status through hand-off cleanup'
 }
-if (($contract.profiles -join ',') -ne 'recommended,full,minimal,work') {
+if (($contract.profiles -join ',') -ne 'ai,recommended,full,minimal,work') {
   throw "Windows GUI profiles are incomplete: $gui"
 }
 if (-not $contract.supportsDryRun) { throw "Windows GUI does not report dry-run support: $gui" }
@@ -304,8 +306,8 @@ if (-not $contract.supportsCancellation) {
 if ($guiSource -match 'raw\.githubusercontent\.com/.+/main/') {
   throw 'Windows GUI still downloads a mutable main bootstrap'
 }
-if ($guiSource -notmatch '\$dryRun\.Add_CheckedChanged') {
-  throw 'Windows GUI preview checkbox does not update the primary action'
+if (-not $contract.separatePreviewAction -or $contract.previewByDefault) {
+  throw 'Windows GUI must keep primary installation separate from optional preview'
 }
 if ($guiSource -notmatch "taskkill\.exe") {
   throw 'Windows GUI cancellation does not terminate the installer process tree'

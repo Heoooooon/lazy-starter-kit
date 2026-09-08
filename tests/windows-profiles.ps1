@@ -80,7 +80,8 @@ function Test-HasCommand([string]$Name) { $false }
   $minimal = 'prereqs packages runtimes shell git'
   $cases = @(
     @{ Name = 'recommended'; Params = @{ Profile = 'recommended' }; Plan = $recommended },
-    @{ Name = 'default remains full'; Params = @{}; Plan = $full },
+    @{ Name = 'default AI'; Params = @{}; Plan = 'prereqs packages runtimes shell agents' },
+    @{ Name = 'explicit AI'; Params = @{ Profile = 'ai' }; Plan = 'prereqs packages runtimes shell agents' },
     @{ Name = 'full'; Params = @{ Profile = 'full' }; Plan = $full },
     @{ Name = 'minimal'; Params = @{ Profile = 'minimal' }; Plan = $minimal },
     @{ Name = 'work'; Params = @{ Profile = 'work' }; Plan = $recommended },
@@ -98,7 +99,7 @@ function Test-HasCommand([string]$Name) { $false }
     @{ Name = 'unknown skip token'; Params = @{ Profile = 'recommended'; Skip = 'typo' }; Reject = $true },
     @{ Name = 'only still validates skip'; Params = @{ Only = 'shell'; Skip = 'typo' }; Reject = $true }
   )
-  foreach ($preset in @('recommended', 'full', 'minimal', 'work')) {
+  foreach ($preset in @('ai', 'recommended', 'full', 'minimal', 'work')) {
     $cases += @{ Name = "$preset rejects only"; Params = @{ Profile = $preset; Only = 'shell' }; Reject = $true }
   }
   $failures = @()

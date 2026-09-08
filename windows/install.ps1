@@ -14,9 +14,10 @@
 .PARAMETER Yes
   Non-interactive: accept defaults, never prompt.
 .PARAMETER Profile
-  Preset step selection (recommended|full|minimal|work):
+  Preset step selection (ai|recommended|full|minimal|work):
+    ai       Git, Node LTS/npm, Claude Code, Codex, safety hooks and PATH (default).
     recommended  prereqs packages runtimes shell git agents (no docker/wsl).
-    full     everything (same as no switch).
+    full     everything.
     minimal  prereqs packages runtimes shell git (skips docker, agents, wsl).
     work     everything except docker and wsl.
   Implemented as a preset skip-set UNIONed with -Skip. Mutually exclusive with
@@ -78,6 +79,84 @@ $ErrorActionPreference = 'Stop'
 # (CI relies on them). $PSCommandPath is the running file's path, empty under iex.
 $script:RunFromFile =
   [bool]$PSCommandPath -and $env:STARTER_KIT_HANDOFF_CHILD -ne '1'
+
+$StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents', 'wsl')
+if ($NoAgents) { $Skip = @($Skip) + 'agents' }
+
+# ---------------------------------------------------------------------------
+# -Profile <name>: a preset skip-set UNIONed with the user's -Skip. A preset
+# picks steps to *drop*; -Only picks steps to *keep* -- combining them is
+# ambiguous, so they're mutually exclusive. Unknown names get the same friendly
+# "valid: ..." listing as an unknown step id.
+# ($Profile is bound in $PSBoundParameters, so it survives the -Update
+# re-invoke's param rebuild and the bootstrap hand-off's splat automatically.)
+# ---------------------------------------------------------------------------
+$ProfileNames = @('ai', 'recommended', 'full', 'minimal', 'work')
+$ProfileSkip  = @{
+  ai = @('docker', 'git', 'wsl')
+  recommended = @('docker', 'wsl')
+  full    = @()
+  minimal = @('docker', 'agents', 'wsl')
+  work    = @('docker', 'wsl')
+}
+# Custom selectors keep their existing full developer-step meanings.
+# Doctor without a profile remains the upstream full inventory.
+if (-not $Profile -and -not $Doctor -and -not $PSBoundParameters.ContainsKey('Only') -and
+    -not $PSBoundParameters.ContainsKey('Skip') -and -not $NoAgents) {
+  $Profile = 'ai'
+}
+if ($Profile) {
+  if (@($Only).Count -gt 0) { throw "choose either -Profile or -Only, not both." }
+  if ($ProfileNames -notcontains $Profile) {
+    throw "unknown profile: '$Profile' (valid: $($ProfileNames -join ' '))"
+  }
+  $Skip = @($Skip) + $ProfileSkip[$Profile]
+}
+
+# Validate every -Only/-Skip token against the known step ids -- a typo like
+# `-Only pacakges` would otherwise silently select zero steps and exit 0.
+foreach ($tok in (@(@($Only) + @($Skip)) | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
+  if ($StepIds -notcontains $tok) { throw "unknown step id: '$tok' (valid: $($StepIds -join ' '))" }
+}
+
+function Get-SelectedSteps {
+  $onlyList = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  $skipList = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+  foreach ($id in $StepIds) {
+    if ($onlyList.Count -gt 0) {
+      if ($onlyList -contains $id) { $id }
+    } elseif ($skipList -notcontains $id) {
+      $id
+    }
+  }
+}
+
+$script:InstallProfile = if ($Profile) { $Profile } else { 'full' }
+
+# A packaged bootstrap can preview offline, before Git or a checkout exists.
+if ($DryRun -and -not $Doctor -and -not $List -and -not $Version -and -not $Help -and -not $Update -and
+    (-not $PSScriptRoot -or -not (Test-Path (Join-Path $PSScriptRoot 'scripts\lib.ps1')))) {
+  Write-Host 'DRY-RUN: offline plan; no changes or executable readiness checks.'
+  $plan = @{
+    prereqs = 'Check winget, TLS and execution policy; user approval may be required.'
+    packages = 'Install the selected winget developer tools.'
+    runtimes = 'Install the selected language runtimes.'
+    shell = 'Configure the selected shell environment.'
+    docker = 'Offer Docker Desktop (licensing and approval required).'
+    git = 'Configure Git identity and GitHub access.'
+    agents = 'Install Claude Code, Codex and safety hooks. Hermes stays opt-in.'
+    wsl = 'Offer the WSL Linux environment.'
+  }
+  if ($script:InstallProfile -eq 'ai') {
+    $plan.packages = 'Install Git (Git.Git).'
+    $plan.runtimes = 'Install Node.js LTS/npm (OpenJS.NodeJS.LTS); no other runtimes.'
+    $plan.shell = 'Persist minimal Claude/Codex/safety-hook PATH; no shell cosmetics.'
+  }
+  foreach ($id in @(Get-SelectedSteps)) { Write-Host "[starter-kit:stage:$id]"; Write-Host $plan[$id] }
+  Write-Host 'Provider accounts and eligible plans or API billing are separate. No login, practice folder or prompt submission occurs in preview.'
+  $global:LASTEXITCODE = 0
+  if ($script:RunFromFile) { exit 0 } else { return }
+}
 
 $HomeDir = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $RepoUrl    = if ($env:STARTER_KIT_REPO)   { $env:STARTER_KIT_REPO }   else { 'https://github.com/Heoooooon/lazy-starter-kit.git' }
@@ -302,7 +381,6 @@ if ($Update) {
 # ---------------------------------------------------------------------------
 # Step registry
 # ---------------------------------------------------------------------------
-$StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents', 'wsl')
 $StepFile = @{
   prereqs  = '01-prereqs.ps1'
   packages = '02-packages.ps1'
@@ -425,53 +503,12 @@ if ($Help)    { Get-Help $target -Detailed;                    if ($script:RunFr
 if ($List)    { $StepIds | ForEach-Object { Write-Output $_ }; if ($script:RunFromFile) { exit 0 } else { return } }
 if ($Version) { Write-Output "lazy-starter-kit $KitVersion";    if ($script:RunFromFile) { exit 0 } else { return } }
 if ($Doctor)  {
-  $code = Invoke-Doctor
+  $code = if ($script:InstallProfile -eq 'ai') {
+    if (Test-AiReadiness -Steps @(Get-SelectedSteps)) { 0 } else { 1 }
+  } else { Invoke-Doctor }
   if ($script:RunFromFile) { exit $code }
   $global:LASTEXITCODE = $code
   return
-}
-
-if ($NoAgents) { $Skip = @($Skip) + 'agents' }
-
-# ---------------------------------------------------------------------------
-# -Profile <name>: a preset skip-set UNIONed with the user's -Skip. A preset
-# picks steps to *drop*; -Only picks steps to *keep* -- combining them is
-# ambiguous, so they're mutually exclusive. Unknown names get the same friendly
-# "valid: ..." listing as an unknown step id.
-# ($Profile is bound in $PSBoundParameters, so it survives the -Update
-# re-invoke's param rebuild and the bootstrap hand-off's splat automatically.)
-# ---------------------------------------------------------------------------
-$ProfileNames = @('recommended', 'full', 'minimal', 'work')
-$ProfileSkip  = @{
-  recommended = @('docker', 'wsl')
-  full    = @()
-  minimal = @('docker', 'agents', 'wsl')
-  work    = @('docker', 'wsl')
-}
-if ($Profile) {
-  if (@($Only).Count -gt 0) { Stop-Kit "choose either -Profile or -Only, not both." }
-  if ($ProfileNames -notcontains $Profile) {
-    Stop-Kit "unknown profile: '$Profile' (valid: $($ProfileNames -join ' '))"
-  }
-  $Skip = @($Skip) + $ProfileSkip[$Profile]
-}
-
-# Validate every -Only/-Skip token against the known step ids -- a typo like
-# `-Only pacakges` would otherwise silently select zero steps and exit 0.
-foreach ($tok in (@(@($Only) + @($Skip)) | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })) {
-  if ($StepIds -notcontains $tok) { Stop-Kit "unknown step id: '$tok' (valid: $($StepIds -join ' '))" }
-}
-
-function Get-SelectedSteps {
-  $onlyList = @($Only | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-  $skipList = @($Skip | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-  foreach ($id in $StepIds) {
-    if ($onlyList.Count -gt 0) {
-      if ($onlyList -contains $id) { $id }
-    } elseif ($skipList -notcontains $id) {
-      $id
-    }
-  }
 }
 
 # ---------------------------------------------------------------------------
@@ -485,11 +522,17 @@ $selected = @(Get-SelectedSteps)
 $stepsLine = "steps: " + ($selected -join ' ')
 if ($Profile) { $stepsLine += "  (profile: $Profile)" }
 Write-Info $stepsLine
+if ($script:InstallProfile -eq 'ai') {
+  Write-Info 'Installs tools only. Claude requires an Anthropic account with an eligible plan or API billing; Codex requires a ChatGPT account with eligible access or API billing. Provider terms and charges apply.'
+  Write-Info 'No automatic login or prompt submission. Hermes is optional and is not installed.'
+}
+
 
 # ---------------------------------------------------------------------------
 # Execute
 # ---------------------------------------------------------------------------
 foreach ($id in $selected) {
+  Write-Host "[starter-kit:stage:$id]"
   $file = Join-Path $Root ("scripts\" + $StepFile[$id])
   if (-not (Test-Path $file)) { Stop-Kit "missing step file: $file" }
   . $file
@@ -499,6 +542,21 @@ foreach ($id in $selected) {
 Write-Step "Done."
 if ($script:DryRun) {
   Write-Info "That was a dry run -- re-run without -DryRun to apply."
+} elseif ($script:InstallProfile -eq 'ai') {
+  Update-AiPath
+  if (-not (Test-AiReadiness -Steps $selected)) {
+    Stop-Kit 'Action needed: a required command is missing or failed --version. Open a NEW PowerShell window, then run .\install.ps1 -Doctor -Profile ai. No login was attempted.'
+  }
+  if (@('packages','runtimes','shell','agents' | Where-Object { $selected -notcontains $_ }).Count -eq 0) {
+    Write-Host '[starter-kit:ai-ready]'
+    Write-Ok 'Required executables are ready; provider login is still required.'
+  } else {
+    Write-Info 'Selected steps completed; this is not a complete AI-ready installation.'
+  }
+  Write-Info '1) Open a NEW PowerShell window.'
+  Write-Info '2) Create a new empty practice folder, enter it, then run claude or codex.'
+  Write-Info '3) Follow the provider account/login and folder trust prompts yourself. Review any plan or API charges before continuing.'
+  Write-Info '4) Paste your starter prompt only when you are ready. The kit has not sent a prompt.'
 } else {
   Write-Info "Installer steps finished; this is not verification that every tool is ready."
   Write-Step "Next steps"

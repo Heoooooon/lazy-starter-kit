@@ -1,6 +1,12 @@
 # 02-packages.ps1 -- install CLI tools + developer toolchain via winget
 
 function Step-Packages {
+  if ($script:InstallProfile -eq 'ai') {
+    Write-Step 'Git: project version control'
+    Install-WingetPackage -Id 'Git.Git' -Name 'Git'
+    Update-AiPath
+    return
+  }
   Write-Step "CLI tools + developer toolchain (winget)"
 
   if (-not (Test-HasCommand winget) -and -not $script:DryRun) {

@@ -3,16 +3,24 @@
 
 step_agents() {
   step "AI agents: codex + Claude Code"
-  load_local_bins
-  load_mise
-  export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
+  if [[ "${PROFILE:-}" == ai ]]; then
+    load_ai_bins
+  else
+    load_local_bins
+    load_mise
+    export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
+  fi
 
   # --- Claude Code (Anthropic) ------------------------------------------
   # Official installer drops the `claude` binary into ~/.local/bin and then
   # self-updates in the background. Installs by default everywhere (incl. CI).
   # Kept ahead of the npm-dependent agents so a box without node still gets it.
   if have claude; then
-    ok "Claude Code present ($(claude --version 2>/dev/null | head -1))"
+    if [[ "${PROFILE:-}" == ai ]]; then
+      info "Claude Code already installed"
+    else
+      ok "Claude Code present ($(claude --version 2>/dev/null | head -1))"
+    fi
   elif [[ "$DRY_RUN" == "1" ]]; then
     info "[dry-run] curl -fsSL https://claude.ai/install.sh | bash"
   else
@@ -34,31 +42,50 @@ step_agents() {
   if ! have npm; then
     if [[ "$DRY_RUN" == "1" ]]; then
       info "[dry-run] npm install -g @openai/codex"
+      info "[dry-run] install Codex/Claude safety hooks after Node is available"
     else
+      [[ "${PROFILE:-}" != ai ]] || die "Action needed: npm is missing; install Node LTS with the 'runtimes' step."
       warn "npm not found — skipping codex (run the 'runtimes' step first)"
     fi
     return 0
   fi
   if have codex; then
-    ok "codex present ($(codex --version 2>/dev/null | head -1))"
+    if [[ "${PROFILE:-}" == ai ]]; then
+      info "Codex already installed"
+    else
+      ok "codex present ($(codex --version 2>/dev/null | head -1))"
+    fi
   else
     info "Installing @openai/codex (npm -g)…"
-    run npm install -g @openai/codex
+    if [[ "${PROFILE:-}" == ai ]]; then
+      run npm install --prefix "$HOME/.local" -g @openai/codex
+    else
+      run npm install -g @openai/codex
+    fi
     # mise-managed node needs a reshim so the `codex` shim appears on PATH
     have mise && run mise reshim
   fi
 
-  if have node; then
+  if [[ "${PROFILE:-}" == ai && "$DRY_RUN" == 1 ]]; then
+    info "[dry-run] install Codex/Claude safety hooks after Node is available"
+  elif have node; then
     if [[ "$DRY_RUN" == "1" ]]; then
       node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME" --dry-run
     else
-      node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME" \
-        || warn "could not install the Codex/Claude recursive-rm guard"
+      if ! node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME"; then
+        [[ "${PROFILE:-}" != ai ]] || die "Action needed: could not install the Codex/Claude safety hooks. Existing settings were not replaced."
+        warn "could not install the Codex/Claude recursive-rm guard"
+      fi
     fi
   else
+    [[ "${PROFILE:-}" != ai ]] || die "Action needed: node is missing; could not install the Codex/Claude safety hooks."
     warn "node not found — could not install the Codex/Claude recursive-rm guard"
   fi
   info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks."
+
+  # AI stays narrow even when an inherited HERMES opt-in is present. Broader
+  # profiles retain their existing optional-agent behavior.
+  [[ "${PROFILE:-}" != ai ]] || return 0
 
   # --- Hermes Agent (Nous Research, OPT-IN only) -------------------------
   # Official installer self-manages Python/Node/Chromium and links `hermes`

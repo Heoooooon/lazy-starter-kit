@@ -78,7 +78,7 @@ Never use pure black for log text. The selectable multi-line log field uses the 
 - Major vertical rhythm: 20 pt.
 - Header: 64 pt icon beside title/subtitle; 16 pt gap.
 - Setup surface: 18 pt inset, 14 pt corner radius.
-- Control row: profile selector expands; preview checkbox remains intrinsic; primary button remains at least 132 × 36 pt.
+- Control row: profile selector expands; secondary preview action remains intrinsic; primary button remains at least 132 × 36 pt.
 - Status strip: 36 pt minimum, icon + status + trust note + update link.
 - Log surface: fills remaining height, 250 pt or taller at the standard window size, and may compress to 170 pt at the minimum window size; 14 pt text inset.
 
@@ -92,39 +92,59 @@ Custom vector `NSImage`; rendered at runtime and packaged as `AppIcon.icns`. It 
 
 ### Profile selector
 
-Native `NSPopUpButton` with `slider.horizontal.3` context icon and four localized presets:
+Native `NSPopUpButton` with `slider.horizontal.3` context icon. The initial selection is `AI 코딩 시작 — 추천` (`ai`): Git, Node.js LTS/npm, Claude Code, Codex, safety hooks, and only the PATH setup needed in a new terminal.
 
-- 추천 설치 — initial selection: `prereqs,brew,runtimes,shell,git,agents`; supported Claude Code and Codex, without Docker
+Explicit advanced presets retain their existing identifiers and payloads:
+
+- 개발 도구 추천 (`recommended`) — `prereqs,brew,runtimes,shell,git,agents`; broad developer tools with Claude Code and Codex, without Docker
 - 전체 설치 — complete environment (unchanged, including Docker)
 - 최소 설치 — essentials only
 - 회사 PC용 — no Docker
 
-The profile is a starting point. A fifth `사용자 지정` state appears when users change the runtime, Docker, or AI-agent component checkboxes.
+The profile is a starting point. A `사용자 지정` state appears when users change the runtime, Docker, or AI-agent component checkboxes. Changing from AI to an advanced/custom selection must not retain the AI-only package restriction.
 
 ### Component selection and permissions
 
-- Core tools remain selected because shell and package setup depend on them.
+- Required AI tools are described together without asking beginners to select their dependencies. Advanced profiles retain their core-tool dependencies.
 - Language runtimes, Docker, and AI agents can be included independently.
-- Selecting AI agents also selects language runtimes because their package managers are required.
+- AI agents require Node.js/npm. The AI profile does not select Python, Go, Rust, Docker, shell cosmetics, or the broader convenience-tool bundle.
 - The exact tools are visible before execution and `cmore.dev` provides the plain-language guide.
 - “Administrator” means a macOS administrator account allowed to approve software installation. The app never asks for, stores, echoes, or pipes a password.
 - Standard users stop before payload execution and are told to ask the Mac administrator.
 - First-time Xcode Command Line Tools or Homebrew setup is handed to a mode-0700 Terminal command carrying the selected installer steps. Homebrew remains under the logged-in user and owns any native `sudo` prompt.
 - Ready prerequisites remain in the GUI. Every terminal state restores the controls so the app can be used again.
 
+### Beginner tool explanation
+
+- Keep the selected tool list visible and explain the purpose of Node.js/npm in
+  one short sentence before installation. Do not ask beginners to choose a
+  runtime or package manager.
+- A native secondary `도구 용어 알아보기` action opens an informational sheet or
+  dialog using the existing help-control styling. The explanation is available
+  offline, does not change the installation selection, and returns to the
+  installer when dismissed with its close action or Escape.
+- Explain Node.js, npm, Bun, bunx, and mise in plain Korean, including the
+  distinction between installing a package and executing it. Bun-installed
+  packages can still require Node.js.
+- Describe the current payload accurately: the default AI profile does not
+  install Bun/bunx; it uses mise for Node on Linux, but not on macOS or Windows.
+  Definitions are not promises that every named tool is installed.
+- Reuse native typography, semantic colors, keyboard focus, and wrapped text.
+  Keep the primary action and account requirements legible at minimum size.
+
 ### Preview control
 
-Native checkbox, on by default. Supporting trust copy explains that no changes are made.
+A secondary native Preview button is separate from the primary Install action. Packaged preview works without installing prerequisites or creating a practice folder, and never unlocks first-run controls.
 
 ### Primary action
 
 Prominent native push button with `arrow.down.circle.fill`. Copy progresses:
 
-1. `미리보기 시작`
-2. `이 구성 적용`
-3. `구성 다시 적용`
+1. `설치 시작`
+2. In-progress status with cancellation
+3. Verified first-run actions, or a concrete action-needed state
 
-First-time prerequisite setup uses `Terminal 다시 열기`; standard-user and recoverable failures use `다시 확인`.
+First-time prerequisite setup continues in Terminal and offers `설치 결과 확인` as a read-only continuation rather than requiring another install. Standard-user and recoverable failures offer a concrete retry or permission instruction.
 
 Default-button keyboard behavior remains Return.
 
@@ -134,7 +154,11 @@ while work is active; choosing Quit cancels the complete installer process tree,
 waits for cleanup, and only then terminates the app. Cancellation restores every
 setup control and reports a neutral mode-specific cancellation state.
 
-Successful installation means the installer process exited successfully, not that every tool was verified. The existing selectable log gives concise first-use steps: open a new terminal, run explicit version checks for the selected components, and initialize a project before starting Claude Code or Codex and completing their own authentication. Preview, failure, cancellation, and Terminal handoff do not claim installation or verification. The doctor remains a full inventory; recommended users are directed to explicit versions rather than promised a green doctor. No new controls, visual tokens, or layout are introduced.
+The AI profile requires successful executable checks before enabling first-run controls. A process exit alone is insufficient. Preview, failure, cancellation, partial setup, and a Terminal handoff awaiting verification do not claim readiness. AI diagnosis checks the intended AI scope rather than marking deliberately excluded developer tools missing; existing explicit advanced profiles remain available.
+
+Before installation, explain that provider accounts and eligible service access or API billing are separate. After verified installation, expose a Claude Code / Codex choice, a new empty practice-folder launch action, and a starter-prompt copy action. Handle spaces, Korean characters, and apostrophes in paths without overwriting existing files. Launch only after a user action; login, trust approval, and prompt submission remain manual. Readiness never claims provider authentication or successful prompt execution.
+
+Automatic uninstall remains retired. Do not add removal buttons, automatic cleanup of installed tools or user data, or a legacy management/removal tab as part of onboarding.
 
 ### Version and updates
 
@@ -151,6 +175,8 @@ Uses `circle.fill`, `checkmark.circle.fill`, `xmark.circle.fill`, or `arrow.down
 ### Log surface
 
 Header uses `terminal.fill`, title `실행 로그`, and a trailing `⌘A로 선택 · 복사 가능` hint. A separate native label presents the plain-language empty state and hides when execution begins. During execution, output is appended to a selectable multi-line `NSTextField` with dynamic label color and a monospaced system font.
+
+Detailed logs are expandable. The current stage and actionable completion state remain visible when logs are collapsed. Preserve native keyboard navigation, semantic colors, and readable Korean labels at the minimum supported window size on both desktop platforms.
 
 ## 7. Accessibility and Interaction
 

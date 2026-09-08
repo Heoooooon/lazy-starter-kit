@@ -10,23 +10,29 @@ private struct InstallerProfile {
 
 private let profilePlans = [
   InstallerProfile(
+    id: "ai",
+    title: "AI 코딩 시작 — 추천",
+    steps: ["prereqs", "brew", "runtimes", "shell", "git", "agents"]
+  ),
+
+  InstallerProfile(
     id: "recommended",
-    title: "추천 설치",
+    title: "고급 · 개발 도구 추천",
     steps: ["prereqs", "brew", "runtimes", "shell", "git", "agents"]
   ),
   InstallerProfile(
     id: "full",
-    title: "전체 설치",
+    title: "고급 · 전체 설치",
     steps: ["prereqs", "brew", "runtimes", "shell", "docker", "git", "agents"]
   ),
   InstallerProfile(
     id: "minimal",
-    title: "최소 설치",
+    title: "고급 · 최소 설치",
     steps: ["prereqs", "brew", "runtimes", "shell", "git"]
   ),
   InstallerProfile(
     id: "work",
-    title: "회사 PC용",
+    title: "고급 · 회사 PC용",
     steps: ["prereqs", "brew", "runtimes", "shell", "git", "agents"]
   ),
 ]
@@ -45,6 +51,8 @@ private enum CompletionAction: String {
   case administratorRequired = "administrator-required"
   case cancelled
   case openNewTerminal = "open-new-terminal"
+  case firstRun = "first-run"
+  case actionNeeded = "action-needed"
   case retry
   case startInstall = "start-install"
   case terminalRequired = "terminal-required"
@@ -99,6 +107,13 @@ private enum InstallerError: LocalizedError {
       "Terminal을 열지 못했습니다."
     }
   }
+}
+
+private struct AIReadinessReport: Decodable {
+  struct Summary: Decodable { let missing: Int; let pathOnly: Int }
+  struct Item: Decodable { let id: String; let state: String }
+  let summary: Summary
+  let items: [Item]
 }
 
 private struct InstallerPayload {
@@ -239,7 +254,8 @@ private func selfTest() {
   )
   let contract: [String: Any] = [
     "hasApplicationIcon": true,
-    "interfaceVersion": 4,
+    "interfaceVersion": 5,
+    "previewIsSecondaryAction": true,
     "profiles": profiles,
     "defaultProfile": profilePlans[0].id,
     "profileSteps": profileSteps,
@@ -303,15 +319,31 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     action: nil
   )
   private let dryRun = NSButton(checkboxWithTitle: "먼저 미리보기", target: nil, action: nil)
-  private let installButton = NSButton(title: previewActionTitle, target: nil, action: nil)
+  private let installButton = NSButton(title: installActionTitle, target: nil, action: nil)
+  private let previewButton = NSButton(title: previewActionTitle, target: nil, action: nil)
+  private let agentChoice = NSPopUpButton(frame: .zero, pullsDown: false)
+  private let launchButton = NSButton(title: "연습 폴더에서 시작", target: nil, action: nil)
+  private let copyButton = NSButton(title: "시작 프롬프트 복사", target: nil, action: nil)
+  private let checkButton = NSButton(title: "설치 결과 확인", target: nil, action: nil)
+  private let starterPrompt = "이 빈 연습 폴더에서 간단한 자기소개 웹페이지를 만들어 주세요. 먼저 계획을 설명하고, 이 폴더 밖의 파일은 변경하지 마세요. 각 단계에서 무엇을 하는지 초보자에게 설명해 주세요."
+  private lazy var promptPasteboard: NSPasteboard =
+    BuildInfo.developerMode && ProcessInfo.processInfo.environment["STARTER_KIT_GUI_COPY_PROMPT"] == "1"
+      ? NSPasteboard.withUniqueName() : NSPasteboard.general
+  private let logsToggle = NSButton(title: "상세 로그 보기", target: nil, action: nil)
+  private var logViewportView: NSView?
+  private var practiceFolder: URL?
+  private var practiceCommand: URL?
+  private var firstRunView: NSView?
+  private var setupHeight: NSLayoutConstraint?
+  private var runWasAI = false
   private let cancelButton = NSButton(title: "설치 취소", target: nil, action: nil)
   private let statusIcon = NSImageView()
-  private let status = NSTextField(labelWithString: "준비됨")
+  private let status = NSTextField(wrappingLabelWithString: "준비됨")
   private let log = NSTextField()
   private let logScroll = NSScrollView()
   private let logEmptyState = NSTextField(
     wrappingLabelWithString:
-      "준비가 되었습니다.\n\n설치 구성을 확인한 뒤 미리보기를 시작하세요.\n실행되는 명령과 변경 예정 항목이 여기에 표시됩니다."
+      "실행 명령과 문제 해결에 필요한 상세 내용이 여기에 표시됩니다."
   )
   private var session: InstallerProcessSession?
   private var isPreparing = false
@@ -343,6 +375,13 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       NSApplication.shared.terminate(nil)
       return
     }
+    if environment["STARTER_KIT_GUI_HELP_SNAPSHOT"] == "tool-terms" {
+      if environment["STARTER_KIT_GUI_HELP_MINIMUM_SIZE"] == "1" {
+        window.setFrame(NSRect(origin: window.frame.origin, size: window.minSize), display: true)
+      }
+      openToolTermsHelp()
+      return
+    }
     if
       let profileID = environment["STARTER_KIT_GUI_PROFILE"],
       let index = profilePlans.firstIndex(where: { $0.id == profileID })
@@ -350,13 +389,18 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       profile.selectItem(at: index)
       applyProfilePlan(profilePlans[index])
     }
-    if environment["STARTER_KIT_GUI_DRY_RUN"] == "0" {
-      dryRun.state = .off
-      updatePrimaryActionTitle()
-    }
     if environment["STARTER_KIT_GUI_AUTOSTART"] == "1" {
-      DispatchQueue.main.async { [weak self] in self?.startInstall() }
+      DispatchQueue.main.async { [weak self] in
+        if environment["STARTER_KIT_GUI_CHECK_RESULT"] == "1" {
+          self?.checkInstallation()
+        } else if environment["STARTER_KIT_GUI_DRY_RUN"] == "1" {
+          self?.startPreview()
+        } else {
+          self?.startInstall()
+        }
+      }
     }
+
   }
 
   func applicationShouldHandleReopen(
@@ -402,7 +446,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     title.font = .systemFont(ofSize: 28, weight: .bold)
     let subtitle = NSTextField(
       wrappingLabelWithString:
-        "필요할 때마다 개발 환경을 점검하고 다시 적용합니다. 먼저 변경 내용을 확인하세요."
+        "npm은 Codex를 설치하고, Node.js는 안전 훅을 실행해요."
     )
     subtitle.textColor = .secondaryLabelColor
     subtitle.font = .systemFont(ofSize: 14)
@@ -494,21 +538,41 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       ]
     )
     permissionButton.toolTip = "관리자 계정과 비밀번호 처리 방식을 설명합니다."
+    let toolTermsButton = NSButton(
+      title: "도구 용어 알아보기",
+      target: self,
+      action: #selector(openToolTermsHelp)
+    )
+    toolTermsButton.bezelStyle = .inline
+    toolTermsButton.controlSize = .small
+    toolTermsButton.contentTintColor = Brand.cobalt
+    toolTermsButton.attributedTitle = NSAttributedString(
+      string: toolTermsButton.title,
+      attributes: [
+        .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
+        .foregroundColor: Brand.cobalt,
+      ]
+    )
+    toolTermsButton.toolTip = "Node.js, npm, Bun, bunx, mise를 오프라인으로 설명합니다."
     let componentRow = NSStackView(views: [componentChoices, componentSpacer])
     componentRow.orientation = .horizontal
     componentRow.alignment = .centerY
     componentRow.spacing = 10
     let helpSpacer = NSView()
     helpSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-    let helpRow = NSStackView(views: [helpSpacer, permissionButton, toolsButton])
+    let helpRow = NSStackView(
+      views: [helpSpacer, permissionButton, toolTermsButton, toolsButton]
+    )
     helpRow.orientation = .horizontal
     helpRow.alignment = .centerY
     helpRow.spacing = 10
 
-    dryRun.state = .on
-    dryRun.toolTip = "처음에는 컴퓨터를 바꾸지 않고 설치 계획만 보여줍니다."
-    dryRun.target = self
-    dryRun.action = #selector(dryRunDidChange)
+    dryRun.state = .off
+    previewButton.bezelStyle = .rounded
+    previewButton.controlSize = .large
+    previewButton.toolTip = "도구 설치나 연습 폴더 생성 없이 계획만 확인합니다."
+    previewButton.target = self
+    previewButton.action = #selector(startPreview)
     installButton.bezelStyle = .rounded
     installButton.controlSize = .large
     installButton.image = NSImage(
@@ -538,7 +602,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     )
     controlsSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     let controls = NSStackView(
-      views: [profile, dryRun, controlsSpacer, cancelButton, installButton]
+      views: [profile, controlsSpacer, cancelButton, previewButton, installButton]
     )
     controls.orientation = .horizontal
     controls.alignment = .centerY
@@ -546,7 +610,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
 
     let setupHint = NSTextField(
       wrappingLabelWithString:
-        "미리보기는 시스템을 변경하지 않습니다. 앱을 응용 프로그램 폴더에 보관하면 언제든 다시 점검하고 적용할 수 있습니다."
+        "Claude: Anthropic 계정과 이용 가능한 구독 또는 API 결제. Codex: OpenAI 계정과 이용 권한 또는 API 결제가 필요합니다. 서비스 사용료는 별도이며, 로그인과 요청 전송은 자동으로 하지 않습니다."
     )
     setupHint.font = .systemFont(ofSize: 12)
     setupHint.textColor = .secondaryLabelColor
@@ -564,10 +628,14 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       setupHint.widthAnchor.constraint(equalTo: setupContent.widthAnchor),
     ])
     let setupBox = makeCard(containing: setupContent, inset: 18)
-    setupBox.heightAnchor.constraint(equalToConstant: 270).isActive = true
+    let setupHeightConstraint = setupBox.heightAnchor.constraint(equalToConstant: 250)
+    setupHeightConstraint.isActive = true
+    setupHeight = setupHeightConstraint
     setupBox.setContentHuggingPriority(.required, for: .vertical)
     setupBox.setContentCompressionResistancePriority(.required, for: .vertical)
 
+    status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+    status.maximumNumberOfLines = 2
     status.font = .systemFont(ofSize: 13, weight: .medium)
     status.textColor = .secondaryLabelColor
     statusIcon.image = NSImage(
@@ -583,7 +651,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       ) ?? NSImage()
     )
     trustIcon.contentTintColor = Brand.mint
-    let trustLabel = NSTextField(labelWithString: "미리보기 기본 · 반복 실행 가능")
+    let trustLabel = NSTextField(labelWithString: "로그인 별도")
     trustLabel.font = .systemFont(ofSize: 11, weight: .medium)
     trustLabel.textColor = .secondaryLabelColor
     let versionTitle = BuildInfo.appVersion == "dev"
@@ -615,6 +683,8 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     statusSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     statusStrip.heightAnchor.constraint(greaterThanOrEqualToConstant: 36).isActive = true
 
+    // Long machine-readable probe output must wrap inside the viewport, not resize the window.
+    log.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     log.isEditable = false
     log.isSelectable = true
     log.isBezeled = false
@@ -656,6 +726,8 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       log.bottomAnchor.constraint(equalTo: logDocument.bottomAnchor, constant: -13),
     ])
     let logViewport = NSView()
+    logViewportView = logViewport
+    logViewport.isHidden = true
     logViewport.addSubview(logScroll)
     logViewport.addSubview(logEmptyState)
     NSLayoutConstraint.activate([
@@ -682,10 +754,10 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     let logTitle = NSTextField(labelWithString: "실행 로그")
     logTitle.font = .systemFont(ofSize: 13, weight: .semibold)
     let logSpacer = NSView()
-    let logHint = NSTextField(labelWithString: "⌘A로 선택 · 복사 가능")
-    logHint.font = .systemFont(ofSize: 11)
-    logHint.textColor = .secondaryLabelColor
-    let logHeader = NSStackView(views: [logIcon, logTitle, logSpacer, logHint])
+    logsToggle.bezelStyle = .inline
+    logsToggle.target = self
+    logsToggle.action = #selector(toggleLogs)
+    let logHeader = NSStackView(views: [logIcon, logTitle, logSpacer, logsToggle])
     logHeader.orientation = .horizontal
     logHeader.alignment = .centerY
     logHeader.spacing = 7
@@ -699,12 +771,38 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     NSLayoutConstraint.activate([
       logHeader.widthAnchor.constraint(equalTo: logContent.widthAnchor),
       logViewport.widthAnchor.constraint(equalTo: logContent.widthAnchor),
-      logViewport.bottomAnchor.constraint(equalTo: logContent.bottomAnchor),
     ])
     let logBox = makeCard(containing: logContent, inset: 14)
     logBox.setContentHuggingPriority(.defaultLow, for: .vertical)
 
-    let content = NSStackView(views: [header, setupBox, statusStrip, logBox])
+    agentChoice.addItems(withTitles: ["Claude Code", "Codex"])
+    for button in [launchButton, copyButton] {
+      button.bezelStyle = .rounded
+      button.target = self
+      button.isEnabled = false
+    }
+    agentChoice.isEnabled = false
+    launchButton.action = #selector(launchPractice)
+    copyButton.action = #selector(copyStarterPrompt)
+    let firstRunTitle = NSTextField(labelWithString: "설치 후 첫 코딩")
+    firstRunTitle.font = .systemFont(ofSize: 13, weight: .semibold)
+    checkButton.bezelStyle = .rounded
+    checkButton.target = self
+    checkButton.action = #selector(checkInstallation)
+    checkButton.toolTip = "Terminal 설치가 끝나면 누르세요. 재설치 없이 실행 가능 여부만 확인합니다."
+    let firstRunHeader = NSStackView(views: [firstRunTitle, NSView(), checkButton])
+    let firstRunHint = NSTextField(wrappingLabelWithString:
+      "도구 실행 확인 후 활성화됩니다. 새 연습 폴더에서 시작하고, 로그인·폴더 신뢰·프롬프트 붙여넣기는 직접 진행하세요.")
+    firstRunHint.font = .systemFont(ofSize: 12)
+    firstRunHint.textColor = .secondaryLabelColor
+    let firstRunControls = NSStackView(views: [agentChoice, launchButton, copyButton])
+    firstRunControls.spacing = 10
+    let firstRun = NSStackView(views: [firstRunHeader, firstRunHint, firstRunControls])
+    firstRunView = firstRun
+    firstRun.orientation = .vertical
+    firstRun.alignment = .leading
+    firstRun.spacing = 8
+    let content = NSStackView(views: [header, setupBox, statusStrip, firstRun, logBox])
     content.orientation = .vertical
     content.alignment = .leading
     content.spacing = 18
@@ -731,6 +829,9 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       header.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
       setupBox.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
       statusStrip.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
+      firstRun.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
+      firstRunHint.widthAnchor.constraint(equalTo: firstRun.widthAnchor),
+      firstRunHeader.widthAnchor.constraint(equalTo: firstRun.widthAnchor),
       logBox.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -56),
     ])
     logBox.setContentHuggingPriority(.defaultLow, for: .vertical)
@@ -761,18 +862,26 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     case ready
     case running
     case success
+    case attention
     case failure
   }
 
   @objc private func profileDidChange() {
+    setFirstRunEnabled(false)
     let index = profile.indexOfSelectedItem
-    guard profilePlans.indices.contains(index) else { return }
     completedActionTitle = nil
-    applyProfilePlan(profilePlans[index])
+    if profilePlans.indices.contains(index) {
+      applyProfilePlan(profilePlans[index])
+    } else {
+      for choice in [coreChoice, runtimesChoice, dockerChoice, agentsChoice] { choice.isHidden = false }
+      firstRunView?.isHidden = true
+      updateProfileDetails()
+    }
     updatePrimaryActionTitle()
   }
 
   @objc private func componentDidChange(_ sender: NSButton) {
+    setFirstRunEnabled(false)
     if sender === agentsChoice && agentsChoice.state == .on {
       runtimesChoice.state = .on
     } else if sender === runtimesChoice && runtimesChoice.state == .off {
@@ -784,14 +893,14 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     updatePrimaryActionTitle()
   }
 
-  @objc private func dryRunDidChange() {
-    updatePrimaryActionTitle()
+  @objc private func toggleLogs() {
+    let hidden = !(logViewportView?.isHidden ?? true)
+    logViewportView?.isHidden = hidden
+    logsToggle.title = hidden ? "상세 로그 보기" : "상세 로그 접기"
   }
 
   private func updatePrimaryActionTitle() {
-    installButton.title = dryRun.state == .on
-      ? previewActionTitle
-      : (completedActionTitle ?? installActionTitle)
+    installButton.title = completedActionTitle ?? installActionTitle
   }
 
   @objc private func openToolsGuide() {
@@ -819,7 +928,69 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     alert.beginSheetModal(for: window)
   }
 
+  @objc private func openToolTermsHelp() {
+    let alert = NSAlert()
+    alert.messageText = "도구 용어 알아보기"
+    alert.informativeText = """
+      Node.js: 자바스크립트로 만든 프로그램을 실행하는 도구입니다.
+      npm: Node.js와 보통 함께 설치되며, 프로젝트에 필요한 패키지나 CLI 도구를 받습니다.
+      Bun: 패키지 설치와 자바스크립트·타입스크립트 프로그램 실행을 모두 할 수 있는 도구입니다.
+      bunx: Bun에 포함된 명령으로, CLI 도구를 찾아 실행하고 없으면 내려받기도 합니다.
+      mise: Node.js나 Bun 같은 개발 도구의 버전을 설치하고 선택하는 도구입니다.
+
+      설치와 실행은 다릅니다. npm으로 받는 많은 패키지를 Bun으로도 설치할 수 있지만, 실행할 때는 Node.js가 필요한 도구도 있습니다. Bun으로 설치했다고 모든 프로그램이 Node.js 없이 실행되는 것은 아닙니다.
+
+      이름이 나온 도구를 모두 설치하는 것은 아닙니다. 현재 기본 AI 구성은 Bun/bunx와 mise를 설치하지 않습니다. 고급 구성의 설치 범위는 다르므로 실행 전 미리보기에서 확인하세요.
+      """
+    alert.alertStyle = .informational
+    let closeButton = alert.addButton(withTitle: "닫기")
+    closeButton.keyEquivalent = "\u{1b}"
+    let environment = BuildInfo.developerMode ? ProcessInfo.processInfo.environment : [:]
+    let isHelpQA = environment["STARTER_KIT_GUI_HELP_SNAPSHOT"] == "tool-terms"
+    alert.beginSheetModal(for: window) { [self] _ in
+      guard isHelpQA else { return }
+      // NSAlert invokes its completion before AppKit detaches the sheet.
+      // Inspect the parent after that close event has finished processing.
+      DispatchQueue.main.async { [self] in
+        guard window.attachedSheet == nil else {
+          fputs("help QA: sheet did not dismiss\n", stderr)
+          exit(1)
+        }
+        do {
+          if let path = environment["STARTER_KIT_GUI_HELP_CLOSED_SNAPSHOT"] {
+            try renderSnapshot(to: path)
+          }
+          print("HELP_QA_CLOSED")
+          NSApplication.shared.terminate(nil)
+        } catch {
+          fputs("help QA closed snapshot failed: \(error.localizedDescription)\n", stderr)
+          exit(1)
+        }
+      }
+    }
+    if isHelpQA {
+      guard window.attachedSheet === alert.window else {
+        fputs("help QA: sheet did not open\n", stderr)
+        exit(1)
+      }
+      do {
+        if let path = environment["STARTER_KIT_GUI_HELP_OPEN_SNAPSHOT"] {
+          try renderSnapshot(to: path, of: alert.window)
+        }
+        print("HELP_QA_OPEN")
+        closeButton.performClick(nil)
+      } catch {
+        fputs("help QA open snapshot failed: \(error.localizedDescription)\n", stderr)
+        exit(1)
+      }
+    }
+  }
+
   private func applyProfilePlan(_ plan: InstallerProfile) {
+    firstRunView?.isHidden = plan.id != "ai"
+    for choice in [coreChoice, runtimesChoice, dockerChoice, agentsChoice] {
+      choice.isHidden = plan.id == "ai"
+    }
     runtimesChoice.state = plan.steps.contains("runtimes") ? .on : .off
     dockerChoice.state = plan.steps.contains("docker") ? .on : .off
     agentsChoice.state = plan.steps.contains("agents") ? .on : .off
@@ -837,6 +1008,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
   }
 
   private func updateProfileDetails() {
+    setupHeight?.constant = profile.indexOfSelectedItem == 0 ? 250 : 300
+    if profile.indexOfSelectedItem == 0 {
+      profileDetails.stringValue = "Git · Node.js LTS/npm · Claude Code · Codex\n안전 훅과 새 터미널 PATH만 설정합니다. 다른 언어·Docker·셸 꾸미기는 설치하지 않습니다."
+      profileDetails.toolTip = profileDetails.stringValue
+      return
+    }
     var lines = [
       "기본 도구: Xcode CLT · Homebrew · Git/gh · jq · ripgrep · fd · fzf · bat · tree · ast-grep · zoxide · starship · JetBrains Mono · Orca"
     ]
@@ -862,6 +1039,8 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       ("arrow.down.circle", Brand.statusBlue)
     case .success:
       ("checkmark.circle.fill", Brand.statusGreen)
+    case .attention:
+      ("exclamationmark.triangle.fill", .systemOrange)
     case .failure:
       ("xmark.circle.fill", Brand.statusRed)
     }
@@ -873,7 +1052,20 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
   }
 
   @objc private func startInstall() {
-    guard session == nil else { return }
+    dryRun.state = .off
+    performInstall()
+  }
+
+  @objc private func startPreview() {
+    dryRun.state = .on
+    performInstall()
+  }
+
+  private func performInstall() {
+    guard session == nil, !isPreparing else { return }
+    setFirstRunEnabled(false)
+    checkButton.isEnabled = false
+    runWasAI = profile.indexOfSelectedItem == 0
     let preview = dryRun.state == .on
     let selectedSteps = selectedStepIDs()
     if !preview {
@@ -950,6 +1142,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     }
 
     installButton.isEnabled = false
+    previewButton.isEnabled = false
     profile.isEnabled = false
     runtimesChoice.isEnabled = false
     dockerChoice.isEnabled = false
@@ -1027,7 +1220,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       .path
     let quotedCloneDirectory =
       "'" + cloneDirectory.replacingOccurrences(of: "'", with: "'\\''") + "'"
-    let selected = steps.joined(separator: ",")
+    let selected = runWasAI ? "--profile ai" : "--only " + steps.joined(separator: ",")
     let script =
       """
       #!/bin/bash
@@ -1046,7 +1239,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       STARTER_KIT_EPHEMERAL_ROOT=\(quotedCloneDirectory) \\
       STARTER_KIT_BRANCH=\(quotedRef) \\
       STARTER_KIT_COMMIT=\(quotedCommit) \\
-      /bin/bash "$PAYLOAD" --yes --only \(selected)
+      /bin/bash "$PAYLOAD" --yes \(selected)
       status=$?
       printf '\\n설치기가 종료되었습니다 (status: %s).\\n' "$status"
       exit "$status"
@@ -1114,7 +1307,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     let processSession = InstallerProcessSession(
       payload: payload.url,
       arguments:
-        ["--yes", "--only", steps.joined(separator: ",")]
+        ["--yes"] + (runWasAI ? ["--profile", "ai"] : ["--only", steps.joined(separator: ",")])
         + (dryRun ? ["--dry-run"] : []),
       environment: environment,
       removePayloadAfterRun: payload.removeAfterRun,
@@ -1212,16 +1405,22 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
         .retry
       } else if dryRun {
         .startInstall
+      } else if runWasAI {
+        result.output.split(separator: "\n").contains("LSK_AI_READINESS=ready") ? .firstRun : .actionNeeded
       } else {
         .openNewTerminal
       }
     finish(
-      code: result.status,
+      code: action == .actionNeeded ? 1 : result.status,
       message: result.status == 0
         ? (
           dryRun
             ? "미리보기 완료 · 구성 적용 가능"
-            : "설치기 완료 · 도구 확인 필요"
+            : (action == .firstRun
+              ? "도구 실행 확인 완료 · 계정 로그인 후 시작하세요."
+              : (action == .actionNeeded
+                ? "실행 확인이 필요합니다. 설치 결과 확인 또는 상세 로그를 확인하세요."
+                : "설치기 완료 · 도구 확인 필요"))
         )
         : (dryRun
           ? "미리보기가 완료되지 않았습니다. 아래 로그를 확인해 주세요."
@@ -1233,6 +1432,19 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
 
   @MainActor private func appendLog(_ text: String) {
     log.stringValue.append(text)
+    if session != nil {
+      let stages: [(String, String)] = [
+        ("Prerequisites:", "설치에 필요한 macOS 도구를 준비하는 중…"),
+        ("Homebrew packages", "Git과 설치 도구를 준비하는 중…"),
+        ("Node.js LTS", "AI 도구 실행에 필요한 Node.js를 준비하는 중…"),
+        ("Make AI commands", "새 터미널에서 명령을 찾도록 설정하는 중…"),
+        ("AI agents:", "Claude Code와 Codex를 준비하는 중…"),
+        ("Checking required", "설치된 도구가 실제로 실행되는지 확인하는 중…"),
+      ]
+      for (marker, message) in stages where text.contains(marker) {
+        setStatus(message, style: .running)
+      }
+    }
     log.invalidateIntrinsicContentSize()
     DispatchQueue.main.async { [weak self] in
       self?.scrollLogToBottom()
@@ -1263,8 +1475,10 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
         scrollLogToBottom()
       }
       let style: StatusStyle = switch action {
-      case .startInstall, .openNewTerminal:
+      case .startInstall, .openNewTerminal, .firstRun:
         .success
+      case .actionNeeded:
+        .attention
       case .cancelled, .terminalRequired:
         .ready
       case .administratorRequired, .retry:
@@ -1275,16 +1489,24 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       case .startInstall:
         completedActionTitle = "이 구성 적용"
         dryRun.state = .off
-      case .openNewTerminal:
+      case .openNewTerminal, .firstRun:
         completedActionTitle = "구성 다시 적용"
       case .terminalRequired:
         completedActionTitle = "Terminal 다시 열기"
+        if runWasAI { setStatus("Terminal 설치 후 ‘설치 결과 확인’을 누르세요.", style: .attention) }
       case .administratorRequired, .retry:
         completedActionTitle = "다시 확인"
-      case .cancelled:
+      case .cancelled, .actionNeeded:
         completedActionTitle = nil
       }
       updatePrimaryActionTitle()
+      setFirstRunEnabled(action == .firstRun && code == 0)
+      if code != 0 && action != .cancelled && action != .terminalRequired {
+        logViewportView?.isHidden = false
+        logsToggle.title = "상세 로그 접기"
+      }
+      previewButton.isEnabled = true
+      checkButton.isEnabled = true
       installButton.isEnabled = true
       cancelButton.isHidden = true
       cancelButton.isEnabled = true
@@ -1332,8 +1554,164 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
         return
       }
       if environment["STARTER_KIT_GUI_EXIT_ON_FINISH"] == "1" {
+        if environment["STARTER_KIT_GUI_COPY_PROMPT"] == "1" {
+          copyStarterPrompt()
+        }
+        if let agent = environment["STARTER_KIT_GUI_FIRST_RUN"], launchButton.isEnabled {
+          agentChoice.selectItem(at: agent == "codex" ? 1 : 0)
+          launchPractice()
+        }
+        if let path = environment["STARTER_KIT_GUI_ONBOARDING_RESULT"] {
+          do {
+            let state: [String: Any] = [
+              "profile": profilePlans.indices.contains(profile.indexOfSelectedItem)
+                ? profilePlans[profile.indexOfSelectedItem].id : "custom",
+              "launchEnabled": launchButton.isEnabled,
+              "copyEnabled": copyButton.isEnabled,
+              "practiceFolder": practiceFolder?.path ?? "",
+              "practiceCommand": practiceCommand?.path ?? "",
+              "clipboardMatchesPrompt": environment["STARTER_KIT_GUI_COPY_PROMPT"] == "1"
+                && promptPasteboard.string(forType: .string) == starterPrompt,
+              "clipboardLength": environment["STARTER_KIT_GUI_COPY_PROMPT"] == "1"
+                ? (promptPasteboard.string(forType: .string)?.count ?? 0) : 0,
+            ]
+            try JSONSerialization.data(withJSONObject: state, options: [.sortedKeys])
+              .write(to: URL(fileURLWithPath: path))
+          } catch {
+            fputs("onboarding QA signal failed: \(error)\n", stderr)
+            exit(1)
+          }
+        }
         NSApplication.shared.terminate(nil)
       }
+  }
+
+  private func setFirstRunEnabled(_ enabled: Bool) {
+    launchButton.isEnabled = enabled
+    copyButton.isEnabled = enabled
+    agentChoice.isEnabled = enabled
+  }
+
+  @objc private func copyStarterPrompt() {
+    guard copyButton.isEnabled else { return }
+    promptPasteboard.clearContents()
+    if !promptPasteboard.setString(starterPrompt, forType: .string) {
+      setStatus("프롬프트를 복사하지 못했습니다. 다시 시도하세요.", style: .attention)
+      return
+    }
+    setStatus("프롬프트를 복사했습니다. 로그인 후 직접 붙여넣고 전송하세요.", style: .ready)
+  }
+
+  @objc private func checkInstallation() {
+    guard session == nil, !isPreparing else { return }
+    setFirstRunEnabled(false)
+    guard let checkout = readinessInstaller() else {
+      finish(code: 1, message: "설치 파일이 없습니다. Terminal 설치를 끝낸 뒤 다시 확인하세요.", action: .actionNeeded)
+      return
+    }
+    checkButton.isEnabled = false
+    installButton.isEnabled = false
+    previewButton.isEnabled = false
+    profile.isEnabled = false
+    runtimesChoice.isEnabled = false
+    dockerChoice.isEnabled = false
+    agentsChoice.isEnabled = false
+    cancelButton.isHidden = false
+    cancelButton.isEnabled = true
+    cancelButton.title = "점검 취소"
+    window.standardWindowButton(.closeButton)?.isEnabled = false
+    logEmptyState.isHidden = true
+    log.stringValue = ""
+    setStatus("새 터미널에서 AI 도구 실행을 확인하는 중…", style: .running)
+    var environment = installerEnvironment()
+    environment.removeValue(forKey: "STARTER_KIT_EPHEMERAL_ROOT")
+    let check = InstallerProcessSession(
+      payload: checkout,
+      arguments: ["--profile", "ai", "--doctor-json"],
+      environment: environment,
+      removePayloadAfterRun: false,
+      onOutput: { [weak self] text in
+        DispatchQueue.main.async { self?.appendLog(text) }
+      },
+      onFinish: { [weak self] result in
+        DispatchQueue.main.async {
+          guard let self else { return }
+          if result.cancelled {
+            self.finish(code: 130, message: "점검이 취소되었습니다.", action: .cancelled, capturedLog: result.output)
+            return
+          }
+          do {
+            let report = try JSONDecoder().decode(AIReadinessReport.self, from: Data(result.output.utf8))
+            let tools = Set(report.items.filter { $0.state == "ok" }.map(\.id))
+            let ready = result.status == 0 && report.summary.missing == 0 && report.summary.pathOnly == 0
+              && Set(["git", "node", "npm", "claude", "codex", "ai-safety"]).isSubset(of: tools)
+            self.finish(code: ready ? 0 : 1,
+              message: ready ? "도구 실행 확인 완료 · 계정 로그인 후 시작하세요." : "설치가 끝나지 않았거나 실행할 수 없는 도구가 있습니다. 상세 로그를 확인하세요.",
+              action: ready ? .firstRun : .actionNeeded, capturedLog: result.output)
+          } catch {
+            self.finish(code: 1, message: "설치 결과를 확인하지 못했습니다: \(error.localizedDescription)",
+              action: .actionNeeded, capturedLog: result.output)
+          }
+        }
+      }
+    )
+    session = check
+    DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+      do { try check.start() }
+      catch {
+        DispatchQueue.main.async {
+          self?.finish(code: 1, message: "점검을 시작하지 못했습니다: \(error.localizedDescription)", action: .actionNeeded)
+        }
+      }
+    }
+  }
+
+  @objc private func launchPractice() {
+    guard launchButton.isEnabled, session == nil, !isPreparing else { return }
+    let agent = agentChoice.indexOfSelectedItem == 1 ? "codex" : "claude"
+    let environment = ProcessInfo.processInfo.environment
+    let home = URL(fileURLWithPath: environment["HOME"] ?? NSHomeDirectory())
+    do {
+      // mkdtemp creates a new directory atomically; existing projects are never reused.
+      var template = Array(home.appendingPathComponent("AI Practice 연습-XXXXXX").path.utf8CString)
+      guard let created = mkdtemp(&template) else {
+        throw NSError(domain: NSPOSIXErrorDomain, code: Int(errno))
+      }
+      let folder = URL(fileURLWithPath: String(cString: created))
+      practiceFolder = folder
+      let command = FileManager.default.temporaryDirectory
+        .appendingPathComponent("lazy-starter-kit-practice-\(UUID().uuidString).command")
+      func quote(_ value: String) -> String {
+        "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
+      }
+      let shellCommand = "cd -- \(quote(folder.path)) && exec \(agent)"
+      let script = "#!/bin/bash\n/bin/rm -f -- \"$0\"\nexec /bin/zsh -lic \(quote(shellCommand))\n"
+      try script.write(to: command, atomically: true, encoding: .utf8)
+      try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: command.path)
+      practiceCommand = command
+      if !(BuildInfo.developerMode && environment["STARTER_KIT_GUI_DISABLE_TERMINAL_OPEN"] == "1") {
+        guard NSWorkspace.shared.open(command) else { throw InstallerError.terminalOpenFailed }
+      }
+      setStatus("새 연습 폴더에서 시작합니다. 로그인과 폴더 신뢰는 직접 승인하세요.", style: .ready)
+    } catch {
+      setStatus("연습 터미널을 열지 못했습니다: \(error.localizedDescription)", style: .failure)
+    }
+  }
+
+  private func readinessInstaller() -> URL? {
+    if BuildInfo.developerMode,
+      let root = ProcessInfo.processInfo.environment["STARTER_KIT_GUI_CHECK_ROOT"] {
+      return URL(fileURLWithPath: root).appendingPathComponent("install.sh")
+    }
+    guard let installer = Bundle.main.resourceURL?
+      .appendingPathComponent("readiness/install.sh") else { return nil }
+    do {
+      _ = try validatedInstallerData(from: installer, expectedSHA256: BuildInfo.installerSHA256)
+      return installer
+    } catch {
+      appendLog("\n설치 결과 확인 파일 오류: \(error.localizedDescription)\n")
+      return nil
+    }
   }
 
   func saveSnapshot(to path: String, contentSize: NSSize? = nil) throws {
@@ -1368,6 +1746,7 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
       setStatus("처음 준비는 Terminal에서 계속합니다.", style: .ready)
       installButton.title = "Terminal 다시 열기"
     case "ready-success":
+      setFirstRunEnabled(true)
       dryRun.state = .off
       logEmptyState.isHidden = true
       log.stringValue = "qa-selected:--yes --only \(selectedStepIDs().joined(separator: ","))\nqa-final\n"
@@ -1377,7 +1756,11 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
         style: .success
       )
       installButton.title = "구성 다시 적용"
+    case "advanced-full":
+      profile.selectItem(at: 2)
+      applyProfilePlan(profilePlans[2])
     case "custom-core":
+      applyProfilePlan(profilePlans[2])
       profile.selectItem(at: profilePlans.count)
       runtimesChoice.state = .off
       dockerChoice.state = .off
@@ -1407,9 +1790,12 @@ private final class InstallerController: NSObject, NSApplicationDelegate, NSWind
     try renderSnapshot(to: path)
   }
 
-  private func renderSnapshot(to path: String) throws {
-    window.center()
-    window.makeKeyAndOrderFront(nil)
+  private func renderSnapshot(to path: String, of targetWindow: NSWindow? = nil) throws {
+    let window = targetWindow ?? self.window
+    if targetWindow == nil {
+      window.center()
+      window.makeKeyAndOrderFront(nil)
+    }
     NSApplication.shared.activate(ignoringOtherApps: true)
     window.contentView?.layoutSubtreeIfNeeded()
     window.displayIfNeeded()

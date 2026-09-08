@@ -132,3 +132,8 @@ load_local_bins() {
   [[ -d "$HOME/.local/share/mise/shims" ]] && export PATH="$HOME/.local/share/mise/shims:$PATH"
   return 0   # never fail under `set -e` (trailing test may be false)
 }
+
+# The AI profile needs only mise's Node shims and user-local agent binaries.
+load_ai_bins() {
+  export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"
+}
