@@ -71,6 +71,36 @@ Docker와 Windows WSL을 제외한 더 넓은 개발 도구 묶음입니다.
 | Linux | mise `node@lts`, npm 포함 |
 | Windows | winget `OpenJS.NodeJS.LTS`, npm 포함 |
 
+**Node.js와 npm은 왜 필요한가요?** npm은 Codex를 설치하고, Node.js는
+AI 도구의 안전 훅을 설치하고 실행하는 데 사용해요. 처음에는 실행 도구를 직접
+고르지 않아도 돼요. 아래에서 사용 중인 OS의 설치 안내를 따라가세요.
+
+<details>
+<summary>도구 용어 알아보기: Node.js, npm, Bun, bunx, mise</summary>
+
+| 이름 | 하는 일 |
+|---|---|
+| Node.js | 자바스크립트로 만든 프로그램을 실행해요. |
+| npm | Node.js와 보통 함께 설치되며, 프로젝트에 필요한 패키지나 CLI 도구를 받아요. |
+| Bun | 패키지 설치와 자바스크립트·타입스크립트 프로그램 실행을 모두 할 수 있어요. |
+| bunx | Bun에 포함된 명령이에요. CLI 도구를 찾아 실행하고, 없으면 내려받기도 해요. |
+| mise | Node.js나 Bun 같은 개발 도구의 버전을 설치하고 선택해요. |
+
+**설치와 실행은 달라요.** npm으로 받는 많은 패키지를 Bun으로도 설치할 수
+있지만, 추가 설치 설정이 필요하거나 실행할 때 Node.js가 필요한 도구도 있어요.
+Bun으로 설치했다고 모든 프로그램이 Node.js 없이 실행되는 것은 아니에요.
+
+**이름이 나온 도구를 모두 설치하는 것은 아니에요.** 현재 기본 `ai` 구성은
+Bun/bunx를 설치하지 않아요. Linux에서는 Node.js 설치에 mise를 사용하지만,
+macOS와 Windows의 기본 `ai` 구성에는 mise를 설치하지 않아요. 고급 구성의
+설치 범위는 다르므로 실행 전 미리보기에서 확인하세요.
+
+더 알아보기: [Bun 패키지 설치](https://bun.com/docs/pm/cli/install) ·
+[bunx 실행 방식](https://bun.com/docs/pm/bunx) ·
+[mise 버전 선택](https://mise.jdx.dev/getting-started.html).
+
+</details>
+
 **설치 전 확인:** 다운로드와 AI 서비스에는 인터넷 연결이 필요합니다. Claude
 Code는 서비스 이용 권한이 있는 Claude 계정 또는 지원되는 API 인증 정보가,
 Codex는 이용 권한이 있는 ChatGPT 계정 또는 지원되는 API 인증 정보가 필요합니다.

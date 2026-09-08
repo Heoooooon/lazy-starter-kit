@@ -72,6 +72,37 @@ developer bundle without Docker or Windows WSL.
 | Linux | mise `node@lts`, including npm |
 | Windows | winget `OpenJS.NodeJS.LTS`, including npm |
 
+**Why are Node.js and npm needed?** npm installs Codex, and Node.js runs the
+safety-hook installer and the AI tools' safety hooks. You do not need to choose
+an execution tool to get started. Follow the installation instructions for your
+OS below.
+
+<details>
+<summary>Tool terms explained: Node.js, npm, Bun, bunx, mise</summary>
+
+| Name | What it does |
+|---|---|
+| Node.js | Runs programs written in JavaScript. |
+| npm | Usually comes with Node.js and downloads project packages or CLI tools. |
+| Bun | Installs packages and runs JavaScript and TypeScript programs. |
+| bunx | Comes with Bun. Finds and runs a CLI tool, downloading it if needed. |
+| mise | Installs and selects versions of development tools such as Node.js or Bun. |
+
+**Installing and running are different.** Bun can install many of the packages
+you get through npm, but some need additional installation settings or Node.js
+to run. Installing a program with Bun does not guarantee it runs without Node.js.
+
+**A definition does not mean the tool is included.** The current default `ai`
+profile does not install Bun/bunx. Linux uses mise to install Node.js, while the
+default macOS and Windows `ai` profiles do not install mise. Advanced profiles
+have different scopes; check Preview before installation.
+
+Learn more: [Bun package installation](https://bun.com/docs/pm/cli/install),
+[bunx execution](https://bun.com/docs/pm/bunx), and
+[mise version selection](https://mise.jdx.dev/getting-started.html).
+
+</details>
+
 **Before installation:** downloads and AI services need internet access. Claude
 Code needs a Claude account with service access or supported API credentials;
 Codex needs a ChatGPT account with service access or supported API credentials.
