@@ -11,7 +11,7 @@ printf 'fixtures: %s\n' "$TMP"
 mkdir -p "$TMP/kit/linux" "$TMP/kit/lib" "$TMP/kit/scripts" "$TMP/bin" "$TMP/system-bin"
 # Expose only test infrastructure, never a preinstalled Git/Node/npm/agent.
 for utility in bash sh env uname dirname basename head sed tr awk mktemp cat rm grep cut tail mkdir cp chmod id true find ln cmp; do
-  ln -s "$(command -v "$utility")" "$TMP/system-bin/$utility"
+  ln -s "$(type -P "$utility")" "$TMP/system-bin/$utility"
 done
 cp "$ROOT/linux/install.sh" "$ROOT/linux/uninstall.sh" "$TMP/kit/linux/"
 cp -R "$ROOT/linux/scripts" "$ROOT/linux/config" "$TMP/kit/linux/"
