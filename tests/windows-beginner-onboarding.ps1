@@ -17,12 +17,19 @@ $env:TMPDIR = $Sandbox
 $env:XDG_CACHE_HOME = Join-Path $Evidence ('runtime-cache-' + [Guid]::NewGuid().ToString('N'))
 Set-Variable -Name HOME -Scope Script -Value $Sandbox -Force
 $PowerShell = (Get-Process -Id $PID).Path
+# Windows treats these names alike; portable PowerShell distinguishes them.
+$env:PATH = ''
+$env:Path = ''
+foreach ($name in @('FAIL_TOOL', 'STARTER_KIT_REPO', 'STARTER_KIT_BRANCH', 'STARTER_KIT_COMMIT', 'STARTER_KIT_DIR', 'STARTER_KIT_EPHEMERAL_ROOT', 'STARTER_KIT_HANDOFF_CHILD')) {
+  Remove-Item "Env:$name" -ErrorAction SilentlyContinue
+}
 $Failures = @()
 function Assert-Equal($Actual, $Expected) {
   if (($Actual -join ',') -cne ($Expected -join ',')) { throw "expected [$($Expected -join ',')], got [$($Actual -join ',')]" }
 }
 function Test-Case([string]$Name, [scriptblock]$Body) {
   try { & $Body; Write-Host "PASS $Name" } catch { $script:Failures += "$Name : $_"; Write-Host "FAIL $Name : $_`n$($_.ScriptStackTrace)" }
+  finally { $env:PATH = ''; $env:Path = '' }
 }
 function Import-Functions([string]$Path, [string[]]$Names) {
   $tokens = $null; $errors = $null
@@ -31,7 +38,8 @@ function Import-Functions([string]$Path, [string[]]$Names) {
   foreach ($name in $Names) {
     $fn = $ast.Find({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq $name }.GetNewClosure(), $true)
     if (-not $fn) { throw "missing runtime function $name" }
-    . ([scriptblock]::Create($fn.Extent.Text.Replace("function $name", "function global:$name")))
+    # Replace script-scope mocks even when CI invokes this as a child script.
+    . ([scriptblock]::Create($fn.Extent.Text.Replace("function $name", "function script:$name")))
   }
 }
 
@@ -58,10 +66,35 @@ for ($i = 0; $i -lt $Ids.Count; $i++) {
   $name = '{0:00}-{1}.ps1' -f ($i + 1), $id
   "function Step-$id { Write-Host 'STEP:$id' }" | Set-Content (Join-Path $Fixture "windows/scripts/$name")
 }
+function Invoke-TestPowerShell([string]$File, [string[]]$Flags) {
+  $previous = $ErrorActionPreference
+  try {
+    # Expected native stderr becomes ErrorRecords on WinPS 5.1. Keep it in
+    # Output and assert the child's exit code instead of aborting the harness.
+    $ErrorActionPreference = 'Continue'
+    $output = & $PowerShell -NoProfile -File $File @Flags 2>&1 | Out-String
+    $code = $LASTEXITCODE
+  } finally { $ErrorActionPreference = $previous }
+  [pscustomobject]@{ Code = $code; Output = $output }
+}
 function Invoke-Fixture([string[]]$Flags) {
-  $output = & $PowerShell -NoProfile -File (Join-Path $Fixture 'windows/install.ps1') @Flags 2>&1 | Out-String
-  $code = $LASTEXITCODE
+  $r = Invoke-TestPowerShell (Join-Path $Fixture 'windows/install.ps1') $Flags
+  $output = $r.Output
+  $code = $r.Code
   [pscustomobject]@{ Code = $code; Output = $output; Steps = @([regex]::Matches($output, 'STEP:(\w+)') | ForEach-Object { $_.Groups[1].Value }); Probes = @([regex]::Matches($output, 'PROBE:(\w+):--version') | ForEach-Object { $_.Groups[1].Value }) }
+}
+Test-Case 'child stderr ErrorRecords preserve output and exit status' {
+  # WinPS 5.1 wraps native stderr in ErrorRecords; emulate that boundary on PS7.
+  $PowerShell = {
+    Write-Error 'STDERR_FIXTURE'
+    $global:LASTEXITCODE = 23
+    'STDOUT_FIXTURE'
+  }
+  $r = Invoke-TestPowerShell 'unused-fixture.ps1' @()
+  Assert-Equal $r.Code 23
+  Assert-Equal $r.Output.Contains('STDERR_FIXTURE') $true
+  Assert-Equal $r.Output.Contains('STDOUT_FIXTURE') $true
+  Assert-Equal $ErrorActionPreference 'Stop'
 }
 Test-Case 'default AI selection and executable probes' {
   $r = Invoke-Fixture @('-Yes')
@@ -310,8 +343,8 @@ Test-Case 'PATH persistence is minimal and idempotent without lifecycle receipts
 }
 Test-Case 'retired uninstall exits 2 and leaves the disposable home untouched' {
   $before = @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" })
-  $output = & $PowerShell -NoProfile -File (Join-Path $Repo 'windows/uninstall.ps1') -Yes 2>&1 | Out-String
-  Assert-Equal $LASTEXITCODE 2
+  $r = Invoke-TestPowerShell (Join-Path $Repo 'windows/uninstall.ps1') @('-Yes')
+  Assert-Equal $r.Code 2
   Assert-Equal @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" }) $before
 }
 if ($Failures.Count) { throw "$($Failures.Count) test(s) failed:`n$($Failures -join "`n")" }
