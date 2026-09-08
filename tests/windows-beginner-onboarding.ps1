@@ -349,3 +349,4 @@ Test-Case 'retired uninstall exits 2 and leaves the disposable home untouched' {
 }
 if ($Failures.Count) { throw "$($Failures.Count) test(s) failed:`n$($Failures -join "`n")" }
 Write-Host 'PASS Windows beginner onboarding behavior'
+exit 0
