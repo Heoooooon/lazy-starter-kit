@@ -10,7 +10,11 @@ _v0.14.0 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks ·
 
 ---
 
-> **🇰🇷 한국어 빠른 시작**: [v0.14.0 GUI ZIP](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)을
+> **Windows — 실험적 제공:** 자동화 테스트와 설치 패키지 검증을 완료했습니다.
+> 다만 실제 Windows PC에서 더블클릭, 설치 화면, 권한 승인, 설치 완료, 첫 실행까지의
+> 전체 과정을 수동으로 검증하지는 못했습니다.
+>
+> **🇰🇷 한국어 빠른 시작**: [v0.14.0 GUI ZIP (실험적 제공)](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)을
 > 풀고 `Lazy-Starter-Kit-Installer.cmd`를 여세요. 기본 구성은 `ai`, 기본 동작은
 > 설치이며 미리보기는 별도 버튼입니다. Docker와 WSL은 제외됩니다.
 > 일반 무프로필 CLI 설치도 `ai`입니다. 명시적 `recommended`는 더 넓은 개발
@@ -60,9 +64,14 @@ blockers, then rerun the same `ai` profile. Continue with [First run](#first-run
 
 <a id="gui-download"></a>
 
-### v0.14.0 GUI download
+### v0.14.0 GUI download (experimental)
 
-- [Download the v0.14.0 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)
+- [Download the experimental v0.14.0 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)
+
+**Windows is experimental:** automated tests and installation package verification
+have passed. Manual verification on a real Windows PC has not covered the full
+journey from double-clicking the launcher through installer screens, permission
+prompts, installation completion, and first run.
 
 Extract the ZIP and double-click `Lazy-Starter-Kit-Installer.cmd`. The GUI starts
 with **ai** and **Install** as the primary action. **Preview** is a separate

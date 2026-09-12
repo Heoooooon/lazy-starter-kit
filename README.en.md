@@ -150,7 +150,7 @@ is in [First project](#first-project).
 
 ## Recommended setup (v0.14.0)
 
-**New to this? On macOS and Windows, use the v0.14.0 GUI below.**
+**New to this? On macOS, use the v0.14.0 GUI below. The Windows GUI is experimental.**
 The default `ai` profile sets up Claude Code and Codex without Docker or Windows
 WSL. v0.14.0 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
 existing configuration. It doesn't provide automatic uninstall.
@@ -162,8 +162,13 @@ existing configuration. It doesn't provide automatic uninstall.
 | OS | v0.14.0 GUI asset | Open after extracting |
 |---|---|---|
 | macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Windows (experimental) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
 | Linux | No GUI package | Use the v0.14.0 source commands below or the [Linux guide](linux/README.md) |
+
+**Windows is experimental:** automated tests and installation package verification
+have passed. Manual verification on a real Windows PC has not covered the full
+journey from double-clicking the launcher through installer screens, permission
+prompts, installation completion, and first run.
 
 The GUI starts with **ai**, with **Install** as the primary action and a separate
 **Preview** button. Review the plan without installing, then choose Install when

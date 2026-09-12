@@ -144,7 +144,7 @@ CLI 사용자는 [아래 명령](#recommended-setup)으로 **v0.14.0 소스**를
 
 ## 추천 설치 (v0.14.0)
 
-**처음이라면 macOS와 Windows에서는 아래 v0.14.0 GUI를 사용하세요.**
+**처음이라면 macOS에서는 아래 v0.14.0 GUI를 사용하세요. Windows GUI는 실험적으로 제공합니다.**
 기본 `ai` 구성은 Docker와 Windows WSL 없이 Claude Code와 Codex를 준비합니다.
 v0.14.0은 gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을
 삭제하지 않으며, 자동 제거 기능도 제공하지 않습니다.
@@ -156,8 +156,12 @@ v0.14.0은 gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설
 | OS | v0.14.0 GUI 파일 | 압축을 푼 뒤 열 파일 |
 |---|---|---|
 | macOS 14+, Apple Silicon 또는 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Windows (실험적 제공) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
 | Linux | GUI 패키지 없음 | 아래 v0.14.0 소스 명령 또는 [Linux 안내](linux/README.md) 사용 |
+
+**Windows — 실험적 제공:** 자동화 테스트와 설치 패키지 검증을 완료했습니다.
+다만 실제 Windows PC에서 더블클릭, 설치 화면, 권한 승인, 설치 완료, 첫 실행까지의
+전체 과정을 수동으로 검증하지는 못했습니다.
 
 GUI의 기본 구성은 **ai**, 기본 동작은 **설치**이며 **미리보기** 버튼은 별도입니다.
 설치 없이 계획을 확인하고, 준비되면 설치를 선택하세요. 프로필이나 사용자 지정
