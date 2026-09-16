@@ -247,8 +247,11 @@ jobs:
       - run: HERMES=1 ./install.sh --profile full --dry-run
 
   integration:
+    # Homebrew no longer publishes bottles for the macOS 14 runner (Tier 3).
+    # Keep dry-run coverage on macOS 14, but run the real full-profile install
+    # on a supported runner so CI tests our installer instead of source builds.
     name: macOS install + verify
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
