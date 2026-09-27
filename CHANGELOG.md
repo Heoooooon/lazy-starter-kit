@@ -7,6 +7,11 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-09-27
+
+Security patch for v0.14.0. Download v0.14.1 rather than v0.14.0; the public
+interface is unchanged.
+
 ### Security
 - **Piped bootstraps no longer run code from the current directory**
   ([PR #14](https://github.com/Heoooooon/lazy-starter-kit/pull/14)).
@@ -505,7 +510,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.1...HEAD
+[0.14.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.11.0...v0.12.0
