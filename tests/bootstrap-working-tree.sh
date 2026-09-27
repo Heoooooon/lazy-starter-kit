@@ -77,6 +77,25 @@ run_piped_bootstrap macos "$ROOT/install.sh" macos
 run_piped_bootstrap linux "$ROOT/linux/install.sh" linux
 printf 'ok   piped bootstraps ignore decoy working-tree code\n'
 
+# The macOS piped offline preview must not trust cwd code either.
+printf '%s\n' '#!/usr/bin/env bash' \
+  'printf "decoy\n" > "$STARTER_KIT_DECOY_MARKER"' 'exit 97' \
+  > "$DECOY/install.sh"
+PREVIEW_MARKER="$TMP/preview-decoy"
+preview_output="$(
+  cd "$DECOY"
+  STARTER_KIT_DIR="$TMP/preview-clone" \
+  STARTER_KIT_DECOY_MARKER="$PREVIEW_MARKER" \
+    bash -s -- --dry-run < "$ROOT/install.sh" 2>&1
+)" || fail "macOS piped preview failed: $preview_output"
+[[ ! -e "$PREVIEW_MARKER" ]] \
+  || fail "macOS piped preview executed code from its current directory"
+[[ "$preview_output" == *"Offline installation preview"* ]] \
+  || fail "macOS piped preview did not use the offline preview"
+[[ ! -e "$TMP/preview-clone" ]] \
+  || fail "macOS piped preview cloned a checkout"
+printf 'ok   macOS piped preview ignores decoy working-tree code\n'
+
 # An existing Linux checkout whose tracked payload was modified must be rejected
 # before fetch/checkout can retain and execute that local content.
 DIRTY_CHECKOUT="$TMP/dirty-checkout"

@@ -7,6 +7,14 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Security
+- **Piped bootstraps no longer run code from the current directory**
+  ([PR #14](https://github.com/Heoooooon/lazy-starter-kit/pull/14)).
+  `curl … | bash` on macOS and Linux, including the macOS piped `--dry-run`
+  preview, could source `scripts/lib.sh` or hand off to `install.sh` from the
+  working directory instead of a verified checkout. The Linux bootstrap now also
+  refuses an existing checkout with local changes, as macOS already did.
+
 ## [0.14.0] - 2026-09-07
 
 ### Added

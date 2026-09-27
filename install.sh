@@ -70,7 +70,8 @@ resolve_root() {
   fi
   # Running piped from curl: clone (or update) and hand off.
   if [[ "$BOOTSTRAP_PREVIEW" == 1 ]]; then
-    printf '%s\n' "${dir:-$PWD}"
+    # Piped previews have no trusted source directory; never fall back to cwd.
+    printf '%s\n' "${dir:-}"
     return 0
   fi
   echo "==> Bootstrapping lazy-starter-kit into $CLONE_DIR" >&2
@@ -133,12 +134,12 @@ if [[ -n "$SCRIPT_SOURCE" ]]; then
   SELF="$(cd "$(dirname "$SCRIPT_SOURCE")" 2>/dev/null && pwd || true)/$(basename "$SCRIPT_SOURCE")"
 fi
 # If we bootstrapped (cloned), hand off to the cloned copy with the original args.
-if [[ "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then
+if [[ -n "$ROOT" && "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then
   exec bash "$ROOT/install.sh" "$@"
 fi
 
 OFFLINE_PREVIEW=0
-if [[ -f "$ROOT/scripts/lib.sh" ]]; then
+if [[ -n "$ROOT" && -f "$ROOT/scripts/lib.sh" ]]; then
   # shellcheck source=scripts/lib.sh
   source "$ROOT/scripts/lib.sh"
 else
