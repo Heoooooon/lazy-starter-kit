@@ -88,7 +88,7 @@ setup, explicitly choose `recommended`; `full` adds Docker. `minimal` omits
 agents and Docker; `work` selects the same steps as `recommended`.
 
 These commands run the local release source, not mutable `main`. The standard
-remote bootstrap chooses the newest release tag unless `STARTER_KIT_BRANCH`
+remote bootstrap chooses the newest published GitHub Release unless `STARTER_KIT_BRANCH`
 selects a ref. Linux doesn't enforce `STARTER_KIT_COMMIT`; use a reviewed local
 checkout for a full commit pin and don't run `--update` on it.
 

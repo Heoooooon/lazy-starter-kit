@@ -181,7 +181,7 @@ Account sign-in and the first prompt remain manual.
 
 See the [v0.14.1 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.1)
 for changes and all assets. Packaged GUIs pin their own release commit; the
-standard remote bootstrap resolves the newest release tag by default.
+standard remote bootstrap resolves the newest published GitHub Release by default.
 Changes to `main` don't automatically update release ZIPs.
 
 **v0.13.0** used full for no-profile CLI installs and recommended + preview in

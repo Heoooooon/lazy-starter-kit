@@ -173,7 +173,7 @@ GUI의 기본 구성은 **ai**, 기본 동작은 **설치**이며 **미리보기
 
 [v0.14.1 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.1)에서
 변경 내역과 전체 파일을 확인하세요. 패키지 GUI는 자신의 릴리스 커밋에 고정되며,
-일반 원격 부트스트랩은 기본적으로 최신 릴리스 태그를 선택합니다.
+일반 원격 부트스트랩은 기본적으로 GitHub에 공개된 최신 Release를 선택합니다.
 릴리스 ZIP에 `main`의 변경 사항이 자동으로 반영되지는 않습니다.
 
 **v0.13.0**은 무프로필 CLI의 기본값이 full, GUI는 recommended + 미리보기였습니다.
