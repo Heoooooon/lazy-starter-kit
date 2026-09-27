@@ -19,6 +19,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   stops instead of falling back to `main`.
 
 ### Fixed
+- **Windows `-Doctor` fails when shell config is missing**
+  ([PR #18](https://github.com/Heoooooon/lazy-starter-kit/pull/18)). A missing
+  managed PowerShell profile block or `starship.toml` now counts as missing and
+  makes the full-inventory doctor exit `1`, as the exit-code contract requires.
 - The Linux bootstrap stops when it can't fetch or check out the requested ref
   instead of continuing from a stale existing checkout.
 
