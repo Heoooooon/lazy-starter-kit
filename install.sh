@@ -33,6 +33,7 @@ for bootstrap_arg in "$@"; do
   [[ "$bootstrap_arg" != --dry-run ]] || BOOTSTRAP_PREVIEW=1
 done
 
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-}"
 REPO_URL="${STARTER_KIT_REPO:-https://github.com/Heoooooon/lazy-starter-kit.git}"
 CLONE_DIR="${STARTER_KIT_DIR:-$HOME/.lazy-starter-kit}"
 # STARTER_KIT_BRANCH pins an explicit ref (a tag like v0.9.0, or "main" to ride
@@ -60,7 +61,7 @@ kit_latest_ref() {
 # Resolve the repo root, or bootstrap by cloning (supports curl | bash).
 # ---------------------------------------------------------------------------
 resolve_root() {
-  local src="${BASH_SOURCE[0]:-}"
+  local src="$SCRIPT_SOURCE"
   if [[ -n "$src" ]]; then
     local dir; dir="$(cd "$(dirname "$src")" 2>/dev/null && pwd || true)"
     if [[ -n "$dir" && -f "$dir/scripts/lib.sh" ]]; then
@@ -69,7 +70,8 @@ resolve_root() {
   fi
   # Running piped from curl: clone (or update) and hand off.
   if [[ "$BOOTSTRAP_PREVIEW" == 1 ]]; then
-    printf '%s\n' "${dir:-$PWD}"
+    # Piped previews have no trusted source directory; never fall back to cwd.
+    printf '%s\n' "${dir:-}"
     return 0
   fi
   echo "==> Bootstrapping lazy-starter-kit into $CLONE_DIR" >&2
@@ -128,16 +130,16 @@ if [[ -n "$EPHEMERAL_ROOT" && "$ROOT" == "$EPHEMERAL_ROOT" ]]; then
 fi
 # Resolve this script's own absolute path (empty when piped from curl).
 SELF=""
-if [[ -n "${BASH_SOURCE[0]:-}" ]]; then
-  SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || true)/$(basename "${BASH_SOURCE[0]}")"
+if [[ -n "$SCRIPT_SOURCE" ]]; then
+  SELF="$(cd "$(dirname "$SCRIPT_SOURCE")" 2>/dev/null && pwd || true)/$(basename "$SCRIPT_SOURCE")"
 fi
 # If we bootstrapped (cloned), hand off to the cloned copy with the original args.
-if [[ "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then
+if [[ -n "$ROOT" && "$SELF" != "$ROOT/install.sh" && -f "$ROOT/install.sh" ]]; then
   exec bash "$ROOT/install.sh" "$@"
 fi
 
 OFFLINE_PREVIEW=0
-if [[ -f "$ROOT/scripts/lib.sh" ]]; then
+if [[ -n "$ROOT" && -f "$ROOT/scripts/lib.sh" ]]; then
   # shellcheck source=scripts/lib.sh
   source "$ROOT/scripts/lib.sh"
 else
