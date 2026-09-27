@@ -23,7 +23,11 @@ run_fixture() {
   local mode="$1" output status fixture_dir="$TMP/$1"
   mkdir -p "$fixture_dir"
   set +e
-  output="$(LSK_HOMEBREW_TEST_DIR="$fixture_dir" /bin/bash "$0" "__fixture_$mode" 2>&1)"
+  # Detach from any controlling terminal so the no-TTY case doesn't depend on
+  # whether the test itself was started from a terminal.
+  output="$(LSK_HOMEBREW_TEST_DIR="$fixture_dir" \
+    perl -MPOSIX=setsid -e 'setsid(); exec @ARGV or die' \
+    /bin/bash "$0" "__fixture_$mode" </dev/null 2>&1)"
   status=$?
   set -e
   printf '%s\n%s\n' "$status" "$output"
