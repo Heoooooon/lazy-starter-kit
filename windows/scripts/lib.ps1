@@ -9,6 +9,7 @@ Set-StrictMode -Version Latest
 # ---------------------------------------------------------------------------
 if (-not (Test-Path variable:script:DryRun))    { $script:DryRun = $false }
 if (-not (Test-Path variable:script:AssumeYes)) { $script:AssumeYes = $false }
+if (-not (Test-Path variable:script:InstallProfile)) { $script:InstallProfile = 'full' }
 # $true when the top-level script runs from a real .ps1 file; $false when it was
 # piped through `iex` (irm | iex), where `exit` would close the user's terminal.
 # install.ps1 sets this before dot-sourcing us; default $true is right for a file
@@ -153,7 +154,8 @@ function Remove-KitTree {
 function Invoke-NativeSilently {
   param(
     [Parameter(Mandatory)][string]$Exe,
-    [string[]]$Arguments = @()
+    [string[]]$Arguments = @(),
+    [switch]$RequireSuccess
   )
   $prev = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
@@ -166,6 +168,9 @@ function Invoke-NativeSilently {
     # the process always runs to completion and $LASTEXITCODE is its real exit
     # code.
     $out = & $Exe @Arguments 2>$null
+    if ($RequireSuccess -and (-not $? -or $LASTEXITCODE -ne 0)) {
+      throw "$Exe failed (exit $LASTEXITCODE)"
+    }
     if ($null -ne $out) { $out }
   } finally {
     $ErrorActionPreference = $prev
@@ -203,6 +208,7 @@ function Confirm-Action {
 # current process won't see them until we re-read the environment.
 # ---------------------------------------------------------------------------
 function Update-SessionPath {
+  if ($script:InstallProfile -eq 'ai') { Update-AiPath; return }
   # MERGE newly-installed tool dirs into the CURRENT process PATH -- do NOT rebuild
   # from Machine+User only. A rebuild drops process-level entries (VS dev shell,
   # portable git, dirs the profile prepended) and, with $ErrorActionPreference=
@@ -235,6 +241,81 @@ function Update-SessionPath {
     $merged += $p
   }
   if ($merged.Count -gt 0) { $env:Path = ($merged -join ';') }
+}
+
+# The AI preset needs executable search paths, not a PowerShell profile or
+# runtime-manager activation. Keep existing entries and persist only AI paths.
+function Merge-AiPath {
+  param([string]$Existing, [string[]]$Additional)
+  $seen = @{}
+  foreach ($entry in @($Existing -split ';')) {
+    $seen[$entry.TrimEnd('\').ToLowerInvariant()] = $true
+  }
+  $result = $Existing
+  foreach ($entry in $Additional) {
+    if ([string]::IsNullOrWhiteSpace($entry)) { continue }
+    $key = $entry.TrimEnd('\').ToLowerInvariant()
+    if (-not $seen.ContainsKey($key)) {
+      $seen[$key] = $true
+      if ($result -and -not $result.EndsWith(';')) { $result += ';' }
+      $result += $entry
+    }
+  }
+  return $result
+}
+
+function Get-UserEnvironmentPath {
+  return [Environment]::GetEnvironmentVariable('Path', 'User')
+}
+
+function Set-UserEnvironmentPath {
+  param([string]$Value)
+  [Environment]::SetEnvironmentVariable('Path', $Value, 'User')
+}
+
+function Update-AiPath {
+  param([switch]$Persist)
+  $user = Get-UserEnvironmentPath
+  $machine = [Environment]::GetEnvironmentVariable('Path', 'Machine')
+  $extra = @()
+  if ($env:USERPROFILE) { $extra += Join-Path $env:USERPROFILE '.local\bin' }
+  if ($env:APPDATA) { $extra += Join-Path $env:APPDATA 'npm' }
+  $newUser = Merge-AiPath -Existing $user -Additional $extra
+  if ($Persist -and $newUser -ne $user) {
+    if ($script:DryRun) { Write-Info '[dry-run] persist Claude/Codex/safety-hook PATH for new terminals' }
+    else {
+      Set-UserEnvironmentPath -Value $newUser
+    }
+  }
+  if (-not $script:DryRun) {
+    $env:Path = Merge-AiPath -Existing $env:Path -Additional @(($machine -split ';') + ($newUser -split ';'))
+  }
+}
+
+function Test-AiReadiness {
+  param([string[]]$Steps)
+  $tools = [ordered]@{ git = 'packages'; node = 'runtimes'; npm = 'runtimes'; claude = 'agents'; codex = 'agents' }
+  $ready = $true
+  foreach ($tool in $tools.Keys) {
+    if ($Steps -notcontains $tools[$tool]) { continue }
+    if (-not (Test-HasCommand $tool)) {
+      Write-Err "$tool missing -- action needed: rerun -Profile ai (or restore this command's PATH)."
+      $ready = $false
+      continue
+    }
+    try {
+      $global:LASTEXITCODE = 0
+      $version = @(Invoke-NativeSilently $tool @('--version') -RequireSuccess)
+      if ($LASTEXITCODE -ne 0 -or $version.Count -eq 0) {
+        throw "$tool --version failed (exit $LASTEXITCODE)"
+      }
+      Write-Ok "$tool ($($version[0]))"
+    } catch {
+      Write-Err "${tool}: action needed -- $($_.Exception.Message)"
+      $ready = $false
+    }
+  }
+  return $ready
 }
 
 # ---------------------------------------------------------------------------

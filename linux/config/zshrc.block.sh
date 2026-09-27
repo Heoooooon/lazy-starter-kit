@@ -10,7 +10,7 @@ command -v mise >/dev/null && eval "$(mise activate zsh)"
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 [ -d "$HOME/.cargo/bin" ] && export PATH="$HOME/.cargo/bin:$PATH"
 
-# bun: global packages (e.g. gjc / gajae-code) live in ~/.bun/bin
+# bun: global package executables live in ~/.bun/bin
 export BUN_INSTALL="$HOME/.bun"
 [ -d "$BUN_INSTALL/bin" ] && export PATH="$BUN_INSTALL/bin:$PATH"
 [ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"

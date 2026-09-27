@@ -2,6 +2,11 @@
 # 06-git.sh — git identity + sensible defaults + GitHub auth
 
 step_git() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Git for AI practice (no account changes)"
+    info "Set your Git author name and email later, before your first commit. No GitHub login is required for local practice."
+    return 0
+  fi
   step "git identity + GitHub auth"
   load_local_bins
   have git || die "git not found — run the 'prereqs' step first."

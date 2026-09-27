@@ -1,22 +1,14 @@
 #!/usr/bin/env bash
-# 07-agents.sh — AI coding agents: gajae-code (gjc), codex, lazycodex (OmO), Claude Code
+# 07-agents.sh — AI coding agents: codex, Claude Code, opt-in Hermes
 
 step_agents() {
-  step "AI agents: gajae-code + codex + lazycodex + Claude Code"
-  load_local_bins
-  load_mise
-  export PATH="$HOME/.bun/bin:$PATH"   # bun global bins (gjc) live here
-
-  # --- gajae-code (gjc) via bun -----------------------------------------
-  if have bun; then
-    if have gjc; then
-      ok "gajae-code present (gjc $(gjc --version 2>/dev/null | head -1))"
-    else
-      info "Installing gajae-code (bun add -g gajae-code)…"
-      run bun add -g gajae-code
-    fi
+  step "AI agents: codex + Claude Code"
+  if [[ "${PROFILE:-}" == ai ]]; then
+    load_ai_bins
   else
-    warn "bun not found — skipping gajae-code (install bun via the 'packages' step)"
+    load_local_bins
+    load_mise
+    export PATH="$HOME/.bun/bin:$PATH"   # bun global executables live here
   fi
 
   # --- Claude Code (Anthropic) ------------------------------------------
@@ -24,7 +16,11 @@ step_agents() {
   # self-updates in the background. Installs by default everywhere (incl. CI).
   # Kept ahead of the npm-dependent agents so a box without node still gets it.
   if have claude; then
-    ok "Claude Code present ($(claude --version 2>/dev/null | head -1))"
+    if [[ "${PROFILE:-}" == ai ]]; then
+      info "Claude Code already installed"
+    else
+      ok "Claude Code present ($(claude --version 2>/dev/null | head -1))"
+    fi
   elif [[ "$DRY_RUN" == "1" ]]; then
     info "[dry-run] curl -fsSL https://claude.ai/install.sh | bash"
   else
@@ -42,50 +38,54 @@ step_agents() {
     rm -f "$cc_tmp"
   fi
 
-  # --- codex (base harness that lazycodex extends) ----------------------
+  # --- codex -----------------------------------------------------------
   if ! have npm; then
     if [[ "$DRY_RUN" == "1" ]]; then
       info "[dry-run] npm install -g @openai/codex"
-      info "[dry-run] npx --yes lazycodex-ai install"
+      info "[dry-run] install Codex/Claude safety hooks after Node is available"
     else
-      warn "npm not found — skipping codex + lazycodex (run the 'runtimes' step first)"
+      [[ "${PROFILE:-}" != ai ]] || die "Action needed: npm is missing; install Node LTS with the 'runtimes' step."
+      warn "npm not found — skipping codex (run the 'runtimes' step first)"
     fi
     return 0
   fi
   if have codex; then
-    ok "codex present ($(codex --version 2>/dev/null | head -1))"
+    if [[ "${PROFILE:-}" == ai ]]; then
+      info "Codex already installed"
+    else
+      ok "codex present ($(codex --version 2>/dev/null | head -1))"
+    fi
   else
     info "Installing @openai/codex (npm -g)…"
-    run npm install -g @openai/codex
+    if [[ "${PROFILE:-}" == ai ]]; then
+      run npm install --prefix "$HOME/.local" -g @openai/codex
+    else
+      run npm install -g @openai/codex
+    fi
     # mise-managed node needs a reshim so the `codex` shim appears on PATH
     have mise && run mise reshim
   fi
 
-  # --- lazycodex (OmO agent harness for codex) --------------------------
-  # No global install by design — always run via npx.
-  if [[ "$DRY_RUN" == "1" ]]; then
-    info "[dry-run] npx --yes lazycodex-ai install"
-  elif is_tty && [[ "$ASSUME_YES" != "1" ]]; then
-    info "Installing lazycodex (npx lazycodex-ai install)…"
-    npx --yes lazycodex-ai install || warn "lazycodex installer did not complete"
-  else
-    info "Installing lazycodex (non-interactive, autonomous)…"
-    npx --yes lazycodex-ai install --no-tui --codex-autonomous || \
-      warn "lazycodex installer did not complete"
-  fi
-  info "lazycodex: on first 'codex' launch, APPROVE the omo hooks in the startup review."
-
-  if have node; then
+  if [[ "${PROFILE:-}" == ai && "$DRY_RUN" == 1 ]]; then
+    info "[dry-run] install Codex/Claude safety hooks after Node is available"
+  elif have node; then
     if [[ "$DRY_RUN" == "1" ]]; then
       node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME" --dry-run
     else
-      node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME" \
-        || warn "could not install the Codex/Claude recursive-rm guard"
+      if ! node "$ROOT/../scripts/ai/install-shell-guard.js" --home "$HOME"; then
+        [[ "${PROFILE:-}" != ai ]] || die "Action needed: could not install the Codex/Claude safety hooks. Existing settings were not replaced."
+        warn "could not install the Codex/Claude recursive-rm guard"
+      fi
     fi
   else
+    [[ "${PROFILE:-}" != ai ]] || die "Action needed: node is missing; could not install the Codex/Claude safety hooks."
     warn "node not found — could not install the Codex/Claude recursive-rm guard"
   fi
   info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks."
+
+  # AI stays narrow even when an inherited HERMES opt-in is present. Broader
+  # profiles retain their existing optional-agent behavior.
+  [[ "${PROFILE:-}" != ai ]] || return 0
 
   # --- Hermes Agent (Nous Research, OPT-IN only) -------------------------
   # Official installer self-manages Python/Node/Chromium and links `hermes`
@@ -119,6 +119,4 @@ step_agents() {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  curl -fsSL https://antigravity.google/cli/install.sh | bash
-  # uninstall.sh still removes ~/.local/bin/agy when present, so a manually
-  # installed copy is torn down with the rest of the kit.
 }

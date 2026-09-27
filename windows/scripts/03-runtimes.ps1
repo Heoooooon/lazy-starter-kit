@@ -3,6 +3,12 @@
 $script:MiseTools = @('node@lts', 'python@latest', 'go@latest', 'ubi:ast-grep/ast-grep')
 
 function Step-Runtimes {
+  if ($script:InstallProfile -eq 'ai') {
+    Write-Step 'Node.js LTS and npm: required by the AI tools and safety hooks'
+    Install-WingetPackage -Id 'OpenJS.NodeJS.LTS' -Name 'Node.js LTS/npm'
+    Update-AiPath
+    return
+  }
   Write-Step "Runtimes: mise (node/python/go/ast-grep) + rustup (rust)"
   Update-SessionPath
 

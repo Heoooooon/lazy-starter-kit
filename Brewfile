@@ -21,7 +21,7 @@ brew "starship"       # cross-shell prompt
 brew "mise"           # node / python / go (and more) version manager
 brew "uv"             # fast Python package/installer manager
 brew "rustup"         # Rust toolchain manager (stable installed in step 03)
-brew "bun"            # JS runtime + package manager (used for gajae-code)
+brew "bun"            # JS runtime + package manager
 
 # --- containers ----------------------------------------------------------
 brew "colima"         # lightweight container runtime (Docker without Desktop)
