@@ -173,7 +173,7 @@ GUI의 기본 구성은 **ai**, 기본 동작은 **설치**이며 **미리보기
 
 [v0.14.1 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.1)에서
 변경 내역과 전체 파일을 확인하세요. 패키지 GUI는 자신의 릴리스 커밋에 고정되며,
-일반 원격 부트스트랩은 기본적으로 최신 릴리스 태그를 선택합니다.
+일반 원격 부트스트랩은 기본적으로 GitHub에 공개된 최신 Release를 선택합니다.
 릴리스 ZIP에 `main`의 변경 사항이 자동으로 반영되지는 않습니다.
 
 **v0.13.0**은 무프로필 CLI의 기본값이 full, GUI는 recommended + 미리보기였습니다.
@@ -404,7 +404,8 @@ oh-my-zsh 등을 사용하고 있었다면 이름이나 경로만 기준으로 �
 - **설정 백업**: 관리 파일을 처음 변경할 때 `.bak` 백업을 만듭니다.
 - **재귀 삭제 경계 검사**: 내부 정리가 필요한 경우 HOME/루트/경계 밖/심볼릭 링크를 거부합니다.
 - **AI shell guard**: Codex/Claude Code의 재귀 `rm` 호출을 차단하는 추가 방어층을 제공합니다.
-- **소스와 릴리스 구분**: 로컬 checkout은 해당 소스를 실행합니다. 일반 원격 부트스트랩은 최신 릴리스 태그를, 릴리스 GUI는 자신의 커밋을 사용합니다.
+- **소스와 릴리스 구분**: 로컬 checkout은 해당 소스를 실행합니다. 일반 원격 부트스트랩과 detached checkout 업데이트는 가장 최신 `v*` 태그가 아니라 GitHub에 공개된 최신 Release를, 릴리스 GUI는 자신의 커밋을 사용합니다. 아직 빌드 중이거나 실패한 태그는 선택되지 않습니다.
+- **릴리스 게이트**: 태그 커밋의 `ci.yml`이 성공하고 macOS/Windows 패키징·서명·attestation이 모두 끝날 때까지 Release는 draft로 유지되며, 모든 단계가 성공한 뒤에만 공개됩니다.
 - **CI**: macOS, Windows, Ubuntu, Fedora, Arch, openSUSE에서 설치와 상태 검증을 자동 실행합니다.
 
 이 키트는 Homebrew, npm/bun 패키지, 각 프로젝트의 공식 설치 프로그램 등

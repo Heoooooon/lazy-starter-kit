@@ -23,7 +23,7 @@ Those explicit developer profiles and retirement policies remain in v0.14.0.
 Older v0.12.0 archives retain the older agent roster, full GUI default and
 automatic uninstall. Use v0.14.0 rather than reusing those ZIPs.
 
-The standard remote bootstrap selects the newest release tag by default.
+The standard remote bootstrap selects the newest published GitHub Release by default.
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
 [recommended setup guide](README.en.md#recommended-setup) to download the GUI
@@ -42,7 +42,8 @@ v1.0.0, breaking changes use a minor bump and a changelog entry:
 | **Step ids** | install steps (`prereqs`, `brew`/`packages`, `runtimes`, `shell`, `docker`, `git`, `agents`, `wsl`); the values accepted by `--only`/`--skip` |
 | **Profile names and defaults** | `ai` (ordinary no-profile install and GUI default since v0.14.0), `recommended` (since v0.13.0), `full`, `minimal`, `work`; custom step selections retain the developer payloads |
 | **Managed-block markers** | `# >>> lazy-starter-kit:<tag> >>>` … `# <<< lazy-starter-kit:<tag> <<<` in `${ZDOTDIR-$HOME}/.zshrc`, `${ZDOTDIR-$HOME}/.zprofile`, PowerShell profiles; tools and users may key on these |
-| **Environment variables** | `STARTER_KIT_BRANCH` (bootstrap ref; unset selects the newest release tag), `STARTER_KIT_COMMIT` (macOS/Windows bootstrap only: require the ref to resolve to one full 40-character commit SHA), `HERMES=1` (macOS/Linux advanced agent opt-in; ignored by `ai`), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
+| **Environment variables** | `STARTER_KIT_BRANCH` (bootstrap ref; unset selects the newest **published GitHub Release**), `STARTER_KIT_COMMIT` (macOS/Windows bootstrap only: require the ref to resolve to one full 40-character commit SHA), `HERMES=1` (macOS/Linux advanced agent opt-in; ignored by `ai`), `ZDOTDIR` (non-empty absolute Zsh config directory), `ASSUME_YES`/CI non-interactive behavior |
+| **Release selection** | With `STARTER_KIT_BRANCH` unset, the official repository must not silently fall back from an unresolved published release to `main`. Tags that haven't become a published Release aren't the default install/update target. |
 | **Installer and doctor exit codes** | `0` success / `1` failure. AI doctor requires successful command execution; macOS also requires its safety configuration. Full inventory exits `1` for missing items; PATH-only warnings don't fail. Scope is defined below. |
 | **macOS AI JSON diagnostics** | `--profile ai --doctor-json` emits `version`, `generatedAt`, `summary` (`ok`, `pathOnly`, `missing`) and `items` with `id`, `label`, `category`, `state`, `detail`, `step`; human-readable values aren't stable prose |
 | **Backup behavior** | the one-time `.bak` backup before the first managed edit of a config file |
@@ -124,11 +125,23 @@ Until `v1.0.0`, minor versions (`0.x` → `0.y`) may include breaking changes;
 we keep them rare and always list them in the [CHANGELOG](./CHANGELOG.md).
 From `v1.0.0` on, the table above is a hard promise.
 
+## Release safety contract
+
+For official tagged releases:
+
+1. the tag's `VERSION` must match the tag name,
+2. `ci.yml` must have completed successfully for the exact tagged commit,
+3. the GitHub Release remains a draft while macOS/Windows release artifacts are built, signed/notarized where applicable, and attested,
+4. only after every release artifact job succeeds is the Release published.
+
+Default bootstrap/update selection uses the newest **published GitHub Release**,
+not simply the lexicographically or semantically newest `v*` tag.
+
 ## Support tiers
 
 | Tier | Platforms | Promise |
 |---|---|---|
-| **Tier 1** | macOS 14+ (Apple Silicon) · Windows Server 2025 (≈ Windows 11) · Ubuntu 24.04 · Fedora (latest) · Arch (latest) · openSUSE Tumbleweed | Install and verify jobs in CI, with platform-specific Docker/WSL exclusions; macOS/Ubuntu idempotency checks, Linux upgrade-path checks, and profile/agent regressions. No automatic uninstall jobs. |
+| **Tier 1** | macOS 14+ (Apple Silicon) · Windows Server 2025 (≈ Windows 11) · Ubuntu 24.04 · Fedora (latest) · Arch (latest) · openSUSE Tumbleweed | Install and verify jobs in CI, with platform-specific Docker/WSL exclusions; macOS/Ubuntu idempotency checks, Linux upgrade-path checks (latest published release → main), and profile/agent regressions. No automatic uninstall jobs. |
 | **Tier 2** | Windows 10 1809+ / 11 desktop · Debian 12+ · RHEL 9 / Rocky / Alma · openSUSE Leap · WSL2 (Ubuntu) · Intel Macs | Expected to work (same code paths), not automatically tested; regressions fixed with priority when reported |
 | **Unsupported** | Alpine / musl distros · 32-bit systems | Upstream tools (node, ast-grep, bun) don't ship builds |
 

@@ -7,6 +7,21 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **Releases publish only verified builds**
+  ([PR #8](https://github.com/Heoooooon/lazy-starter-kit/pull/8)). The release
+  workflow waits up to 30 minutes for `ci.yml` to pass on the exact tagged
+  commit and keeps the GitHub Release a draft until the macOS and Windows
+  packaging, signing and attestation jobs succeed.
+- **Bootstraps and `--update` select the newest published GitHub Release**
+  rather than the newest `v*` tag, so a tag whose release is still building or
+  failed isn't installed. For the official repository, an unresolvable release
+  stops instead of falling back to `main`.
+
+### Fixed
+- The Linux bootstrap stops when it can't fetch or check out the requested ref
+  instead of continuing from a stale existing checkout.
+
 ## [0.14.1] - 2026-09-27
 
 Security patch for v0.14.0. Download v0.14.1 rather than v0.14.0; the public

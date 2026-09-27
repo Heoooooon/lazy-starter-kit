@@ -9,16 +9,81 @@ permissions:
   contents: read
 
 jobs:
+  verify-ci:
+    name: verify tagged commit passed CI
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: verify version matches tag
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          test "v$version" = "$GITHUB_REF_NAME" || {
+            echo "::error::VERSION $version does not match release tag $GITHUB_REF_NAME"
+            exit 1
+          }
+      - name: require successful CI for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Waiting for ci.yml on $GITHUB_SHA"
+          for attempt in $(seq 1 180); do
+            row="$(
+              gh run list \
+                --repo "$GITHUB_REPOSITORY" \
+                --workflow ci.yml \
+                --commit "$GITHUB_SHA" \
+                --event push \
+                --limit 20 \
+                --json databaseId,status,conclusion,createdAt \
+                --jq 'sort_by(.createdAt) | reverse | .[0] | if . == null then "" else [.databaseId, .status, (.conclusion // "")] | map(tostring) | join("|") end'
+            )"
+            if [[ -z "$row" ]]; then
+              echo "CI run not visible yet (attempt $attempt/180)"
+              sleep 10
+              continue
+            fi
+            IFS='|' read -r run_id status conclusion <<< "$row"
+            echo "CI run $run_id: status=$status conclusion=${conclusion:-pending}"
+            if [[ "$status" == "completed" ]]; then
+              [[ "$conclusion" == "success" ]] || {
+                echo "::error::Refusing release: CI run $run_id concluded '$conclusion'"
+                exit 1
+              }
+              echo "CI gate passed: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::Timed out waiting for a successful ci.yml run for $GITHUB_SHA"
+          exit 1
+
   create-release:
-    name: create GitHub release
+    name: create draft GitHub release
+    needs: verify-ci
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - name: create release with auto-generated notes
+      - name: create or reuse draft release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes --verify-tag
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft >/dev/null 2>&1; then
+            is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
+            [[ "$is_draft" == "true" ]] || {
+              echo "::error::Release $GITHUB_REF_NAME is already public; refusing to rebuild it"
+              exit 1
+            }
+            echo "Reusing existing draft release $GITHUB_REF_NAME"
+          else
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --generate-notes --verify-tag --draft
+          fi
 
   macos-installers:
     name: package macOS beginner installers
@@ -139,7 +204,7 @@ jobs:
           subject-path: |
             lazy-starter-kit-macos-gui.zip
             lazy-starter-kit-macos-double-click.zip
-      - name: upload macOS assets
+      - name: upload macOS assets to draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -147,6 +212,7 @@ jobs:
             lazy-starter-kit-macos-gui.zip \
             lazy-starter-kit-macos-double-click.zip \
             lazy-starter-kit-macos-double-click.zip.sha256 \
+            --clobber \
             --repo "$GITHUB_REPOSITORY"
       - name: remove temporary signing credentials
         if: always()
@@ -248,7 +314,7 @@ jobs:
           subject-path: |
             lazy-starter-kit-windows-gui.zip
             lazy-starter-kit-windows-double-click.zip
-      - name: upload Windows assets
+      - name: upload Windows assets to draft
         shell: powershell
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -258,4 +324,21 @@ jobs:
             lazy-starter-kit-windows-gui.zip.sha256 `
             lazy-starter-kit-windows-double-click.zip `
             lazy-starter-kit-windows-double-click.zip.sha256 `
+            --clobber `
             --repo $env:GITHUB_REPOSITORY
+
+  publish-release:
+    name: publish verified release
+    needs: [macos-installers, windows-installers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: publish only after every release artifact succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')"
+          [[ "$is_draft" == "true" ]] || { echo "::error::Expected $GITHUB_REF_NAME to still be a draft before final publish"; exit 1; }
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false
