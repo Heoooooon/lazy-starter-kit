@@ -13,7 +13,7 @@ The fastest way to start AI coding on your own machine.
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-[한국어](./README.md) · **English** · [Recommended setup](#recommended-setup) · [First project](#first-project) · [Changelog](./CHANGELOG.md)
+[한국어](./README.md) · **English** · [简体中文](./README.zh-CN.md) · [Recommended setup](#recommended-setup) · [First project](#first-project) · [Changelog](./CHANGELOG.md)
 
 </div>
 

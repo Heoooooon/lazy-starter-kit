@@ -13,7 +13,7 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-**한국어** · [English](./README.en.md) · [추천 설치](#recommended-setup) · [첫 프로젝트](#first-project) · [변경 이력](./CHANGELOG.md)
+**한국어** · [English](./README.en.md) · [简体中文](./README.zh-CN.md) · [추천 설치](#recommended-setup) · [첫 프로젝트](#first-project) · [변경 이력](./CHANGELOG.md)
 
 </div>
 

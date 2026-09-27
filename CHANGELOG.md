@@ -7,6 +7,11 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Simplified Chinese README** ([README.zh-CN.md](README.zh-CN.md)), a
+  translation of the English README. All three READMEs now link to each other
+  from the language switcher.
+
 ### Changed
 - **Releases publish only verified builds**
   ([PR #8](https://github.com/Heoooooon/lazy-starter-kit/pull/8)). The release
