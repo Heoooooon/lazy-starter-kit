@@ -19,6 +19,12 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   stops instead of falling back to `main`.
 
 ### Fixed
+- **macOS Homebrew installation no longer trips over inherited mode flags**
+  ([PR #5](https://github.com/Heoooooon/lazy-starter-kit/pull/5), thanks
+  @agiletalk). The official installer is downloaded and checked before it runs,
+  and it runs in an isolated environment. `--yes` stays non-interactive, while
+  an ordinary terminal run lets Homebrew ask for the administrator password
+  through `/dev/tty`, including under `curl | bash`.
 - **Windows `-Doctor` fails when shell config is missing**
   ([PR #18](https://github.com/Heoooooon/lazy-starter-kit/pull/18)). A missing
   managed PowerShell profile block or `starship.toml` now counts as missing and
