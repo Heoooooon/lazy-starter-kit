@@ -4,7 +4,12 @@ This project follows [Semantic Versioning](https://semver.org/). This document
 defines **what counts as the public interface**, what you can script
 against and pin, and what a version number promises about it.
 
-## Release guidance: v0.14.0
+## Release guidance: v0.14.1
+
+**v0.14.1** is a security patch for v0.14.0. Piped bootstraps no longer run
+installer code from the current working directory, and the Linux bootstrap
+refuses an existing checkout with local changes. The public interface is
+unchanged; use v0.14.1 instead of v0.14.0.
 
 **v0.14.0** adds the public `ai` profile and makes it the default for ordinary
 no-profile installs and both GUIs. It also separates GUI Install and Preview
@@ -22,7 +27,7 @@ The standard remote bootstrap selects the newest release tag by default.
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
 [recommended setup guide](README.en.md#recommended-setup) to download the GUI
-or clone `v0.14.0` and preview the local installer before applying. Record the
+or clone `v0.14.1` and preview the local installer before applying. Record the
 checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.
 

@@ -2,7 +2,7 @@
 
 ### Start AI coding on Windows.
 
-_v0.14.0 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks · minimal PATH. Explicit developer profiles remain available._
+_v0.14.1 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks · minimal PATH. Explicit developer profiles remain available._
 
 **[← Back to repo root](../README.md)** · [macOS kit](../README.md) · [Linux kit](../linux/README.md)
 
@@ -14,26 +14,26 @@ _v0.14.0 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks ·
 > 다만 실제 Windows PC에서 더블클릭, 설치 화면, 권한 승인, 설치 완료, 첫 실행까지의
 > 전체 과정을 수동으로 검증하지는 못했습니다.
 >
-> **🇰🇷 한국어 빠른 시작**: [v0.14.0 GUI ZIP (실험적 제공)](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)을
+> **🇰🇷 한국어 빠른 시작**: [v0.14.1 GUI ZIP (실험적 제공)](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.1/lazy-starter-kit-windows-gui.zip)을
 > 풀고 `Lazy-Starter-Kit-Installer.cmd`를 여세요. 기본 구성은 `ai`, 기본 동작은
 > 설치이며 미리보기는 별도 버튼입니다. Docker와 WSL은 제외됩니다.
 > 일반 무프로필 CLI 설치도 `ai`입니다. 명시적 `recommended`는 더 넓은 개발
 > 구성을 유지합니다. 설치 후 새 PowerShell에서 `-Profile ai -Doctor`로 확인하세요.
 > 단독 `-Doctor`는 전체 목록 점검이므로 AI 검사에는 프로필을 반드시 넣으세요.
 > 로그인과 첫 프롬프트 전송은 직접 합니다. [AI 안내](../README.md#ai-setup)를 참고하세요.
-> v0.14.0은 자동 제거를 지원하지 않고 gajae-code (`gjc`), lazycodex를
+> v0.14.1은 자동 제거를 지원하지 않고 gajae-code (`gjc`), lazycodex를
 > 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
 > 설치가 끝나면 PowerShell을 새로 여세요. [한국어 추천 설치 안내](../README.md#recommended-setup)
 
 ## Quick start
 
-### AI setup (v0.14.0)
+### AI setup (v0.14.1)
 
-**Start with the [v0.14.0 GUI](#gui-download) or [pinned source](#install-from-source)
+**Start with the [v0.14.1 GUI](#gui-download) or [pinned source](#install-from-source)
 below.** v0.13.0 already had the broader `recommended` profile and first-use
 guidance, but not the smaller AI default or the new GUI first-run flow.
 
-The v0.14.0 GUI and ordinary no-profile CLI installs default to `ai`.
+The v0.14.1 GUI and ordinary no-profile CLI installs default to `ai`.
 **Install** is the primary GUI action; **Preview** is a separate action that
 makes no changes. Explicit `recommended`, `full`, `minimal`, and `work` keep their
 existing developer payloads. There is no removal UI or automatic uninstall.
@@ -50,7 +50,7 @@ the local installer and scripts before previewing or installing. Follow the
 prerequisite guidance; don't change policy to work around IT restrictions.
 
 After installation, open a new PowerShell window and run the AI result check
-from the v0.14.0 source's `windows` folder:
+from the v0.14.1 source's `windows` folder:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Profile ai -Doctor
@@ -64,9 +64,9 @@ blockers, then rerun the same `ai` profile. Continue with [First run](#first-run
 
 <a id="gui-download"></a>
 
-### v0.14.0 GUI download (experimental)
+### v0.14.1 GUI download (experimental)
 
-- [Download the experimental v0.14.0 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.0/lazy-starter-kit-windows-gui.zip)
+- [Download the experimental v0.14.1 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.14.1/lazy-starter-kit-windows-gui.zip)
 
 **Windows is experimental:** automated tests and installation package verification
 have passed. Manual verification on a real Windows PC has not covered the full
@@ -80,7 +80,7 @@ installation, and incomplete readiness checks don't unlock first-run controls.
 After installation and successful checks, open a new PowerShell
 window and check versions before starting your [first project](../README.en.md#first-project).
 Release GUIs use their pinned release commit, not mutable `main`. See the
-[v0.14.0 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.0)
+[v0.14.1 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.1)
 for changes and all assets. The standard remote bootstrap chooses the newest
 release tag unless a ref is selected; a release GUI stays pinned to its own
 release. Later changes to `main` don't update a downloaded ZIP.
@@ -91,7 +91,7 @@ The GUI runs the shared PowerShell installer with `-Yes`.
 can still be initialized or receive the Linux kit as root. Review the preview
 log before applying that profile.
 
-v0.14.0 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+v0.14.1 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
 existing configuration. Automatic uninstall isn't supported. v0.13.0 used
 recommended + preview in the GUI and full for no-profile CLI installs.
 Older v0.12.0
@@ -100,25 +100,25 @@ uninstall behavior. Its GUI starts with full + preview; don't use it for this se
 
 <a id="install-from-source"></a>
 
-### v0.14.0 source: AI setup
+### v0.14.1 source: AI setup
 
 For a local source copy, open **PowerShell** (Windows PowerShell 5.1 or PowerShell
 7) in a fresh folder. If Git is already available:
 
 ```powershell
-git clone --branch v0.14.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.14.0
-cd lazy-starter-kit-v0.14.0\windows
+git clone --branch v0.14.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.14.1
+cd lazy-starter-kit-v0.14.1\windows
 # Inspect install.ps1 and scripts/ before running:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Profile ai -DryRun # preview
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -Profile ai         # install
 ```
 
-Without Git, [download the v0.14.0 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.14.0.zip),
-extract it, and open PowerShell in `lazy-starter-kit-0.14.0\windows`. Inspect the
+Without Git, [download the v0.14.1 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.14.1.zip),
+extract it, and open PowerShell in `lazy-starter-kit-0.14.1\windows`. Inspect the
 installer and scripts, then run the same preview and apply commands above.
 This source archive is different from the GUI ZIP.
 
-These commands pin v0.14.0, the same release as the GUI above, and explicitly
+These commands pin v0.14.1, the same release as the GUI above, and explicitly
 select `ai`, also the ordinary no-profile install default. Use `recommended`
 for the broader developer bundle, not as an alias for `ai`.
 
@@ -192,7 +192,7 @@ prereqs  packages  runtimes  shell  docker  git  agents  wsl
 .\install.ps1 -Update -Profile recommended # update a Git checkout, then re-run the developer profile
 ```
 
-In v0.14.0, **`-Profile ai -Doctor` is required for AI scope**. It executes the
+In v0.14.1, **`-Profile ai -Doctor` is required for AI scope**. It executes the
 required commands and fails if one is missing or can't run; it doesn't test
 provider login. Bare `-Doctor` and explicit developer profiles keep the full
 tool/config inventory used by every doctor run in v0.13.0. Intentionally omitted
@@ -236,7 +236,7 @@ The `ai` runtime uses winget `OpenJS.NodeJS.LTS` with npm, not mise or rustup.
   (system MSI, nvm-windows, scoop) are left alone; mise's win on PATH. Verify
   with `Get-Command node -All`.
 - **Hermes Agent** has no native Windows build. In an existing WSL2 distro,
-  use a reviewed v0.14.0 Linux source checkout and explicitly opt into the
+  use a reviewed v0.14.1 Linux source checkout and explicitly opt into the
   advanced agents setup, for example `HERMES=1 ./install.sh --profile recommended`
   from its `linux` folder. The `wsl` step doesn't enable Hermes. Linux `ai`
   intentionally ignores even an inherited `HERMES=1`.
@@ -282,7 +282,7 @@ next run picks up from wherever it left off (initialize → run the Linux kit).
 
 ## First run
 
-After checks pass, choose Claude Code or Codex in the v0.14.0 GUI and
+After checks pass, choose Claude Code or Codex in the v0.14.1 GUI and
 explicitly launch a **new, empty practice folder**. Prompt copy puts the starter
 request on your clipboard; it doesn't send it. Login and submission stay manual.
 
@@ -301,7 +301,7 @@ None is required for the first AI session.
 
 ## Automatic uninstall is not supported
 
-v0.14.0 keeps the no-uninstall policy introduced in v0.13.0. The legacy
+v0.14.1 keeps the no-uninstall policy introduced in v0.13.0. The legacy
 `windows/uninstall.ps1` entrypoint stops with an explanation and exit code 2,
 without changing or removing anything. The kit can't reliably distinguish tools
 it installed from tools you already had. For individual removals, follow the
