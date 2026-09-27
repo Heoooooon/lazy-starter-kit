@@ -28,7 +28,7 @@ lazy-starter-kit를 안전하게 써주셔서 고맙습니다. 취약점을 발�
 ## 범위 (Scope)
 
 이 키트는 **여러 업스트림 프로젝트의 공식 설치 스크립트를 내려받아 실행**합니다
-(Homebrew, oh-my-zsh, `get.docker.com`, Hermes, `npx lazycodex` 등).
+(Homebrew, oh-my-zsh, Claude Code, 선택 설치인 `get.docker.com`과 Hermes 등).
 
 - **업스트림 자체의 취약점**(예: Homebrew 설치 스크립트 결함)은 **해당 프로젝트에
   직접** 신고해 주세요 — 우리가 고칠 수 있는 부분이 아닙니다.
@@ -66,7 +66,7 @@ repro steps, and `--dry-run` / `-DryRun` output if possible.
 ## Scope
 
 This kit **downloads and runs official install scripts from upstream projects**
-(Homebrew, oh-my-zsh, `get.docker.com`, Hermes, `npx lazycodex`, …).
+(Homebrew, oh-my-zsh, Claude Code, and opt-in `get.docker.com` and Hermes).
 
 - **Vulnerabilities in those upstreams** should be reported **to those projects** —
   they're outside our control.

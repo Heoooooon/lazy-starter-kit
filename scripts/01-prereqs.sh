@@ -43,6 +43,9 @@ step_prereqs() {
 
   load_brew
 
+  # AI needs only its minimal .zshrc PATH block, not brew shellenv startup.
+  [[ "${PROFILE:-}" != ai ]] || return 0
+
   local p zprofile; p="$(brew_prefix)"; zprofile="$(zsh_config_file .zprofile)"
   remove_block "$zprofile" "macos-starter-kit:brew"   # migrate pre-rename block
   if [[ "$zprofile" != "$HOME/.zprofile" ]]; then

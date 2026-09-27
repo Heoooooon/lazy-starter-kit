@@ -7,6 +7,13 @@
 MISE_TOOLS=("node@lts" "python@latest" "go@latest" "ubi:ast-grep/ast-grep")
 
 step_runtimes() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Installing Node LTS and npm"
+    load_ai_bins
+    [[ "$DRY_RUN" == 1 ]] || have mise || die "mise not found — run the 'packages' step first."
+    run mise use -g node@lts
+    return 0
+  fi
   step "Runtimes: mise (node/python/go/ast-grep) + rustup (rust)"
   load_local_bins
 

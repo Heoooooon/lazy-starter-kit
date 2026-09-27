@@ -30,7 +30,10 @@ fi
 DEVELOPER_MODE="${STARTER_KIT_DEVELOPER_MODE:-0}"
 [[ "$DEVELOPER_MODE" == "0" || "$DEVELOPER_MODE" == "1" ]] \
   || die "STARTER_KIT_DEVELOPER_MODE must be 0 or 1"
+BUNDLE_IDENTIFIER=dev.cmore.lazy-starter-kit.installer
 if [[ "$DEVELOPER_MODE" == "1" ]]; then
+  QA_IDENTIFIER="$(printf '%s' "$OUT" | shasum -a 256 | cut -c1-12)"
+  BUNDLE_IDENTIFIER="$BUNDLE_IDENTIFIER.qa-$QA_IDENTIFIER"
   RELEASE_COMMIT="$(
     git -C "$ROOT" rev-parse --verify "${RELEASE_REF}^{commit}" 2>/dev/null \
       || git -C "$ROOT" rev-parse --verify 'HEAD^{commit}'
@@ -48,6 +51,13 @@ fi
 BOOTSTRAP="$CONTENTS/Resources/install.sh"
 cp "$ROOT/install.sh" "$BOOTSTRAP"
 chmod 644 "$BOOTSTRAP"
+# A local, read-only doctor entrypoint survives ephemeral install cleanup.
+# Keep it separate so the bootstrap still resolves the pinned checkout for installs.
+mkdir -p "$CONTENTS/Resources/readiness/scripts" "$CONTENTS/Resources/readiness/lib"
+cp "$ROOT/install.sh" "$CONTENTS/Resources/readiness/install.sh"
+cp "$ROOT/VERSION" "$CONTENTS/Resources/readiness/VERSION"
+cp "$ROOT/scripts/lib.sh" "$CONTENTS/Resources/readiness/scripts/lib.sh"
+cp "$ROOT/lib/common.sh" "$CONTENTS/Resources/readiness/lib/common.sh"
 BOOTSTRAP_SHA256="$(shasum -a 256 "$BOOTSTRAP" | awk '{print $1}')"
 
 BUILD_INFO="$OUT/.LazyStarterKitBuildInfo.swift"
@@ -124,7 +134,7 @@ cat > "$CONTENTS/Info.plist" <<PLIST
   <key>CFBundleDevelopmentRegion</key><string>ko</string>
   <key>CFBundleDisplayName</key><string>Lazy Starter Kit Installer</string>
   <key>CFBundleExecutable</key><string>LazyStarterKitInstaller</string>
-  <key>CFBundleIdentifier</key><string>dev.cmore.lazy-starter-kit.installer</string>
+  <key>CFBundleIdentifier</key><string>$BUNDLE_IDENTIFIER</string>
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
   <key>CFBundleName</key><string>Lazy Starter Kit Installer</string>
   <key>CFBundlePackageType</key><string>APPL</string>

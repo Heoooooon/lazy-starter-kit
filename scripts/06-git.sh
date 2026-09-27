@@ -2,6 +2,10 @@
 # 06-git.sh — git identity + sensible defaults + GitHub auth
 
 step_git() {
+  if [[ "${PROFILE:-}" == ai ]]; then
+    step "Git (no account sign-in or identity changes)"
+    return 0
+  fi
   step "git identity + GitHub auth"
   load_brew
   have git || die "git not found."

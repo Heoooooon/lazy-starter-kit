@@ -1,31 +1,24 @@
-# 07-agents.ps1 -- AI coding agents: gajae-code (gjc), codex, lazycodex (OmO),
-# Claude Code (claude)
+# 07-agents.ps1 -- AI coding agents: codex, Claude Code (claude)
 
 function Step-Agents {
-  Write-Step "AI agents: gajae-code + codex + lazycodex + Claude Code"
+  Write-Step "AI agents: codex + Claude Code"
   Update-SessionPath
-
-  # --- gajae-code (gjc) via bun -----------------------------------------
-  if (Test-HasCommand bun) {
-    if (Test-HasCommand gjc) {
-      Write-Ok "gajae-code present (gjc $(Invoke-NativeSilently 'gjc' @('--version') | Select-Object -First 1))"
-    } else {
-      Write-Info "Installing gajae-code (bun add -g gajae-code)..."
-      Invoke-Run -Exe 'bun' -Arguments @('add', '-g', 'gajae-code') | Out-Null
-      Update-SessionPath
-    }
-  } else {
-    Write-Warn "bun not found -- skipping gajae-code (install bun via the 'packages' step)"
+  if ($script:DryRun -and $script:InstallProfile -eq 'ai') {
+    Write-Info '[dry-run] npm.cmd install -g @openai/codex'
+    Write-Info '[dry-run] official Claude Code installer: https://claude.ai/install.ps1'
+    Write-Info '[dry-run] install Codex/Claude safety hooks with Node; persist minimal AI PATH'
+    return
   }
 
-  # --- codex (base harness that lazycodex extends) ----------------------
+  # --- codex via npm ---------------------------------------------------
   $haveNpm = Test-HasCommand npm
-  if (-not $haveNpm -and (Test-HasCommand mise)) {
+  if (-not $haveNpm -and $script:InstallProfile -ne 'ai' -and (Test-HasCommand mise)) {
     # npm may only be reachable through mise's node shim
     $haveNpm = $true
   }
   if (-not $haveNpm) {
-    Write-Warn "npm not found -- skipping codex + lazycodex (run the 'runtimes' step first)"
+    if ($script:InstallProfile -eq 'ai') { Stop-Kit 'npm missing -- action needed: install Node.js LTS/npm before AI agents.' }
+    Write-Warn "npm not found -- skipping codex (run the 'runtimes' step first)"
     return
   }
 
@@ -36,7 +29,10 @@ function Step-Agents {
     if ($script:DryRun) {
       Write-Info "[dry-run] mise exec -- npm install -g @openai/codex; mise reshim"
     } else {
-      if (Test-HasCommand mise) {
+      if ($script:InstallProfile -eq 'ai') {
+        & npm.cmd install -g '@openai/codex'
+        if ($LASTEXITCODE -ne 0) { Stop-Kit "Codex install failed (exit $LASTEXITCODE)." }
+      } elseif (Test-HasCommand mise) {
         & mise exec -- npm install -g '@openai/codex'
         Invoke-NativeSilently 'mise' @('reshim')
       } else {
@@ -45,20 +41,6 @@ function Step-Agents {
     }
     Update-SessionPath
   }
-
-  # --- lazycodex (OmO harness for codex) -- always via npx ----------------
-  if ($script:DryRun) {
-    Write-Info "[dry-run] npx --yes lazycodex-ai install"
-  } elseif (-not [Console]::IsInputRedirected) {
-    Write-Info "Installing lazycodex (npx lazycodex-ai install)..."
-    & npx --yes lazycodex-ai install
-    if ($LASTEXITCODE -ne 0) { Write-Warn "lazycodex installer did not complete" }
-  } else {
-    Write-Info "Installing lazycodex (non-interactive, autonomous)..."
-    & npx --yes lazycodex-ai install --no-tui --codex-autonomous
-    if ($LASTEXITCODE -ne 0) { Write-Warn "lazycodex installer did not complete" }
-  }
-  Write-Info "lazycodex: on first 'codex' launch, APPROVE the omo hooks in the startup review."
 
   # --- Claude Code (claude) via the official installer ------------------
   # https://claude.ai/install.ps1 is non-interactive, works on WinPS 5.1+/7,
@@ -86,6 +68,7 @@ function Step-Agents {
         Write-Info "Claude Code installed -- open a new shell (or it's on ~/.local/bin) to use 'claude'."
       }
     } catch {
+      if ($script:InstallProfile -eq 'ai') { Stop-Kit "Claude Code install failed: $($_.Exception.Message)" }
       Write-Warn "Claude Code install did not complete -- re-run later: irm https://claude.ai/install.ps1 | iex"
     }
   }
@@ -95,11 +78,17 @@ function Step-Agents {
     $safetyArgs = @($safetyInstaller, '--home', $env:USERPROFILE)
     if ($script:DryRun) { $safetyArgs += '--dry-run' }
     & node @safetyArgs
-    if ($LASTEXITCODE -ne 0) { Write-Warn "could not install the Codex/Claude recursive-rm guard" }
+    if ($LASTEXITCODE -ne 0) {
+      if ($script:InstallProfile -eq 'ai') { Stop-Kit 'AI safety-hook installation failed; action needed.' }
+      Write-Warn "could not install the Codex/Claude recursive-rm guard"
+    }
     else { Write-Info "AI safety: review and approve the lazy-starter-kit hook when Codex first asks." }
   } else {
+    if ($script:InstallProfile -eq 'ai') { Stop-Kit 'Node or the safety-hook installer is missing; action needed.' }
     Write-Warn "node not found -- could not install the Codex/Claude recursive-rm guard"
   }
+
+  if ($script:InstallProfile -eq 'ai') { Update-AiPath -Persist; return }
 
   # --- Hermes Agent (Nous Research) -------------------------------------
   # The official installer is a bash/curl script with no native Windows build.
@@ -111,6 +100,5 @@ function Step-Agents {
   # Gemini CLI's closed-source successor (`agy`) has a small free tier and its
   # own account flow, so it is a manual one-liner documented in the README
   # next to Grok Build:  irm https://antigravity.google/cli/install.ps1 | iex
-  # uninstall.ps1 still removes %LOCALAPPDATA%\agy when present, so a manually
-  # installed copy is torn down with the rest of the kit.
+  # Automatic uninstall is retired; use the vendor's removal instructions.
 }
