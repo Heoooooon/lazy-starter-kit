@@ -191,6 +191,10 @@ try {
     $env:USERPROFILE = $doctorHome
     $env:APPDATA = Join-Path $env:USERPROFILE 'AppData\Roaming'
     $env:LOCALAPPDATA = Join-Path $env:USERPROFILE 'AppData\Local'
+    # Doctor counts missing shell config; provide it so only tools vary here.
+    $doctorConfig = Join-Path $doctorHome '.config'
+    New-Item -ItemType Directory -Force -Path $doctorConfig | Out-Null
+    Set-Content -LiteralPath (Join-Path $doctorConfig 'starship.toml') -Value ''
     foreach ($missingTool in @('', 'codex', 'claude')) {
       $script:Probes.Clear()
       try {
