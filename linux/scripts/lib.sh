@@ -112,7 +112,7 @@ pm_try() {
   pm_install "$@" || warn "could not install via $PM: $* (skipping)"
 }
 
-# pm_remove PKG...  — remove system packages (used by the uninstaller)
+# pm_remove PKG...  — remove system packages (no current caller; automatic uninstall is retired)
 pm_remove() {
   [[ $# -gt 0 ]] || return 0
   case "$PM" in
