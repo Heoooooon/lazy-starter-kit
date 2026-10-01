@@ -13,7 +13,7 @@ if (-not (Test-Path variable:script:InstallProfile)) { $script:InstallProfile = 
 # $true when the top-level script runs from a real .ps1 file; $false when it was
 # piped through `iex` (irm | iex), where `exit` would close the user's terminal.
 # install.ps1 sets this before dot-sourcing us; default $true is right for a file
-# run and for the uninstaller.
+# run.
 if (-not (Test-Path variable:script:RunFromFile)) { $script:RunFromFile = $true }
 
 # ---------------------------------------------------------------------------
@@ -379,7 +379,7 @@ function Install-WingetPackage {
   }
 }
 
-# Uninstall-WingetPackage <Id> [<Friendly name>]  -- used by the uninstaller
+# Uninstall-WingetPackage <Id> [<Friendly name>]  -- no current caller; automatic uninstall is retired
 function Uninstall-WingetPackage {
   param([Parameter(Mandatory)][string]$Id, [string]$Name = $null)
   if (-not $Name) { $Name = $Id }

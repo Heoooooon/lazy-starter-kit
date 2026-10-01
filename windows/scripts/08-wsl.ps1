@@ -38,7 +38,8 @@
 #    and do not launch the shell", "--root: Do not create a user account and
 #    leave the default user set to root").
 #  - `wsl --set-default-version 2` sets WSL2 as the default for new distros.
-#  - `wsl --unregister Ubuntu` (used by the uninstaller) permanently deletes the
+#  - `wsl --unregister Ubuntu` (never run by the kit; the retired uninstaller
+#    used it) permanently deletes the
 #    distro's filesystem/data (basic-commands: "all data, settings, and software
 #    associated with that distribution will be permanently lost").
 

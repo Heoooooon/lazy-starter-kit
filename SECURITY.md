@@ -71,7 +71,8 @@ This kit **downloads and runs official install scripts from upstream projects**
 - **Vulnerabilities in those upstreams** should be reported **to those projects** —
   they're outside our control.
 - **Anything in this kit's own code is in scope**: marker-block editing, privilege
-  (sudo/admin) use, download URLs and verification, and the uninstall scripts.
+  (sudo/admin) use, download URLs and verification, and the legacy uninstall
+  entrypoints (which must stay non-destructive).
 
 ## Response expectations
 
