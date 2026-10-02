@@ -178,9 +178,10 @@ roundtrip="$(QUOTED="$quoted_path" /bin/zsh -c 'eval "set -- $QUOTED"; print -r 
 [[ "$roundtrip" == "$hostile_path" && ! -e "$quote_sentinel" && ! -e "$backtick_sentinel" ]] \
   || fail "source_guidance: path was not safely shell-escaped"
 
+brew_body="$(source "$ROOT/scripts/lib.sh"; printf 'eval "$(%s/bin/brew shellenv)"' "$(brew_prefix)")"
 printf '%s\n' \
   '# >>> lazy-starter-kit:brew >>>' \
-  ':' \
+  "$brew_body" \
   '# <<< lazy-starter-kit:brew <<<' \
   > "$zshenv_zdot/.zprofile"
 
@@ -210,6 +211,10 @@ space_expected="$(HOME="$zshenv_home" ROOT="$ROOT" VALUE="$space_zdot/.zshrc" /b
 [[ "$space_output" == *"$space_expected"* ]] \
   || fail "space_zdotdir: dry-run guidance did not quote the active path"
 
+# The ZDOTDIR migration above used the Linux writer on both hosts. Doctor
+# compares against the native platform's template, so refresh that fixture.
+inject_block "$zshenv_zdot/.zshrc" "lazy-starter-kit:main" \
+  < "$platform_root/config/zshrc.block.sh" >/dev/null
 doctor_output="$(
   env -u ZDOTDIR HOME="$zshenv_home" SHELL=/bin/zsh \
     PATH="$zshenv_home/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
@@ -221,6 +226,43 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   grep -q "has 'lazy-starter-kit:brew' block" <<< "$doctor_output" \
     || fail "doctor: active ZDOTDIR/.zprofile was reported missing"
 fi
+
+# Doctor must count damaged/stale blocks as issues without modifying user files.
+doctor_file="$TMP_ROOT/doctor-config"
+doctor_snapshot="$TMP_ROOT/doctor-config.copy"
+for template in "$ROOT/config/zshrc.block.sh" "$ROOT/linux/config/zshrc.block.sh" brew; do
+  tag=lazy-starter-kit:main
+  if [[ "$template" == brew ]]; then
+    tag=lazy-starter-kit:brew
+    expected_body="$brew_body"
+  else
+    expected_body="$(< "$template")"
+  fi
+  begin="# >>> $tag >>>"; end="# <<< $tag <<<"
+  for variant in healthy absent begin-only end-only duplicated reversed truncated empty outdated; do
+    expected_issues=1
+    case "$variant" in
+      healthy)
+        printf '%s\n' '# user before' "$begin" "$expected_body" "$end" '# user after' > "$doctor_file"
+        expected_issues=0 ;;
+      absent) printf '%s\n' '# user config only' > "$doctor_file" ;;
+      begin-only) printf '%s\n' "$begin" "$expected_body" > "$doctor_file" ;;
+      end-only) printf '%s\n' "$expected_body" "$end" > "$doctor_file" ;;
+      duplicated) printf '%s\n' "$begin" "$expected_body" "$end" "$begin" "$expected_body" "$end" > "$doctor_file" ;;
+      reversed) printf '%s\n' "$end" "$expected_body" "$begin" > "$doctor_file" ;;
+      truncated) printf '%s\n' "$begin" "${expected_body:0:10}" "$end" > "$doctor_file" ;;
+      empty) printf '%s\n' "$begin" "$end" > "$doctor_file" ;;
+      outdated) printf '%s\n' "$begin" "$expected_body" '# stale addition' "$end" > "$doctor_file" ;;
+    esac
+    cp "$doctor_file" "$doctor_snapshot"
+    _DOCTOR_MISSING=0
+    _doctor_managed "$doctor_file" "$tag" "$expected_body" >/dev/null 2>&1
+    [[ "$_DOCTOR_MISSING" == "$expected_issues" ]] \
+      || fail "doctor $template $variant: expected $expected_issues issue(s), got $_DOCTOR_MISSING"
+    cmp -s "$doctor_snapshot" "$doctor_file" \
+      || fail "doctor $template $variant: modified user config"
+  done
+done
 
 uninstall_snapshot="$TMP_ROOT/uninstall-before"
 uninstall_files=(.config/zsh/.zshrc .config/zsh/.zprofile .zshrc .zshenv .config/starship.toml)

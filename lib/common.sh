@@ -400,15 +400,29 @@ _doctor_runtime() {
   _doctor_tool "$tool" "$step"
 }
 
-# _doctor_managed <file> <tag>  — report whether a managed block is present.
+# _doctor_managed <file> <tag> <expected-content> — validate a managed block.
 _doctor_managed() {
-  local file="$1" tag="$2" begin="# >>> $2 >>>"
-  if [[ -f "$file" ]] && grep -qxF "$begin" "$file"; then
-    ok "${file/#$HOME/~} has '$tag' block"
-  else
-    err "${file/#$HOME/~} missing '$tag' block (install: ./install.sh --only shell)"
-    _DOCTOR_MISSING=$((_DOCTOR_MISSING + 1))
-  fi
+  local file="$1" tag="$2" expected="$3" state body
+  state="$(_managed_block_state "$file" "$tag")"
+  case "$state" in
+    present)
+      body="$(awk -v b="# >>> $tag >>>" -v e="# <<< $tag <<<" '
+        $0==e {inside=0} inside {print} $0==b {inside=1}
+      ' "$file")"
+      if [[ "$body" == "$expected" ]]; then
+        ok "${file/#$HOME/~} has '$tag' block"
+        return 0
+      fi
+      err "${file/#$HOME/~} '$tag' block incomplete or outdated (install: ./install.sh --only shell)"
+      ;;
+    damaged)
+      err "${file/#$HOME/~} '$tag' block damaged (repair duplicate, unmatched, or out-of-order marker lines by hand, then: ./install.sh --only shell)"
+      ;;
+    absent)
+      err "${file/#$HOME/~} missing '$tag' block (install: ./install.sh --only shell)"
+      ;;
+  esac
+  _DOCTOR_MISSING=$((_DOCTOR_MISSING + 1))
 }
 
 # _doctor_exists <path>  — report whether a config file is present.

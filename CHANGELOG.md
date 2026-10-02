@@ -18,6 +18,7 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   when it is a single complete block matching the kit's template. A
   begin-only, duplicated, out-of-order or truncated block now fails the
   check with a repair hint instead of passing on a tag-string match.
+- macOS and Linux `--doctor` reject damaged or incomplete/outdated managed shell blocks instead of accepting a begin marker alone.
 
 ## [0.15.0] - 2026-10-02
 
