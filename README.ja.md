@@ -2,7 +2,7 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · **日本語** · [한국어](./README.ko.md)
 
-<img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit. Ready to build." width="100%" />
+<img src="./docs/images/lsk-hero-en.svg" alt="lazy-starter-kit. Ready to build." width="100%" />
 
 *このイラストは旧リリースの full プロファイルのプレビュー画面です。現在の推奨セットアップを実際にインストール・検証した結果ではありません。下の[現在の推奨セットアップ](#recommended-setup)に沿って進めてください。*
 
