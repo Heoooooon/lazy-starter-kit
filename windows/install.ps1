@@ -81,6 +81,22 @@ $script:RunFromFile =
   [bool]$PSCommandPath -and $env:STARTER_KIT_HANDOFF_CHILD -ne '1'
 
 $StepIds = @('prereqs', 'packages', 'runtimes', 'shell', 'docker', 'git', 'agents', 'wsl')
+# Reject empty explicit values before defaults or preset exclusions can turn
+# a malformed selective invocation into a broader installation.
+if ($PSBoundParameters.ContainsKey('Profile') -and [string]::IsNullOrWhiteSpace($Profile)) {
+  throw '-Profile requires a non-empty value.'
+}
+foreach ($selector in @('Only', 'Skip')) {
+  if (-not $PSBoundParameters.ContainsKey($selector)) { continue }
+  $entries = @($PSBoundParameters[$selector])
+  if ($entries.Count -eq 0) { throw "-$selector requires a non-empty value." }
+  foreach ($entry in $entries) {
+    if ([string]::IsNullOrWhiteSpace($entry)) { throw "-$selector requires a non-empty value." }
+    foreach ($token in ($entry -split ',')) {
+      if ([string]::IsNullOrWhiteSpace($token)) { throw "empty step id in -${selector}: '$entry'" }
+    }
+  }
+}
 if ($NoAgents) { $Skip = @($Skip) + 'agents' }
 
 # ---------------------------------------------------------------------------
