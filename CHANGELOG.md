@@ -14,6 +14,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 - macOS and Linux keep `--no-agents` in effect when a later `--skip` is
   supplied, so combining the switches no longer installs agents depending
   on argument order.
+- Windows `-Doctor` only reports the PowerShell profile block as present
+  when it is a single complete block matching the kit's template. A
+  begin-only, duplicated, out-of-order or truncated block now fails the
+  check with a repair hint instead of passing on a tag-string match.
 
 ## [0.15.0] - 2026-10-02
 
