@@ -516,15 +516,36 @@ function Invoke-Doctor {
   }
 
   Write-Step "Config"
-  # managed profile block must be in BOTH CurrentUserAllHosts profiles (5.1 + 7).
+  # managed profile block must be in BOTH CurrentUserAllHosts profiles (5.1 + 7),
+  # as exactly one complete block whose body matches config\profile.block.ps1
+  # (what Step-Shell writes). A tag-string match alone passes partial blocks.
+  $blockBegin = '# >>> lazy-starter-kit:main >>>'
+  $blockEnd   = '# <<< lazy-starter-kit:main <<<'
+  $expectedBody = [System.IO.File]::ReadAllText((Join-Path $Root 'config\profile.block.ps1')) -split "`r?`n"
   foreach ($profilePath in (Get-AllHostsProfilePaths)) {
     $short = if ($env:USERPROFILE) { $profilePath.Replace($env:USERPROFILE, '~') } else { $profilePath }
-    if ((Test-Path $profilePath) -and (Select-String -Path $profilePath -SimpleMatch 'lazy-starter-kit:main' -Quiet)) {
-      Write-Ok "profile block present ($short)"
-    } else {
-      Write-Warn "profile block missing ($short) -- fix: .\install.ps1 -Only shell"
-      $missing++
+    $state = 'absent'
+    if (Test-Path $profilePath) {
+      $lines = [System.IO.File]::ReadAllLines($profilePath, (Get-ProfileEncoding $profilePath))
+      $state = Get-ManagedBlockState -Lines $lines -Begin $blockBegin -End $blockEnd
+      if ($state -eq 'valid') {
+        $body = @()
+        $inBlock = $false
+        foreach ($line in $lines) {
+          if ($line -eq $blockBegin) { $inBlock = $true; continue }
+          if ($line -eq $blockEnd) { break }
+          if ($inBlock) { $body += $line }
+        }
+        if (($body -join "`n") -cne ($expectedBody -join "`n")) { $state = 'outdated' }
+      }
     }
+    switch ($state) {
+      'valid'    { Write-Ok "profile block present ($short)" }
+      'damaged'  { Write-Warn "profile block damaged ($short): duplicate, unmatched or out-of-order markers -- fix: delete the stray lazy-starter-kit:main marker lines by hand, then .\install.ps1 -Only shell" }
+      'outdated' { Write-Warn "profile block incomplete or outdated ($short) -- fix: .\install.ps1 -Only shell" }
+      default    { Write-Warn "profile block missing ($short) -- fix: .\install.ps1 -Only shell" }
+    }
+    if ($state -ne 'valid') { $missing++ }
   }
   # starship.toml (04-shell.ps1 installs it at ~\.config\starship.toml)
   $starshipToml = Join-Path $HomeDir '.config\starship.toml'

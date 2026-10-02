@@ -47,6 +47,18 @@ function Assert-DoctorFailsWithoutFile {
   }
 }
 
+function Assert-DoctorFailsWithProfileLines {
+  param([Parameter(Mandatory)][string]$Path, [Parameter(Mandatory)][AllowEmptyString()][string[]]$Lines, [Parameter(Mandatory)][string]$Label)
+  $original = [IO.File]::ReadAllBytes($Path)
+  try {
+    [IO.File]::WriteAllLines($Path, $Lines, (New-Object System.Text.UTF8Encoding($true)))
+    $code = Invoke-DoctorProcess
+    if ($code -ne 1) { throw "Doctor returned $code with a $Label managed profile block; expected 1" }
+  } finally {
+    [IO.File]::WriteAllBytes($Path, $original)
+  }
+}
+
 if ((Invoke-DoctorProcess) -ne 0) {
   throw 'Doctor did not return 0 for the healthy installed environment'
 }
@@ -58,6 +70,19 @@ $starshipPath = Join-Path $env:USERPROFILE '.config\starship.toml'
 
 Assert-DoctorFailsWithoutFile -Path $profilePath -Label 'managed PowerShell profile'
 Assert-DoctorFailsWithoutFile -Path $starshipPath -Label 'starship.toml'
+
+$healthy = [IO.File]::ReadAllLines($profilePath)
+$begin = '# >>> lazy-starter-kit:main >>>'
+$end = '# <<< lazy-starter-kit:main <<<'
+$beginIndex = [Array]::IndexOf($healthy, $begin)
+$endIndex = [Array]::IndexOf($healthy, $end)
+if ($beginIndex -lt 0 -or $endIndex -le $beginIndex + 3) {
+  throw "Doctor regression fixture has no complete managed block: $profilePath"
+}
+$body = $healthy[($beginIndex + 1)..($endIndex - 1)]
+Assert-DoctorFailsWithProfileLines -Path $profilePath -Lines (@($begin) + $body) -Label 'begin-only'
+Assert-DoctorFailsWithProfileLines -Path $profilePath -Lines ($healthy + $healthy) -Label 'duplicated'
+Assert-DoctorFailsWithProfileLines -Path $profilePath -Lines (@($begin) + $body[0..1] + @($end)) -Label 'truncated'
 
 if ((Invoke-DoctorProcess) -ne 0) {
   throw 'Doctor did not return to healthy status after restoring config fixtures'
