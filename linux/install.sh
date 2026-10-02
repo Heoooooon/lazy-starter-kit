@@ -164,7 +164,7 @@ usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/inst
 # fdfind/batcat names too.
 # ---------------------------------------------------------------------------
 _doctor_config() {
-  _doctor_managed "$_DOCTOR_ZSHRC" "lazy-starter-kit:main"
+  _doctor_managed "$_DOCTOR_ZSHRC" "lazy-starter-kit:main" "$(cat "$ROOT/config/zshrc.block.sh")"
   _doctor_exists  "$HOME/.config/starship.toml"
 }
 

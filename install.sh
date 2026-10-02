@@ -215,8 +215,8 @@ usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,""); print; next} {exit}' "$ROOT/inst
 # probing mechanism lives in lib/common.sh (_doctor_* helpers).
 # ---------------------------------------------------------------------------
 _doctor_config() {
-  _doctor_managed "$_DOCTOR_ZSHRC"    "lazy-starter-kit:main"
-  _doctor_managed "$_DOCTOR_ZPROFILE" "lazy-starter-kit:brew"
+  _doctor_managed "$_DOCTOR_ZSHRC"    "lazy-starter-kit:main" "$(cat "$ROOT/config/zshrc.block.sh")"
+  _doctor_managed "$_DOCTOR_ZPROFILE" "lazy-starter-kit:brew" "eval \"\$($(brew_prefix)/bin/brew shellenv)\""
   _doctor_exists  "$HOME/.config/starship.toml"
 }
 
