@@ -97,8 +97,17 @@ function Test-HasCommand([string]$Name) { $false }
     @{ Name = 'unknown profile'; Params = @{ Profile = 'recomended' }; Reject = $true },
     @{ Name = 'unknown only token'; Params = @{ Only = 'shell,typo' }; Reject = $true },
     @{ Name = 'unknown skip token'; Params = @{ Profile = 'recommended'; Skip = 'typo' }; Reject = $true },
-    @{ Name = 'only still validates skip'; Params = @{ Only = 'shell'; Skip = 'typo' }; Reject = $true }
+    @{ Name = 'only still validates skip'; Params = @{ Only = 'shell'; Skip = 'typo' }; Reject = $true },
+    @{ Name = 'empty profile'; Params = @{ Profile = '' }; Reject = $true },
+    @{ Name = 'blank profile'; Params = @{ Profile = ' ' }; Reject = $true }
   )
+  foreach ($selector in @('Only', 'Skip')) {
+    foreach ($value in @('', ' ', ',,', ',agents', 'agents,', 'shell,,agents', 'shell, ,agents')) {
+      $cases += @{ Name = "$selector rejects [$value]"; Params = @{ $selector = $value }; Reject = $true }
+    }
+    $cases += @{ Name = "$selector rejects empty array"; Params = @{ $selector = @() }; Reject = $true }
+    $cases += @{ Name = "$selector rejects blank array entry"; Params = @{ $selector = @('shell', ' ') }; Reject = $true }
+  }
   foreach ($preset in @('ai', 'recommended', 'full', 'minimal', 'work')) {
     $cases += @{ Name = "$preset rejects only"; Params = @{ Profile = $preset; Only = 'shell' }; Reject = $true }
   }
@@ -111,6 +120,9 @@ function Test-HasCommand([string]$Name) { $false }
       try { $output = @(& $installer -DryRun -Yes @params) } catch { $failure = $_ }
       if ($case.Reject) {
         if (-not $failure) { throw 'Invalid selector accepted' }
+        if (@($output | Where-Object { $_ -match '^dispatch:' }).Count) {
+          throw 'Invalid selector dispatched an install step'
+        }
       } else {
         if ($failure) { throw $failure }
         $plans = @($output | Where-Object { $_ -match '^steps: ' })
