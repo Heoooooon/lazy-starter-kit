@@ -7,40 +7,33 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-02
+
 ### Added
-- **Simplified Chinese README** ([README.zh-CN.md](README.zh-CN.md)), a
-  translation of the English README. All three READMEs now link to each other
-  from the language switcher.
-- **English is now the main README**, with Simplified Chinese
-  ([README.zh-CN.md](README.zh-CN.md)), Japanese ([README.ja.md](README.ja.md))
-  and Korean ([README.ko.md](README.ko.md)) as separate files. Every README
-  starts with the same language switcher. `README.en.md` remains as a pointer
-  to `README.md` so older links keep working.
+- **Four-language setup guides:** English is the main README, with
+  [Simplified Chinese](README.zh-CN.md), [Japanese](README.ja.md) and
+  [Korean](README.ko.md) translations and a shared language switcher.
+  `README.en.md` keeps older links working.
 
 ### Changed
-- **Releases publish only verified builds**
-  ([PR #8](https://github.com/Heoooooon/lazy-starter-kit/pull/8)). The release
-  workflow waits up to 30 minutes for `ci.yml` to pass on the exact tagged
-  commit and keeps the GitHub Release a draft until the macOS and Windows
-  packaging, signing and attestation jobs succeed.
-- **Bootstraps and `--update` select the newest published GitHub Release**
-  rather than the newest `v*` tag, so a tag whose release is still building or
-  failed isn't installed. For the official repository, an unresolvable release
-  stops instead of falling back to `main`.
+- **Only verified releases become install targets.** Releases stay draft until
+  CI, packaging, signing and attestation succeed. Bootstraps and updates select
+  the newest published GitHub Release, not an unfinished tag, and stop if the
+  official release cannot be resolved ([PR #8](https://github.com/Heoooooon/lazy-starter-kit/pull/8)).
+- Non-Korean READMEs use an English hero image; platform guides and removal
+  guidance now match the current README layout and no-uninstall policy (#29-31).
 
 ### Fixed
-- **macOS Homebrew installation no longer trips over inherited mode flags**
-  ([PR #5](https://github.com/Heoooooon/lazy-starter-kit/pull/5), thanks
-  @agiletalk). The official installer is downloaded and checked before it runs,
-  and it runs in an isolated environment. `--yes` stays non-interactive, while
-  an ordinary terminal run lets Homebrew ask for the administrator password
-  through `/dev/tty`, including under `curl | bash`.
-- **Windows `-Doctor` fails when shell config is missing**
-  ([PR #18](https://github.com/Heoooooon/lazy-starter-kit/pull/18)). A missing
-  managed PowerShell profile block or `starship.toml` now counts as missing and
-  makes the full-inventory doctor exit `1`, as the exit-code contract requires.
-- The Linux bootstrap stops when it can't fetch or check out the requested ref
-  instead of continuing from a stale existing checkout.
+- **macOS Homebrew setup handles inherited mode flags and password prompts.**
+  `--yes` stays non-interactive; ordinary terminal installs can prompt through
+  `/dev/tty`, including under `curl | bash`
+  ([PR #5](https://github.com/Heoooooon/lazy-starter-kit/pull/5), thanks @agiletalk).
+- **Windows preserves files with damaged managed-block markers** instead of
+  rewriting them ([PR #16](https://github.com/Heoooooon/lazy-starter-kit/pull/16)).
+- **Windows full-inventory `-Doctor` exits `1` for missing shell configuration,**
+  including PowerShell profile blocks and `starship.toml`
+  ([PR #18](https://github.com/Heoooooon/lazy-starter-kit/pull/18)).
+- Linux bootstrap stops on fetch or checkout failure instead of using stale code.
 
 ## [0.14.1] - 2026-09-27
 
@@ -545,7 +538,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.1...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.12.0...v0.13.0
