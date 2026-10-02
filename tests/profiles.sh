@@ -148,6 +148,10 @@ for platform in macos linux; do
   run_case "$platform" skip-union 0 "prereqs $package shell git" core --profile recommended --skip 'runtimes, agents'
   run_case "$platform" skip-first 0 "prereqs $package shell git" core --skip=runtimes,agents --profile=recommended
   run_case "$platform" no-agents 0 "$minimal" 'core runtimes' --profile recommended --no-agents
+  run_case "$platform" no-agents-before-skip 0 "prereqs $package runtimes git" 'core runtimes' --profile recommended --no-agents --skip shell
+  run_case "$platform" no-agents-after-skip 0 "prereqs $package runtimes git" 'core runtimes' --profile recommended --skip shell --no-agents
+  run_case "$platform" no-agents-before-skip-equals 0 "prereqs $package runtimes git" 'core runtimes' --profile recommended --no-agents --skip=shell
+  run_case "$platform" no-agents-repeated-skip 0 "prereqs $package runtimes git" 'core runtimes' --profile recommended --skip git --no-agents --skip shell
   run_case "$platform" full-skip 0 "$recommended" 'core runtimes' --profile full --skip docker
   run_case "$platform" only 0 "$package shell" core --only "$package, shell"
   run_case "$platform" only-runtimes 0 "$package runtimes" 'core runtimes' --only "$package,runtimes"

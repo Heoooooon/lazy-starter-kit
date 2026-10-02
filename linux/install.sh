@@ -232,7 +232,7 @@ fi
 # ---------------------------------------------------------------------------
 # Arg parsing
 # ---------------------------------------------------------------------------
-ONLY=""; SKIP=""; PROFILE=""; DOCTOR=0
+ONLY=""; SKIP=""; PROFILE=""; DOCTOR=0; NO_AGENTS=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run)   export DRY_RUN=1 ;;
@@ -251,7 +251,7 @@ while [[ $# -gt 0 ]]; do
         --skip) SKIP="$value" ;;
         --profile) PROFILE="$value" ;;
       esac ;;
-    --no-agents) SKIP="${SKIP:+$SKIP,}agents" ;;
+    --no-agents) NO_AGENTS=1 ;;
     --doctor)    DOCTOR=1 ;;
     --list)      printf '%s\n' "${STEP_IDS[@]}"; exit 0 ;;
     -V|--version) echo "lazy-starter-kit $KIT_VERSION"; exit 0 ;;
@@ -260,6 +260,9 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
+
+# Keep this shortcut independent of the order of explicit --skip values.
+if [[ "$NO_AGENTS" == 1 ]]; then SKIP="${SKIP:+$SKIP,}agents"; fi
 
 # Normalize --only/--skip (strip spaces so `--only "brew, shell"` works), then
 # reject any unknown token up front instead of silently selecting nothing.

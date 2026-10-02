@@ -11,6 +11,9 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 - Windows rejects blank profiles and malformed `-Only`/`-Skip` selectors
   before dispatch, rather than silently expanding an empty selection to a
   full developer installation.
+- macOS and Linux keep `--no-agents` in effect when a later `--skip` is
+  supplied, so combining the switches no longer installs agents depending
+  on argument order.
 
 ## [0.15.0] - 2026-10-02
 
