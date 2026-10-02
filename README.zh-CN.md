@@ -1,5 +1,7 @@
 <div align="center">
 
+[English](./README.md) · **简体中文** · [日本語](./README.ja.md) · [한국어](./README.ko.md)
+
 <img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit. Ready to build." width="100%" />
 
 *此插图展示的是旧版本 full 配置的预览，并不代表当前推荐配置的安装或验证结果。请按照下方的[当前推荐安装](#recommended-setup)操作。*
@@ -13,7 +15,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-[한국어](./README.md) · [English](./README.en.md) · **简体中文** · [推荐安装](#recommended-setup) · [第一个项目](#first-project) · [更新日志](./CHANGELOG.md)
+[推荐安装](#recommended-setup) · [第一个项目](#first-project) · [更新日志](./CHANGELOG.md)
 
 </div>
 

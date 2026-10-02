@@ -20,10 +20,10 @@ _v0.14.1 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks ·
 > 일반 무프로필 CLI 설치도 `ai`입니다. 명시적 `recommended`는 더 넓은 개발
 > 구성을 유지합니다. 설치 후 새 PowerShell에서 `-Profile ai -Doctor`로 확인하세요.
 > 단독 `-Doctor`는 전체 목록 점검이므로 AI 검사에는 프로필을 반드시 넣으세요.
-> 로그인과 첫 프롬프트 전송은 직접 합니다. [AI 안내](../README.md#ai-setup)를 참고하세요.
+> 로그인과 첫 프롬프트 전송은 직접 합니다. [AI 안내](../README.ko.md#ai-setup)를 참고하세요.
 > v0.14.1은 자동 제거를 지원하지 않고 gajae-code (`gjc`), lazycodex를
 > 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
-> 설치가 끝나면 PowerShell을 새로 여세요. [한국어 추천 설치 안내](../README.md#recommended-setup)
+> 설치가 끝나면 PowerShell을 새로 여세요. [한국어 추천 설치 안내](../README.ko.md#recommended-setup)
 
 ## Quick start
 
@@ -78,7 +78,7 @@ with **ai** and **Install** as the primary action. **Preview** is a separate
 button for reviewing the plan without installing. Preview, failed or cancelled
 installation, and incomplete readiness checks don't unlock first-run controls.
 After installation and successful checks, open a new PowerShell
-window and check versions before starting your [first project](../README.en.md#first-project).
+window and check versions before starting your [first project](../README.md#first-project).
 Release GUIs use their pinned release commit, not mutable `main`. See the
 [v0.14.1 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.14.1)
 for changes and all assets. The standard remote bootstrap chooses the newest
@@ -163,7 +163,7 @@ Windows installer; its advanced Linux opt-in is described below.
 | **AI agents** | **Claude Code** (`claude`) and **Codex** (`codex`). Hermes is a separate opt-in inside WSL2, not a native Windows installation. |
 
 Open a new PowerShell window after installation and check `codex --version` and
-`claude --version`. Follow the [first-project guide](../README.en.md#first-project)
+`claude --version`. Follow the [first-project guide](../README.md#first-project)
 and sign in through your chosen agent. An installer exit code alone doesn't
 verify every tool or authenticate your accounts.
 
