@@ -26,7 +26,7 @@ automatic uninstall. Use v0.14.0 rather than reusing those ZIPs.
 The standard remote bootstrap selects the newest published GitHub Release by default.
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
-[recommended setup guide](README.en.md#recommended-setup) to download the GUI
+[recommended setup guide](README.md#recommended-setup) to download the GUI
 or clone `v0.14.1` and preview the local installer before applying. Record the
 checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.

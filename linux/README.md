@@ -32,7 +32,7 @@ _v0.14.1 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks ·
 > v0.14.1은 자동 제거를 지원하지 않으며,
 > gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
 > apt·dnf·pacman·zypper를 자동 감지합니다 (glibc 배포판; Alpine/musl 미지원).
-> [한국어 추천 설치 안내](../README.md#recommended-setup)
+> [한국어 추천 설치 안내](../README.ko.md#recommended-setup)
 
 ## Quick start
 
@@ -95,7 +95,7 @@ checkout for a full commit pin and don't run `--update` on it.
 v0.14.1 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
 existing configuration. Automatic uninstall isn't supported. Older v0.12.0
 doesn't have the recommended profile or these policies; don't use it for this setup.
-For macOS or Windows, the [v0.14.1 GUI downloads](../README.en.md#gui-downloads)
+For macOS or Windows, the [v0.14.1 GUI downloads](../README.md#gui-downloads)
 default to `ai`, with Install and Preview as separate actions.
 
 **Supported distros** (auto-detected package manager): Debian/Ubuntu (`apt`),
@@ -135,7 +135,7 @@ The table below describes these broader tools, not the default AI setup.
 | **AI agents** | **Claude Code** (`claude`) and **Codex** (`codex`). **Hermes Agent** (`hermes`) needs `HERMES=1` and a non-AI selection that includes `agents`. |
 
 After installation, open a new terminal and check `codex --version` and
-`claude --version`. Then follow the [first-project guide](../README.en.md#first-project)
+`claude --version`. Then follow the [first-project guide](../README.md#first-project)
 and complete the chosen agent's own sign-in flow. An installer exit code alone
 doesn't verify every tool or authenticate your accounts.
 

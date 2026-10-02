@@ -11,6 +11,11 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 - **Simplified Chinese README** ([README.zh-CN.md](README.zh-CN.md)), a
   translation of the English README. All three READMEs now link to each other
   from the language switcher.
+- **English is now the main README**, with Simplified Chinese
+  ([README.zh-CN.md](README.zh-CN.md)), Japanese ([README.ja.md](README.ja.md))
+  and Korean ([README.ko.md](README.ko.md)) as separate files. Every README
+  starts with the same language switcher. `README.en.md` remains as a pointer
+  to `README.md` so older links keep working.
 
 ### Changed
 - **Releases publish only verified builds**
