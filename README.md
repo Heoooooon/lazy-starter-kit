@@ -1,5 +1,7 @@
 <div align="center">
 
+**English** · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md)
+
 <img src="./docs/images/lsk-hero.svg" alt="lazy-starter-kit. Ready to build." width="100%" />
 
 *This illustration shows an older release's full-profile preview, not an installed or verified current recommended setup. Follow the [current recommended setup](#recommended-setup) below.*
@@ -13,7 +15,7 @@ The fastest way to start AI coding on your own machine.
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/OS-macOS%20·%20Linux%20·%20Windows-000000)](#)
 
-[한국어](./README.md) · **English** · [简体中文](./README.zh-CN.md) · [Recommended setup](#recommended-setup) · [First project](#first-project) · [Changelog](./CHANGELOG.md)
+[Recommended setup](#recommended-setup) · [First project](#first-project) · [Changelog](./CHANGELOG.md)
 
 </div>
 
