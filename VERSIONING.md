@@ -4,7 +4,14 @@ This project follows [Semantic Versioning](https://semver.org/). This document
 defines **what counts as the public interface**, what you can script
 against and pin, and what a version number promises about it.
 
-## Release guidance: v0.14.1
+## Release guidance: v0.15.0
+
+**v0.15.0** adds four-language setup guides and safer installation and release
+selection. English is the main README, with Chinese, Japanese and Korean
+translations. Homebrew handles inherited installer flags and password prompts;
+Windows preserves damaged managed blocks and reports missing shell configuration.
+Bootstraps and updates select only published, verified releases. The public
+profiles, defaults and flags remain unchanged from v0.14.1.
 
 **v0.14.1** is a security patch for v0.14.0. Piped bootstraps no longer run
 installer code from the current working directory, and the Linux bootstrap
@@ -27,7 +34,7 @@ The standard remote bootstrap selects the newest published GitHub Release by def
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
 [recommended setup guide](README.md#recommended-setup) to download the GUI
-or clone `v0.14.1` and preview the local installer before applying. Record the
+or clone `v0.15.0` and preview the local installer before applying. Record the
 checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.
 
