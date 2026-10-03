@@ -29,12 +29,12 @@ Docker、AI コーディングエージェントをひとつずつ入れてい�
 lazy-starter-kit は、その開発環境を一度にまとめて立ち上げ、あとから結果を
 確認する手段も用意します。
 
-v0.15.0 のデフォルトである `ai` プロファイルは、**Git、Node.js LTS/npm、Claude Code、
+v0.15.1 のデフォルトである `ai` プロファイルは、**Git、Node.js LTS/npm、Claude Code、
 Codex、安全フック、最小限の PATH 設定**と、それらのインストールに必要な前提ツールを
 準備します。Python、Go、Rust、Docker、Bun、uv、シェルの見た目まわりの設定、フォント、
 オプションの CLI バンドルは含みません。
 
-**まずは v0.15.0 から：** 小さな AI セットアップとガイド付きの初回起動を使うには、
+**まずは v0.15.1 から：** 小さな AI セットアップとガイド付きの初回起動を使うには、
 下の[リリースのダウンロードまたはバージョン固定のソースコマンド](#recommended-setup)を
 使ってください。v0.13.0 にも `recommended` 開発者プロファイルと初回利用ガイドはありましたが、
 `ai` デフォルトと新しい GUI フローはありません。
@@ -61,7 +61,7 @@ Docker は含まれず、Windows の WSL も含まれません。Hermes は macO
 
 <a id="ai-setup"></a>
 
-## AI セットアップ (v0.15.0)
+## AI セットアップ (v0.15.1)
 
 プロファイルやステップを個別に指定しない通常の GUI / CLI インストールは、現在 `ai` を
 使います。明示的に指定した `recommended`、`full`、`minimal`、`work` の内容は従来のままです。
@@ -111,7 +111,7 @@ Codex には、サービスを利用できる ChatGPT アカウントか、対�
 規約や料金、所属組織のポリシーを先に確認してください。新しい GUI は、インストール前に
 これらの要件を表示します。
 
-v0.15.0 の GUI では、**Install** がメインのアクションです。**Preview** は別のアクションで、
+v0.15.1 の GUI では、**Install** がメインのアクションです。**Preview** は別のアクションで、
 何も変更しません。プレビューが完了しただけ、あるいはインストーラーが正常終了しただけでは、
 マシンの準備ができたことにはなりません。Git、Node、npm、Claude Code、Codex が実際に動き、
 バージョンチェックを通る必要があります。実行ファイルが見つからない、またはチェックに失敗した
@@ -123,7 +123,7 @@ v0.15.0 の GUI では、**Install** がメインのアクションです。**Pr
 結果チェックに戻り、それから練習セッションを始めます。インストールされた PATH を確認するときは、
 インストール前のシェルではなく、新しく開いたターミナルウィンドウを使ってください。
 
-CLI でインストールする場合は、[下](#recommended-setup)のコマンドで **v0.15.0 のソース**を
+CLI でインストールする場合は、[下](#recommended-setup)のコマンドで **v0.15.1 のソース**を
 取得し、インストーラーとスクリプトの中身を確認してから、そのソースのルートで
 自分の OS の行のコマンドだけを使ってください。
 
@@ -149,22 +149,22 @@ AI セットアップを小さく直すための近道としては使わない�
 
 <a id="recommended-setup"></a>
 
-## 推奨セットアップ (v0.15.0)
+## 推奨セットアップ (v0.15.1)
 
-**はじめての方は、macOS なら下の v0.15.0 GUI を使ってください。Windows GUI は実験的なものです。**
+**はじめての方は、macOS なら下の v0.15.1 GUI を使ってください。Windows GUI は実験的なものです。**
 デフォルトの `ai` プロファイルは、Docker や Windows WSL なしで Claude Code と Codex を
-セットアップします。v0.15.0 は gajae-code (`gjc`)、lazycodex、およびその既存設定を
+セットアップします。v0.15.1 は gajae-code (`gjc`)、lazycodex、およびその既存設定を
 インストールも削除もしません。自動アンインストール機能もありません。
 
 <a id="gui-downloads"></a>
 
 ### GUI のダウンロード
 
-| OS | v0.15.0 GUI アセット | 展開後に開くもの |
+| OS | v0.15.1 GUI アセット | 展開後に開くもの |
 |---|---|---|
-| macOS 14 以降、Apple Silicon または Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.0/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows（実験的） | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.0/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | GUI パッケージなし | 下の v0.15.0 ソースコマンドか [Linux ガイド](linux/README.md)を使ってください |
+| macOS 14 以降、Apple Silicon または Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows（実験的） | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | GUI パッケージなし | 下の v0.15.1 ソースコマンドか [Linux ガイド](linux/README.md)を使ってください |
 
 **Windows 版は実験的です：** 自動テストとインストールパッケージの検証は通っています。
 ただし、実機の Windows PC での手動検証は、ランチャーのダブルクリックからインストーラー画面、
@@ -178,13 +178,13 @@ Windows の `wsl` は含まれません。プレビューのみ、インスト�
 [新しいターミナル、バージョン確認、最初のプロジェクト](#first-project)に進んでください。
 アカウントへのサインインと最初のプロンプトは手動のままです。
 
-変更点とすべてのアセットは [v0.15.0 のリリースページ](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.0)を
+変更点とすべてのアセットは [v0.15.1 のリリースページ](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.1)を
 参照してください。パッケージ化された GUI は、それぞれのリリースコミットに固定されています。
 標準のリモートブートストラップは、デフォルトで公開済みの最新 GitHub Release を使います。
 `main` への変更でリリースの ZIP が自動的に更新されることはありません。
 
 **v0.13.0** では、プロファイルなしの CLI インストールは full、GUI は recommended + プレビューでした。
-明示的な開発者プロファイルとアンインストールしない方針は v0.15.0 にも引き継がれていますが、
+明示的な開発者プロファイルとアンインストールしない方針は v0.15.1 にも引き継がれていますが、
 v0.13.0 の ZIP に新しい AI フローは入りません。
 
 さらに古い **v0.12.0** には `recommended` プロファイルがなく、GUI は full + プレビューで起動します。
@@ -193,10 +193,10 @@ gajae-code と lazycodex をインストールし、旧来の自動アンイン�
 
 ### ソースからインストール（Linux またはターミナル派の方）
 
-下のコマンドは **v0.15.0 タグ**をクローンし、ローカルのインストーラーを実行します。
+下のコマンドは **v0.15.1 タグ**をクローンし、ローカルのインストーラーを実行します。
 先に [Git](https://git-scm.com/downloads) をインストールして新しいターミナルを開くか、
-[v0.15.0 のソース ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.0.zip) をダウンロードして
-展開し、`lazy-starter-kit-0.15.0` でターミナルを開いてください。ZIP の場合は、
+[v0.15.1 のソース ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.1.zip) をダウンロードして
+展開し、`lazy-starter-kit-0.15.1` でターミナルを開いてください。ZIP の場合は、
 clone と `cd` のコマンドは飛ばします。既存のチェックアウトではなく、新しいフォルダーを使ってください。
 
 ### 1. 中身を確認してプレビューする
@@ -208,8 +208,8 @@ Windows では `wsl` が含まれていないことを確認してください�
 ### macOS
 
 ```bash
-git clone --branch v0.15.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.0
-cd lazy-starter-kit-v0.15.0
+git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
+cd lazy-starter-kit-v0.15.1
 # Inspect install.sh and scripts/, then preview:
 bash ./install.sh --profile ai --dry-run
 ```
@@ -219,8 +219,8 @@ bash ./install.sh --profile ai --dry-run
 Ubuntu/Debian、Fedora/RHEL、Arch、openSUSE 系に対応しています。
 
 ```bash
-git clone --branch v0.15.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.0
-cd lazy-starter-kit-v0.15.0
+git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
+cd lazy-starter-kit-v0.15.1
 # Inspect linux/install.sh and linux/scripts/, then preview:
 bash ./linux/install.sh --profile ai --dry-run
 ```
@@ -232,8 +232,8 @@ bash ./linux/install.sh --profile ai --dry-run
 PowerShell（5.1 以降）で実行します。
 
 ```powershell
-git clone --branch v0.15.0 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.0
-cd lazy-starter-kit-v0.15.0
+git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
+cd lazy-starter-kit-v0.15.1
 # Inspect windows/install.ps1 and windows/scripts/, then preview:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
@@ -262,7 +262,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -P
 
 ## よく使うオプション
 
-以下の明示的な開発者プロファイル向けオプションは、v0.15.0 でも引き続き使えます。
+以下の明示的な開発者プロファイル向けオプションは、v0.15.1 でも引き続き使えます。
 ソースのルートで実行してください（Linux では `./install.sh` を
 `./linux/install.sh` に置き換えます）。
 
@@ -283,7 +283,7 @@ Windows では `windows\install.ps1` を使い、`--dry-run` や `--only` の代
 |---|---|
 | `ai`（デフォルト） | Git、Node LTS/npm、Claude Code、Codex、安全フック、最小限の PATH と必要な前提ツール。v0.14.0 以降、プロファイルなしの通常インストールと GUI のデフォルト。 |
 | `recommended` | コアツール、ランタイム、シェル、Git、Claude Code、Codex。Docker と Windows WSL は含まない。`ai` の別名ではない。 |
-| `full` | Docker と Windows WSL を含む全ステップ。v0.15.0 では明示的なオプトイン。v0.13.0 以前はプロファイルなし CLI のデフォルト。Windows のインストール時の確認ダイアログと前提ツールは引き続き必要。 |
+| `full` | Docker と Windows WSL を含む全ステップ。v0.15.1 では明示的なオプトイン。v0.13.0 以前はプロファイルなし CLI のデフォルト。Windows のインストール時の確認ダイアログと前提ツールは引き続き必要。 |
 | `minimal` | コアツール、ランタイム、シェル、Git。エージェント、Docker、Windows WSL は含まない。 |
 | `work` | recommended と同じステップ。インストール前に勤務先のポリシーを確認してください。 |
 
@@ -332,7 +332,7 @@ claude --version
 `--only runtimes` または `--only agents`、Windows では `-Only runtimes` / `-Only agents` です。
 `--only` / `-Only` のコマンドに `--profile` / `-Profile` は付けないでください。
 
-v0.15.0 の doctor の対象範囲はプラットフォームによって異なります。
+v0.15.1 の doctor の対象範囲はプラットフォームによって異なります。
 
 - **macOS:** オプションなしの `--doctor` は、保存されたインストールプロファイルのマーカーから
   対象を推定します。認識できるマーカーがなければ全項目のチェックになります。AI の実行ファイルと
@@ -362,7 +362,7 @@ mkdir "$HOME/my-first-ai" && cd "$HOME/my-first-ai" && git init && codex
 
 Windows では、エクスプローラーで新しい空のフォルダーを作り、そこで PowerShell を開いて
 `git init`、続けて `codex` を実行します。Claude Code を使いたい場合は代わりに `claude` を実行してください。
-v0.15.0 の GUI では、エージェントを選んで、新しい練習用フォルダーを明示的に開いて起動します。
+v0.15.1 の GUI では、エージェントを選んで、新しい練習用フォルダーを明示的に開いて起動します。
 プロンプトのコピー機能を使うと、最初のリクエスト文がクリップボードに入ります。
 
 サインインは各ツール自身の案内に従ってください。キットをインストールしても、アカウントが作られたり
@@ -378,7 +378,7 @@ API クレジットが付与されたりはしません。Codex がキットの�
 
 ## 自動アンインストールには対応していません
 
-**v0.15.0 には自動アンインストール機能はありません。**
+**v0.15.1 には自動アンインストール機能はありません。**
 
 古い v0.12.0 リリースには、旧来の削除処理がまだ残っています。既存のマシンを片付けるために、
 古いリリースのアンインストーラーを使わないでください。
@@ -448,7 +448,7 @@ Get-Command python -All
 
 ## 会社のマシンで使う場合
 
-v0.15.0 の `work` プロファイルは Docker と Windows WSL を除外します。権限を回避するための
+v0.15.1 の `work` プロファイルは Docker と Windows WSL を除外します。権限を回避するための
 ものではありません。ソースのルートで実行してください（Linux では `./linux/install.sh` を使います）。
 
 ```bash

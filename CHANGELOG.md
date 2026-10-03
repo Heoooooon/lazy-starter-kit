@@ -7,18 +7,23 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-10-03
+
+Patch release for v0.15.0. The public interface is unchanged.
+
 ### Fixed
 - Windows rejects blank profiles and malformed `-Only`/`-Skip` selectors
   before dispatch, rather than silently expanding an empty selection to a
-  full developer installation.
+  full developer installation ([PR #33](https://github.com/Heoooooon/lazy-starter-kit/pull/33)).
 - macOS and Linux keep `--no-agents` in effect when a later `--skip` is
   supplied, so combining the switches no longer installs agents depending
-  on argument order.
+  on argument order ([PR #34](https://github.com/Heoooooon/lazy-starter-kit/pull/34)).
 - Windows `-Doctor` only reports the PowerShell profile block as present
   when it is a single complete block matching the kit's template. A
   begin-only, duplicated, out-of-order or truncated block now fails the
-  check with a repair hint instead of passing on a tag-string match.
-- macOS and Linux `--doctor` reject damaged or incomplete/outdated managed shell blocks instead of accepting a begin marker alone.
+  check with a repair hint instead of passing on a tag-string match ([PR #35](https://github.com/Heoooooon/lazy-starter-kit/pull/35)).
+- macOS and Linux `--doctor` reject damaged or incomplete/outdated managed
+  shell blocks instead of accepting a begin marker alone ([PR #36](https://github.com/Heoooooon/lazy-starter-kit/pull/36)).
 
 ## [0.15.0] - 2026-10-02
 
@@ -551,7 +556,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.0...v0.14.1
 [0.14.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.13.0...v0.14.0
