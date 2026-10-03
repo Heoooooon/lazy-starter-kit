@@ -4,7 +4,12 @@ This project follows [Semantic Versioning](https://semver.org/). This document
 defines **what counts as the public interface**, what you can script
 against and pin, and what a version number promises about it.
 
-## Release guidance: v0.15.0
+## Release guidance: v0.15.1
+
+**v0.15.1** is a patch for v0.15.0. Doctor rejects damaged or outdated managed
+shell and PowerShell profile blocks, Windows rejects empty installation
+selectors, and `--no-agents` holds regardless of `--skip` order. The public
+interface is unchanged; use v0.15.1 instead of v0.15.0.
 
 **v0.15.0** adds four-language setup guides and safer installation and release
 selection. English is the main README, with Chinese, Japanese and Korean
@@ -34,7 +39,7 @@ The standard remote bootstrap selects the newest published GitHub Release by def
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
 [recommended setup guide](README.md#recommended-setup) to download the GUI
-or clone `v0.15.0` and preview the local installer before applying. Record the
+or clone `v0.15.1` and preview the local installer before applying. Record the
 checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.
 
