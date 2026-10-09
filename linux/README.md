@@ -2,7 +2,7 @@
 
 ### Start AI coding on Linux.
 
-_v0.15.1 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks · minimal PATH. Explicit developer profiles remain available._
+_v0.15.2 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks · minimal PATH. Explicit developer profiles remain available._
 
 **[← Back to repo root](../README.md)** · [macOS kit](../README.md) · [Windows kit](../windows/README.md)
 
@@ -11,34 +11,34 @@ _v0.15.1 default: Git · Node LTS/npm · Claude Code · Codex · safety hooks ·
 ---
 
 > **🇰🇷 한국어 빠른 시작**: Linux는 GUI 없이 소스로 설치합니다. Git이 설치된
-> 터미널에서 `v0.15.1` 태그를 새 폴더에 복제하고 기본 `ai` 구성을 미리 확인하세요.
-> `lazy-starter-kit-v0.15.1` 폴더가 이미 있다면 다른 작업 폴더에서 시작하세요.
+> 터미널에서 `v0.15.2` 태그를 새 폴더에 복제하고 기본 `ai` 구성을 미리 확인하세요.
+> `lazy-starter-kit-v0.15.2` 폴더가 이미 있다면 다른 작업 폴더에서 시작하세요.
 > 복제에 실패하면 다음 단계로 진행하지 마세요.
 > ```sh
-> git clone --branch v0.15.1 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1 &&
->   cd lazy-starter-kit-v0.15.1/linux &&
+> git clone --branch v0.15.2 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 &&
+>   cd lazy-starter-kit-v0.15.2/linux &&
 >   ./install.sh --profile ai --dry-run
 > ```
 > 로그를 확인한 뒤 같은 터미널에서 아래 명령을 실행하면 Docker 없이 설치합니다:
 > ```sh
 > ./install.sh --profile ai
 > ```
-> Git이 없다면 [v0.15.1 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.1.zip)을
-> 풀고 `lazy-starter-kit-0.15.1/linux`에서 미리보기와 적용 명령을 실행하세요.
-> v0.15.1의 일반 무프로필 설치 기본값은 `ai`입니다. 설치 후 새 터미널에서
+> Git이 없다면 [v0.15.2 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.2.zip)을
+> 풀고 `lazy-starter-kit-0.15.2/linux`에서 미리보기와 적용 명령을 실행하세요.
+> v0.15.2의 일반 무프로필 설치 기본값은 `ai`입니다. 설치 후 새 터미널에서
 > 같은 소스 폴더의 `./install.sh --profile ai --doctor`로 확인하세요.
 > 단독 `--doctor`도 AI 실행 파일을 검사하며, 로그인은 직접 합니다.
 > 명시적 `recommended`는 기존의 더 넓은 개발 구성을 유지합니다.
-> v0.15.1은 자동 제거를 지원하지 않으며,
+> v0.15.2는 자동 제거를 지원하지 않으며,
 > gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을 삭제하지 않습니다.
 > apt·dnf·pacman·zypper를 자동 감지합니다 (glibc 배포판; Alpine/musl 미지원).
 > [한국어 추천 설치 안내](../README.ko.md#recommended-setup)
 
 ## Quick start
 
-### AI setup (v0.15.1)
+### AI setup (v0.15.2)
 
-**Use the v0.15.1 source commands [below](#install-from-source).** Ordinary
+**Use the v0.15.2 source commands [below](#install-from-source).** Ordinary
 no-profile installs now use the smaller `ai` payload. Explicit `recommended`,
 `full`, `minimal`, and `work` keep their existing developer payloads.
 
@@ -51,7 +51,7 @@ Codex needs a ChatGPT account with access or supported API credentials. The kit
 doesn't include subscriptions or credits. Review provider terms, billing, and
 organization policy. Login and prompt submission are manual.
 
-After installation, open a new terminal, return to the v0.15.1 source's `linux`
+After installation, open a new terminal, return to the v0.15.2 source's `linux`
 folder, and run `./install.sh --profile ai --doctor`. Git, Node, npm, Claude Code,
 and Codex must actually run and pass their version checks. A missing executable
 or failed probe needs attention, even if installation exited successfully.
@@ -61,21 +61,21 @@ Follow [First run](#first-run) below.
 
 <a id="install-from-source"></a>
 
-### Install from source: v0.15.1 AI setup
+### Install from source: v0.15.2 AI setup
 
-Linux has no GUI package. With Git available, clone the **v0.15.1 tag** into a
+Linux has no GUI package. With Git available, clone the **v0.15.2 tag** into a
 fresh directory and preview the default AI profile.
-Start in a folder without an existing `lazy-starter-kit-v0.15.1` directory.
+Start in a folder without an existing `lazy-starter-kit-v0.15.2` directory.
 The `&&` chain stops if cloning or changing directories fails:
 
 ```sh
-git clone --branch v0.15.1 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1 &&
-  cd lazy-starter-kit-v0.15.1/linux &&
+git clone --branch v0.15.2 --depth 1 https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 &&
+  cd lazy-starter-kit-v0.15.2/linux &&
   ./install.sh --profile ai --dry-run
 ```
 
-Without Git, download the [v0.15.1 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.1.zip),
-extract it, and open a terminal in `lazy-starter-kit-0.15.1/linux`. Inspect
+Without Git, download the [v0.15.2 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.2.zip),
+extract it, and open a terminal in `lazy-starter-kit-0.15.2/linux`. Inspect
 `install.sh` and `scripts/`, then run `./install.sh --profile ai --dry-run`.
 After reviewing the preview, apply from the same terminal and directory:
 
@@ -83,7 +83,7 @@ After reviewing the preview, apply from the same terminal and directory:
 ./install.sh --profile ai # apply the small AI setup; no Docker
 ```
 
-The v0.15.1 ordinary no-profile install defaults to `ai`. For a broader developer
+The v0.15.2 ordinary no-profile install defaults to `ai`. For a broader developer
 setup, explicitly choose `recommended`; `full` adds Docker. `minimal` omits
 agents and Docker; `work` selects the same steps as `recommended`.
 
@@ -92,10 +92,10 @@ remote bootstrap chooses the newest published GitHub Release unless `STARTER_KIT
 selects a ref. Linux doesn't enforce `STARTER_KIT_COMMIT`; use a reviewed local
 checkout for a full commit pin and don't run `--update` on it.
 
-v0.15.1 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+v0.15.2 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
 existing configuration. Automatic uninstall isn't supported. Older v0.12.0
 doesn't have the recommended profile or these policies; don't use it for this setup.
-For macOS or Windows, the [v0.15.1 GUI downloads](../README.md#gui-downloads)
+For macOS or Windows, the [v0.15.2 GUI downloads](../README.md#gui-downloads)
 default to `ai`, with Install and Preview as separate actions.
 
 **Supported distros** (auto-detected package manager): Debian/Ubuntu (`apt`),
@@ -162,7 +162,7 @@ prereqs  packages  runtimes  shell  docker  git  agents
 ./install.sh --profile work        # corporate PCs; same steps as recommended
 ```
 
-In v0.15.1, bare `--doctor` and `--profile ai --doctor` check the required AI
+In v0.15.2, bare `--doctor` and `--profile ai --doctor` check the required AI
 executables and fail if a command is missing or can't run. They don't test
 provider login. Explicit developer profiles retain the full tool/config
 inventory that v0.13.0 used for all doctor runs. Intentionally omitted tools can
@@ -223,7 +223,7 @@ manually submit a first request:
 > Create a single-file breakout game named index.html in this practice folder that I can open directly in a browser. Don't overwrite or delete existing files. If index.html already exists, stop and ask for another name. Explain how to open the finished file.
 
 Review proposed changes and commands before accepting them, then open the new
-file in your browser. There is no native Linux GUI. The v0.15.1 macOS/Windows
+file in your browser. There is no native Linux GUI. The v0.15.2 macOS/Windows
 GUIs offer a separate Install and Preview, explicit practice-folder launch, and
 prompt copy to the clipboard, not automatic login or submission. Optional
 `gh auth login`, shell customization, and Docker group changes apply only if you
@@ -231,7 +231,7 @@ installed those tools. None is required for the first AI session.
 
 ## Automatic uninstall is not supported
 
-v0.15.1 keeps the no-uninstall policy introduced in v0.13.0. There is no removal
+v0.15.2 keeps the no-uninstall policy introduced in v0.13.0. There is no removal
 UI. The legacy
 `linux/uninstall.sh` entrypoint stops with an explanation and exit code 2,
 without changing or removing anything. The kit can't reliably distinguish tools

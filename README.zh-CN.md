@@ -28,11 +28,11 @@
 
 lazy-starter-kit 一次性把这套开发环境搭好，并提供事后验证结果的方法。
 
-v0.15.1 的默认 `ai` 配置会准备 **Git、Node.js LTS/npm、Claude Code、
+v0.15.2 的默认 `ai` 配置会准备 **Git、Node.js LTS/npm、Claude Code、
 Codex、安全钩子（safety hooks）以及最小化的 PATH 设置**，外加安装它们所需的前置依赖。
 它不包含 Python、Go、Rust、Docker、Bun、uv、Shell 美化、字体或可选的 CLI 工具包。
 
-**从 v0.15.1 开始：** 使用下方的[发布版下载或固定版本的源码命令](#recommended-setup)，
+**从 v0.15.2 开始：** 使用下方的[发布版下载或固定版本的源码命令](#recommended-setup)，
 即可获得更精简的 AI 配置和引导式首次运行。v0.13.0 已经有 `recommended`
 开发者配置和入门指引，但还没有默认的 `ai` 配置和新的 GUI 流程。
 
@@ -57,7 +57,7 @@ lazycodex，也不会动它们已有的配置。
 
 <a id="ai-setup"></a>
 
-## AI 配置（v0.15.1）
+## AI 配置（v0.15.2）
 
 不指定配置、也不自定义步骤的普通 GUI 和 CLI 安装，现在都使用 `ai`。
 显式指定的 `recommended`、`full`、`minimal` 和 `work` 保持原有内容。
@@ -104,7 +104,7 @@ Claude 账号或受支持的 API 凭据；Codex 需要一个有服务权限的 C
 API 凭据。安装本身不包含订阅、服务权限或额度。请先查看服务商的条款、计费方式以及
 你所在组织的政策。新版 GUI 会在安装前展示这些要求。
 
-在 v0.15.1 的 GUI 中，**Install（安装）** 是主操作，**Preview（预览）** 是一个
+在 v0.15.2 的 GUI 中，**Install（安装）** 是主操作，**Preview（预览）** 是一个
 不做任何改动的独立操作。预览完成或安装程序成功退出，都不能单独说明这台机器已经就绪。
 Git、Node、npm、Claude Code 和 Codex 必须真正能运行并通过版本检查。缺少可执行文件
 或检查失败意味着 **需要处理**，而不是 **已就绪**。本地就绪检查不会测试登录认证，
@@ -115,7 +115,7 @@ Git、Node、npm、Claude Code 和 Codex 必须真正能运行并通过版本检
 检查，再开始练习。检查安装后的 PATH 时请打开一个新的终端窗口，而不是用安装前的那个
 Shell。
 
-如需通过 CLI 安装，请用[下方](#recommended-setup)的命令获取 **v0.15.1 源码**，
+如需通过 CLI 安装，请用[下方](#recommended-setup)的命令获取 **v0.15.2 源码**，
 审阅安装程序及其脚本，然后在源码根目录中只运行你所用系统那一行的命令：
 
 | 操作系统 | 预览 | 安装 | 在新终端中检查 |
@@ -138,22 +138,22 @@ Shell。
 
 <a id="recommended-setup"></a>
 
-## 推荐安装（v0.15.1）
+## 推荐安装（v0.15.2）
 
-**第一次接触？macOS 用户请使用下方的 v0.15.1 GUI。Windows GUI 仍处于实验阶段。**
+**第一次接触？macOS 用户请使用下方的 v0.15.2 GUI。Windows GUI 仍处于实验阶段。**
 默认的 `ai` 配置会装好 Claude Code 和 Codex，不含 Docker 和 Windows WSL。
-v0.15.1 既不会安装、也不会删除 gajae-code（`gjc`）、lazycodex 或它们已有的配置，
+v0.15.2 既不会安装、也不会删除 gajae-code（`gjc`）、lazycodex 或它们已有的配置，
 也不提供自动卸载。
 
 <a id="gui-downloads"></a>
 
 ### GUI 下载
 
-| 操作系统 | v0.15.1 GUI 安装包 | 解压后打开 |
+| 操作系统 | v0.15.2 GUI 安装包 | 解压后打开 |
 |---|---|---|
-| macOS 14+，Apple Silicon 或 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows（实验性） | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | 无 GUI 安装包 | 使用下方的 v0.15.1 源码命令或 [Linux 指南](linux/README.md) |
+| macOS 14+，Apple Silicon 或 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.2/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows（实验性） | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.2/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | 无 GUI 安装包 | 使用下方的 v0.15.2 源码命令或 [Linux 指南](linux/README.md) |
 
 **Windows 为实验性支持：** 自动化测试和安装包验证均已通过。但在真实 Windows 电脑上
 的手动验证，尚未覆盖从双击启动器、经过安装界面和权限提示、到安装完成和首次运行的
@@ -167,22 +167,22 @@ CLI 安装同样使用 `ai`。AI 计划不包含 `docker` 和 Windows 的 `wsl`�
 [打开新终端、检查版本并开始第一个项目](#first-project)。
 账号登录和第一条提示词仍需手动完成。
 
-更新内容和全部安装包见 [v0.15.1 发布页](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.1)。
+更新内容和全部安装包见 [v0.15.2 发布页](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.2)。
 打包好的 GUI 会固定到各自的发布提交；标准的远程引导脚本默认解析最新发布的
 GitHub Release。`main` 分支上的改动不会自动更新发布版 ZIP。
 
 **v0.13.0** 在不指定配置的 CLI 安装中使用 full，GUI 中则是 recommended + 预览。
-它的显式开发者配置和不卸载策略在 v0.15.1 中得以保留；但它的 ZIP 不会获得新的 AI 流程。
+它的显式开发者配置和不卸载策略在 v0.15.2 中得以保留；但它的 ZIP 不会获得新的 AI 流程。
 
 更早的 **v0.12.0** 没有 `recommended` 配置，其 GUI 默认是 full + 预览。它仍会安装
 gajae-code 和 lazycodex，并带有旧的自动卸载行为。请不要用它来完成本文所述的配置。
 
 ### 从源码安装（Linux 或终端用户）
 
-下方命令会克隆 **v0.15.1 标签** 并运行本地安装程序。
+下方命令会克隆 **v0.15.2 标签** 并运行本地安装程序。
 请先安装 [Git](https://git-scm.com/downloads) 并打开一个新终端；或者下载
-[v0.15.1 源码 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.1.zip)，
-解压后在 `lazy-starter-kit-0.15.1` 中打开终端。使用 ZIP 时，跳过 clone 和 `cd`
+[v0.15.2 源码 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.2.zip)，
+解压后在 `lazy-starter-kit-0.15.2` 中打开终端。使用 ZIP 时，跳过 clone 和 `cd`
 命令。请使用一个新文件夹，而不是已有的仓库目录。
 
 ### 1. 审阅并预览
@@ -194,8 +194,8 @@ gajae-code 和 lazycodex，并带有旧的自动卸载行为。请不要用它�
 ### macOS
 
 ```bash
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # Inspect install.sh and scripts/, then preview:
 bash ./install.sh --profile ai --dry-run
 ```
@@ -205,8 +205,8 @@ bash ./install.sh --profile ai --dry-run
 支持 Ubuntu/Debian、Fedora/RHEL、Arch 和 openSUSE 系列：
 
 ```bash
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # Inspect linux/install.sh and linux/scripts/, then preview:
 bash ./linux/install.sh --profile ai --dry-run
 ```
@@ -218,8 +218,8 @@ bash ./linux/install.sh --profile ai --dry-run
 在 PowerShell（5.1 或更高版本）中：
 
 ```powershell
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # Inspect windows/install.ps1 and windows/scripts/, then preview:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
@@ -247,7 +247,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -P
 
 ## 常用选项
 
-以下显式的开发者配置选项在 v0.15.1 中仍然可用。
+以下显式的开发者配置选项在 v0.15.2 中仍然可用。
 请在源码根目录运行（Linux 上把 `./install.sh` 换成 `./linux/install.sh`）：
 
 ```bash
@@ -267,7 +267,7 @@ Windows 使用 `windows\install.ps1`，参数为 PowerShell 风格，例如用 `
 |---|---|
 | `ai`（默认） | Git、Node LTS/npm、Claude Code、Codex、安全钩子、最小化 PATH 以及必需的前置依赖。自 v0.14.0 起为不指定配置时的普通安装和 GUI 的默认值。 |
 | `recommended` | 核心工具、运行时、Shell、Git、Claude Code 和 Codex。不含 Docker 和 Windows WSL。不是 `ai` 的别名。 |
-| `full` | 所有步骤，包括 Docker 和 Windows WSL。在 v0.15.1 中需显式选择；在 v0.13.0 及更早版本中是不指定配置时的 CLI 默认值。Windows 的安装提示和前置依赖仍然适用。 |
+| `full` | 所有步骤，包括 Docker 和 Windows WSL。在 v0.15.2 中需显式选择；在 v0.13.0 及更早版本中是不指定配置时的 CLI 默认值。Windows 的安装提示和前置依赖仍然适用。 |
 | `minimal` | 核心工具、运行时、Shell 和 Git。不含代理、Docker 和 Windows WSL。 |
 | `work` | 步骤与 recommended 相同；安装前请确认雇主的政策。 |
 
@@ -314,7 +314,7 @@ claude --version
 `--only runtimes` 或 `--only agents`，Windows 上用 `-Only runtimes` / `-Only agents`。
 不要在 `--only` / `-Only` 命令中加上 `--profile` / `-Profile`。
 
-v0.15.1 中 doctor 的检查范围因平台而异：
+v0.15.2 中 doctor 的检查范围因平台而异：
 
 - **macOS：** 单独的 `--doctor` 会根据保存的安装配置标记推断范围；如果没有可识别的标记，
   则回退为完整清单。使用 `--profile ai --doctor` 检查 AI 可执行文件和安全钩子，
@@ -341,7 +341,7 @@ mkdir "$HOME/my-first-ai" && cd "$HOME/my-first-ai" && git init && codex
 
 在 Windows 上，用文件资源管理器新建一个空文件夹，在其中打开 PowerShell，
 运行 `git init`，然后运行 `codex`。如果更喜欢 Claude Code，就运行 `claude`。
-在 v0.15.1 的 GUI 中，选择代理并明确地在它的新练习文件夹中启动。
+在 v0.15.2 的 GUI 中，选择代理并明确地在它的新练习文件夹中启动。
 使用“复制提示词”操作，把入门请求放到剪贴板上。
 
 按照工具自身的登录提示操作；安装本工具不会创建账号，也不会提供 API 额度。
@@ -358,7 +358,7 @@ mkdir "$HOME/my-first-ai" && cd "$HOME/my-first-ai" && git init && codex
 
 ## 不支持自动卸载
 
-**v0.15.1 不提供自动卸载功能。**
+**v0.15.2 不提供自动卸载功能。**
 
 更早的 v0.12.0 版本仍保留旧的删除行为。请不要用旧版本的卸载程序来清理现有机器。
 
@@ -424,7 +424,7 @@ Get-Command python -All
 
 ## 公司电脑
 
-v0.15.1 的 `work` 配置不包含 Docker 和 Windows WSL。它不是绕过权限的手段。
+v0.15.2 的 `work` 配置不包含 Docker 和 Windows WSL。它不是绕过权限的手段。
 在源码根目录运行（Linux 上使用 `./linux/install.sh`）：
 
 ```bash
