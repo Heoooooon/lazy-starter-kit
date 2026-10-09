@@ -104,6 +104,8 @@ try {
   @'
 [CmdletBinding()]
 param()
+$ErrorActionPreference = 'Stop'
+$null = Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256
 Write-Output "branch=$env:STARTER_KIT_BRANCH;commit=$env:STARTER_KIT_COMMIT"
 exit 0
 '@ | Set-Content -LiteralPath $bootstrapPath -Encoding UTF8
@@ -122,8 +124,22 @@ exit 0
     (New-Object System.Text.UTF8Encoding($false))
   )
   $env:STARTER_KIT_NO_PAUSE = '1'
-  $launcher = & cmd.exe /d /c $launcherPath 2>&1 | Out-String
-  if ($LASTEXITCODE -ne 0) {
+  # A PowerShell 7 terminal exports its own module paths; Windows PowerShell
+  # children must not load those modules (Get-FileHash would disappear).
+  $savedModulePath = $env:PSModulePath
+  $pwshModules = Join-Path $env:ProgramFiles 'PowerShell\7\Modules'
+  if (Test-Path -LiteralPath $pwshModules) {
+    $env:PSModulePath = "$pwshModules;$savedModulePath"
+  } else {
+    Write-Host 'note PowerShell 7 is not installed; launcher module-path isolation not exercised'
+  }
+  try {
+    $launcher = & cmd.exe /d /c $launcherPath 2>&1 | Out-String
+    $launcherExit = $LASTEXITCODE
+  } finally {
+    $env:PSModulePath = $savedModulePath
+  }
+  if ($launcherExit -ne 0) {
     throw "Bundled Windows launcher failed: $launcher"
   }
   if ($launcher -notmatch "branch=v9\.9\.9;commit=$releaseCommit") {

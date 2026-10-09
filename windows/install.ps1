@@ -72,6 +72,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Windows PowerShell started by a PowerShell 7 process (Start-Process, a .cmd
+# launcher) inherits PowerShell 7 module paths and then fails to load core
+# modules (Get-FileHash, Get-ExecutionPolicy). Drop those entries here.
+if ($PSVersionTable.PSEdition -ne 'Core' -and $env:PSModulePath) {
+  $env:PSModulePath = (@($env:PSModulePath -split ';') | Where-Object {
+    $_ -and ($_ -match '\\WindowsPowerShell\\' -or $_ -notmatch '\\PowerShell\\(\d[^\\]*\\)?Modules\\?$')
+  }) -join ';'
+}
+
 # Are we running from a real .ps1 file, or piped through `iex` (irm | iex)? When
 # iex'd the script shares the caller's session scope, so `exit` closes the user's
 # terminal -- wiping the "Next steps" output on success and the error on failure.
