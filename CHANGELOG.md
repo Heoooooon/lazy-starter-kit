@@ -7,6 +7,15 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Windows double-click launchers (`Install-lazy-starter-kit.cmd`,
+  `Lazy-Starter-Kit-Installer.cmd`) work when typed in a PowerShell 7
+  terminal. They inherited PowerShell 7 module paths, so Windows PowerShell
+  lost `Get-FileHash`: the integrity check or the Claude Code install failed.
+- Windows prerequisites no longer warn `could not adjust execution policy:
+  Security error.` after successfully saving the CurrentUser policy under the
+  documented `-ExecutionPolicy Bypass` command.
+
 ## [0.15.1] - 2026-10-03
 
 Patch release for v0.15.0. The public interface is unchanged.
