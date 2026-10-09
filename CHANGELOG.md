@@ -12,6 +12,8 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
   `Lazy-Starter-Kit-Installer.cmd`) work when typed in a PowerShell 7
   terminal. They inherited PowerShell 7 module paths, so Windows PowerShell
   lost `Get-FileHash`: the integrity check or the Claude Code install failed.
+  `windows/install.ps1` also drops PowerShell 7 module paths when Windows
+  PowerShell is started by a PowerShell 7 process (for example `Start-Process`).
 - Windows prerequisites no longer warn `could not adjust execution policy:
   Security error.` after successfully saving the CurrentUser policy under the
   documented `-ExecutionPolicy Bypass` command.

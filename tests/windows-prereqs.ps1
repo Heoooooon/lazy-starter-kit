@@ -44,7 +44,8 @@ try {
   if ($output -notmatch 'execution policy \(CurrentUser\) -> RemoteSigned') {
     throw 'prereqs did not report the CurrentUser execution policy change'
   }
-  $after = [string](Get-ExecutionPolicy -Scope CurrentUser)
+  # PowerShell 7 caches its policy file per process; read the saved value fresh.
+  $after = (& $HostExe -NoLogo -NoProfile -Command 'Get-ExecutionPolicy -Scope CurrentUser' | Out-String).Trim()
   if ($after -ne 'RemoteSigned') { throw "CurrentUser execution policy is $after; expected RemoteSigned" }
 } finally {
   Set-CurrentUserPolicy -Policy $original
