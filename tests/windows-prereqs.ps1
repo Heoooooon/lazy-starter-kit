@@ -22,13 +22,19 @@ try {
   # The README runs the installer with a process-scoped Bypass, which outranks
   # CurrentUser and makes Set-ExecutionPolicy report an override.
   Set-CurrentUserPolicy -Policy 'Undefined'
+  # A Windows PowerShell child of a PowerShell 7 process inherits PowerShell 7
+  # module paths; the installer must still load its own core modules.
   $previousPreference = $ErrorActionPreference
+  $savedModulePath = $env:PSModulePath
+  $pwshModules = Join-Path $env:ProgramFiles 'PowerShell\7\Modules'
+  if (Test-Path -LiteralPath $pwshModules) { $env:PSModulePath = "$pwshModules;$savedModulePath" }
   $ErrorActionPreference = 'Continue'
   try {
     $output = & $HostExe -NoLogo -NoProfile -ExecutionPolicy Bypass -File $Installer -Only prereqs -Yes 2>&1 | Out-String
     $code = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousPreference
+    $env:PSModulePath = $savedModulePath
   }
   Write-Host $output
   if ($code -ne 0) { throw "prereqs step exited $code" }
