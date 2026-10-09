@@ -29,11 +29,11 @@ AI 코딩 에이전트 등을 하나씩 설치해야 합니다.
 lazy-starter-kit은 이 과정을 한 번에 구성하고, 설치가 끝난 뒤 제대로
 동작하는지 확인할 수 있게 만든 개발 환경 부트스트랩입니다.
 
-v0.15.1의 기본 `ai` 구성은 **Git, Node.js LTS/npm, Claude Code, Codex,
+v0.15.2의 기본 `ai` 구성은 **Git, Node.js LTS/npm, Claude Code, Codex,
 안전 훅, 최소 PATH 설정**과 설치에 필요한 선행 도구만 준비합니다.
 Python, Go, Rust, Docker, Bun, uv, 셸 꾸미기, 폰트, 선택 CLI 묶음은 제외합니다.
 
-**v0.15.1으로 시작하세요:** 아래 [릴리스 다운로드와 고정된 소스 명령](#recommended-setup)은
+**v0.15.2로 시작하세요:** 아래 [릴리스 다운로드와 고정된 소스 명령](#recommended-setup)은
 더 작은 AI 구성과 GUI 첫 실행 안내를 사용합니다. v0.13.0에도 `recommended`
 개발 프로필과 첫 사용 안내는 있었지만, `ai` 기본값과 새 GUI 흐름은 없었습니다.
 
@@ -60,9 +60,9 @@ Docker는 제외하며 Windows의 WSL도 설치하지 않습니다. Hermes는 ma
 
 <a id="ai-setup"></a>
 
-## AI 설치 (v0.15.1)
+## AI 설치 (v0.15.2)
 
-v0.15.1에서 프로필이나 사용자 지정 단계를 선택하지 않은 일반 GUI·CLI 설치의
+v0.15.2에서 프로필이나 사용자 지정 단계를 선택하지 않은 일반 GUI·CLI 설치의
 기본값은 `ai`입니다. 명시적으로 고른 `recommended`, `full`, `minimal`, `work`는
 기존 설치 범위를 유지합니다. **`recommended`는 `ai`의 별칭이 아닙니다.**
 Docker와 Windows WSL을 제외한 더 넓은 개발 도구 묶음입니다.
@@ -109,7 +109,7 @@ Codex는 이용 권한이 있는 ChatGPT 계정 또는 지원되는 API 인증 �
 설치에 구독, 서비스 이용권, 크레딧은 포함되지 않습니다. 제공자의 약관·결제 조건과
 조직 정책을 먼저 확인하세요. 새 GUI도 설치 전에 이 요구사항을 보여줍니다.
 
-v0.15.1 GUI는 **설치**가 기본 동작이고, 변경 없는 **미리보기**는 별도 동작입니다.
+v0.15.2 GUI는 **설치**가 기본 동작이고, 변경 없는 **미리보기**는 별도 동작입니다.
 미리보기 완료나 설치 프로세스의 성공 종료만으로 준비 완료가 되지 않습니다.
 Git, Node, npm, Claude Code, Codex가 실제로 실행되고 버전 확인을 통과해야 합니다.
 필수 실행 파일 누락이나 확인 실패는 **조치 필요**입니다. 로컬 준비 확인은 로그인이나
@@ -120,7 +120,7 @@ Terminal에서 설치를 이어 진행했다면 완료 후 GUI로 돌아와 **�
 실행한 다음 연습을 시작하세요. 설치 전 셸이 아닌 **새 Terminal 창**에서 PATH가
 적용된 결과를 확인합니다.
 
-CLI 사용자는 [아래 명령](#recommended-setup)으로 **v0.15.1 소스**를 받은 뒤
+CLI 사용자는 [아래 명령](#recommended-setup)으로 **v0.15.2 소스**를 받은 뒤
 최상위 폴더에서 설치기와 스크립트를 읽고, 사용 중인 OS의 행만 실행하세요.
 
 | OS | 미리보기 | 설치 | 새 터미널에서 결과 확인 |
@@ -144,22 +144,22 @@ CLI 사용자는 [아래 명령](#recommended-setup)으로 **v0.15.1 소스**를
 
 <a id="recommended-setup"></a>
 
-## 추천 설치 (v0.15.1)
+## 추천 설치 (v0.15.2)
 
-**처음이라면 macOS에서는 아래 v0.15.1 GUI를 사용하세요. Windows GUI는 실험적으로 제공합니다.**
+**처음이라면 macOS에서는 아래 v0.15.2 GUI를 사용하세요. Windows GUI는 실험적으로 제공합니다.**
 기본 `ai` 구성은 Docker와 Windows WSL 없이 Claude Code와 Codex를 준비합니다.
-v0.15.1은 gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을
+v0.15.2는 gajae-code (`gjc`), lazycodex를 설치하거나 기존 도구와 설정을
 삭제하지 않으며, 자동 제거 기능도 제공하지 않습니다.
 
 <a id="gui-downloads"></a>
 
 ### GUI 다운로드
 
-| OS | v0.15.1 GUI 파일 | 압축을 푼 뒤 열 파일 |
+| OS | v0.15.2 GUI 파일 | 압축을 푼 뒤 열 파일 |
 |---|---|---|
-| macOS 14+, Apple Silicon 또는 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows (실험적 제공) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.1/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | GUI 패키지 없음 | 아래 v0.15.1 소스 명령 또는 [Linux 안내](linux/README.md) 사용 |
+| macOS 14+, Apple Silicon 또는 Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.2/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows (실험적 제공) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.2/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | GUI 패키지 없음 | 아래 v0.15.2 소스 명령 또는 [Linux 안내](linux/README.md) 사용 |
 
 **Windows — 실험적 제공:** 자동화 테스트와 설치 패키지 검증을 완료했습니다.
 다만 실제 Windows PC에서 더블클릭, 설치 화면, 권한 승인, 설치 완료, 첫 실행까지의
@@ -173,13 +173,13 @@ GUI의 기본 구성은 **ai**, 기본 동작은 **설치**이며 **미리보기
 [새 터미널에서 버전 확인과 첫 프로젝트](#first-project)로 이어집니다.
 계정 로그인과 첫 프롬프트 전송은 직접 합니다.
 
-[v0.15.1 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.1)에서
+[v0.15.2 릴리스 페이지](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.2)에서
 변경 내역과 전체 파일을 확인하세요. 패키지 GUI는 자신의 릴리스 커밋에 고정되며,
 일반 원격 부트스트랩은 기본적으로 GitHub에 공개된 최신 Release를 선택합니다.
 릴리스 ZIP에 `main`의 변경 사항이 자동으로 반영되지는 않습니다.
 
 **v0.13.0**은 무프로필 CLI의 기본값이 full, GUI는 recommended + 미리보기였습니다.
-명시적 개발 프로필과 자동 제거 미지원 정책은 v0.15.1에서도 유지되지만,
+명시적 개발 프로필과 자동 제거 미지원 정책은 v0.15.2에서도 유지되지만,
 이전 ZIP에 새 AI 흐름이 추가되지는 않습니다.
 
 이전 **v0.12.0**에는 `recommended`가 없고 GUI는 full + 미리보기로 시작합니다.
@@ -188,10 +188,10 @@ gajae-code와 lazycodex 설치 및 이전 자동 제거 동작도 남아 있으�
 
 ### 소스에서 설치 (Linux 또는 터미널 사용자)
 
-아래 명령은 **v0.15.1 태그**를 clone한 뒤 로컬 설치기를 실행합니다.
+아래 명령은 **v0.15.2 태그**를 clone한 뒤 로컬 설치기를 실행합니다.
 먼저 [Git](https://git-scm.com/downloads)을 설치하고 새 터미널을 열어 주세요.
-Git 없이 시작하려면 [v0.15.1 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.1.zip)을
-받아 압축을 풀고 `lazy-starter-kit-0.15.1` 폴더에서 터미널을 여세요. ZIP을 사용하면
+Git 없이 시작하려면 [v0.15.2 소스 ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.2.zip)을
+받아 압축을 풀고 `lazy-starter-kit-0.15.2` 폴더에서 터미널을 여세요. ZIP을 사용하면
 아래 clone과 `cd` 명령은 생략합니다. 기존 작업 폴더가 아닌 새 폴더를 사용하세요.
 
 ### 1. 내용을 읽고 미리보기
@@ -203,8 +203,8 @@ Git 없이 시작하려면 [v0.15.1 소스 ZIP](https://github.com/Heoooooon/laz
 ### macOS
 
 ```bash
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # install.sh와 scripts/를 읽은 뒤 미리보기:
 bash ./install.sh --profile ai --dry-run
 ```
@@ -214,8 +214,8 @@ bash ./install.sh --profile ai --dry-run
 Ubuntu/Debian, Fedora/RHEL, Arch, openSUSE 계열을 지원합니다.
 
 ```bash
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # linux/install.sh와 linux/scripts/를 읽은 뒤 미리보기:
 bash ./linux/install.sh --profile ai --dry-run
 ```
@@ -227,8 +227,8 @@ bash ./linux/install.sh --profile ai --dry-run
 PowerShell 5.1 이상에서:
 
 ```powershell
-git clone --branch v0.15.1 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.1
-cd lazy-starter-kit-v0.15.1
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2
+cd lazy-starter-kit-v0.15.2
 # windows/install.ps1과 windows/scripts/를 읽은 뒤 미리보기:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
@@ -257,7 +257,7 @@ Tools와 Homebrew 준비가 필요할 수 있습니다. 안내에 따라 준비�
 
 ## 자주 쓰는 옵션
 
-아래의 명시적 개발 프로필 옵션은 v0.15.1에서도 사용할 수 있습니다.
+아래의 명시적 개발 프로필 옵션은 v0.15.2에서도 사용할 수 있습니다.
 저장소 루트에서 실행하며, Linux에서는 `./install.sh`를 `./linux/install.sh`로 바꾸세요.
 
 ```bash
@@ -277,7 +277,7 @@ Windows에서는 `windows\install.ps1`에 `--dry-run` 대신 `-DryRun`, `--only`
 |---|---|
 | `ai` (기본값) | Git, Node LTS/npm, Claude Code, Codex, 안전 훅, 최소 PATH와 필요한 선행 도구. v0.14.0부터 일반 무프로필 설치와 GUI 기본값. |
 | `recommended` | 기본 도구, 런타임, 셸, Git, Claude Code와 Codex. Docker와 Windows WSL 제외. `ai`의 별칭이 아닙니다. |
-| `full` | Docker와 Windows WSL을 포함한 전체 단계. v0.15.1에서는 명시적으로 선택하며, v0.13.0 이전에는 무프로필 CLI 기본값이었습니다. Windows의 설치 확인과 사전 조건은 그대로 적용됩니다. |
+| `full` | Docker와 Windows WSL을 포함한 전체 단계. v0.15.2에서는 명시적으로 선택하며, v0.13.0 이전에는 무프로필 CLI 기본값이었습니다. Windows의 설치 확인과 사전 조건은 그대로 적용됩니다. |
 | `minimal` | 기본 도구, 런타임, 셸, Git. 에이전트, Docker, Windows WSL 제외. |
 | `work` | recommended와 같은 단계. 설치 전 회사 정책을 확인하세요. |
 
@@ -327,7 +327,7 @@ PowerShell에서도 같은 명령을 사용할 수 있습니다. 명령 실행 �
 `--only agents` 또는 Windows의 `-Only runtimes`, `-Only agents`가 예입니다.
 `--only` / `-Only` 명령에는 `--profile` / `-Profile`을 함께 넣지 마세요.
 
-v0.15.1의 doctor 범위는 OS별로 다릅니다:
+v0.15.2의 doctor 범위는 OS별로 다릅니다:
 
 - **macOS:** 단독 `--doctor`는 저장된 설치 프로필 마커를 읽으며, 인식 가능한
   마커가 없으면 전체 목록을 점검합니다. AI 실행 파일과 안전 훅 검사는
@@ -355,7 +355,7 @@ mkdir "$HOME/my-first-ai" && cd "$HOME/my-first-ai" && git init && codex
 
 Windows는 파일 탐색기에서 새 빈 폴더를 만들고 그 위치에서 PowerShell을 연 뒤
 `git init`, `codex`를 실행하세요. Claude Code를 쓰려면 `codex` 대신 `claude`를
-실행합니다. v0.15.1 GUI에서는 도구를 고른 뒤 새 연습 폴더 열기를 직접 누르세요.
+실행합니다. v0.15.2 GUI에서는 도구를 고른 뒤 새 연습 폴더 열기를 직접 누르세요.
 프롬프트 복사 동작으로 첫 요청을 클립보드에 넣을 수 있습니다.
 
 각 도구의 안내에 따라 직접 로그인합니다. 키트 설치로 계정이나 API 크레딧이
@@ -371,7 +371,7 @@ Windows는 파일 탐색기에서 새 빈 폴더를 만들고 그 위치에서 P
 
 ## 자동 제거(Uninstall)는 지원하지 않습니다
 
-**v0.15.1은 자동 uninstall 기능을 제공하지 않습니다.**
+**v0.15.2는 자동 uninstall 기능을 제공하지 않습니다.**
 
 이전 v0.12.0에는 당시의 제거 동작이 남아 있습니다. 기존 컴퓨터를 정리하려고
 오래된 릴리스의 제거 스크립트를 사용하지 마세요.
@@ -441,7 +441,7 @@ Get-Command python -All
 
 ## 회사 PC
 
-v0.15.1의 `work` 프로필은 Docker와 Windows WSL을 제외하지만 권한 제한을
+v0.15.2의 `work` 프로필은 Docker와 Windows WSL을 제외하지만 권한 제한을
 우회하지는 않습니다. 소스 루트에서 실행하세요. Linux는 `./linux/install.sh`를 사용합니다.
 
 ```bash
