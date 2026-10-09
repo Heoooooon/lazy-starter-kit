@@ -1,5 +1,19 @@
 # 01-prereqs.ps1 -- winget (App Installer) + TLS + execution policy
 
+# Set-ExecutionPolicy saves the CurrentUser policy but still throws
+# ExecutionPolicyOverride when a more specific scope (the documented
+# `-ExecutionPolicy Bypass` process scope) wins. Treat that as success only
+# when the saved CurrentUser policy really is RemoteSigned.
+function Set-CurrentUserRemoteSigned {
+  try {
+    Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
+  } catch {
+    if ($_.FullyQualifiedErrorId -notlike 'ExecutionPolicyOverride*' -or
+        (Get-ExecutionPolicy -Scope CurrentUser) -ne 'RemoteSigned') { throw }
+  }
+  Write-Ok "execution policy (CurrentUser) -> RemoteSigned"
+}
+
 function Step-Prereqs {
   Write-Step "Prerequisites: winget + TLS + execution policy"
 
@@ -34,8 +48,7 @@ function Step-Prereqs {
       if ($script:DryRun) {
         Write-Info "[dry-run] Set-ExecutionPolicy -Scope CurrentUser RemoteSigned"
       } else {
-        Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
-        Write-Ok "execution policy (CurrentUser) -> RemoteSigned"
+        Set-CurrentUserRemoteSigned
       }
     } elseif ($cur -eq 'AllSigned') {
       # AllSigned is a STRICTER posture the user deliberately chose; downgrading it
@@ -44,8 +57,7 @@ function Step-Prereqs {
       if ($script:DryRun) {
         Write-Info "[dry-run] would ask to relax AllSigned -> RemoteSigned (default No)"
       } elseif (Confirm-Action "Execution policy is AllSigned (a strict posture you chose). Relax it to RemoteSigned so this kit's .ps1 files can load?" -DefaultNo) {
-        Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force
-        Write-Ok "execution policy (CurrentUser) -> RemoteSigned"
+        Set-CurrentUserRemoteSigned
       } else {
         Write-Warn "keeping AllSigned -- later steps that source unsigned .ps1 files may fail to load"
       }
