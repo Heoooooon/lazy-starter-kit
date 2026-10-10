@@ -19,6 +19,54 @@ The fastest way to start AI coding on your own machine.
 
 </div>
 
+<a id="quick-start"></a>
+
+## Quick start
+
+**Not sure which profile? Keep the default (`ai`).** These commands already use it; the other profiles are [advanced options](#advanced-options).
+
+**1. Preview first** (gets the v0.15.2 source and only shows the plan; installs nothing):
+
+macOS:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./install.sh --profile ai --dry-run
+```
+
+Linux:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./linux/install.sh --profile ai --dry-run
+```
+
+Windows (PowerShell):
+
+```powershell
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2; cd lazy-starter-kit-v0.15.2; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+```
+
+**2. Install** (same terminal and folder; run only your OS's line):
+
+macOS:
+
+```bash
+bash ./install.sh --profile ai
+```
+
+Linux:
+
+```bash
+bash ./linux/install.sh --profile ai
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai
+```
+
+Prefer a GUI on macOS, or want to read the scripts first? See [Recommended setup](#recommended-setup).
+
 ---
 
 ## What is this?
@@ -263,7 +311,12 @@ Continue with [a new terminal and your first project](#first-project).
 
 ---
 
-## Common options
+<a id="advanced-options"></a>
+<a id="common-options"></a>
+
+## Advanced options (other profiles)
+
+**Advanced:** skip this section if you kept the default `ai`.
 
 These explicit developer-profile options remain available in v0.15.2.
 Run from the source root (replace `./install.sh` with

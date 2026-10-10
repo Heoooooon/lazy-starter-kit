@@ -19,6 +19,54 @@
 
 </div>
 
+<a id="quick-start"></a>
+
+## 快速开始
+
+**不确定选哪个配置？保持默认值（`ai`）即可。** 下面的命令已经使用 `ai`；其他配置见[高级选项](#advanced-options)。
+
+**1. 先预览**（获取 v0.15.2 源码并只显示安装计划，不安装任何东西）：
+
+macOS:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./install.sh --profile ai --dry-run
+```
+
+Linux:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./linux/install.sh --profile ai --dry-run
+```
+
+Windows（PowerShell）:
+
+```powershell
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2; cd lazy-starter-kit-v0.15.2; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+```
+
+**2. 安装**（在同一终端、同一文件夹中，只运行你的系统那一行）：
+
+macOS:
+
+```bash
+bash ./install.sh --profile ai
+```
+
+Linux:
+
+```bash
+bash ./linux/install.sh --profile ai
+```
+
+Windows（PowerShell）:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai
+```
+
+想在 macOS 上用 GUI 安装，或想先阅读脚本？请看[推荐安装](#recommended-setup)。
+
 ---
 
 ## 这是什么？
@@ -245,7 +293,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -P
 
 ---
 
-## 常用选项
+<a id="advanced-options"></a>
+<a id="common-options"></a>
+
+## 高级选项（其他配置）
+
+**高级：** 如果保持默认的 `ai`，可以跳过本节。
 
 以下显式的开发者配置选项在 v0.15.2 中仍然可用。
 请在源码根目录运行（Linux 上把 `./install.sh` 换成 `./linux/install.sh`）：

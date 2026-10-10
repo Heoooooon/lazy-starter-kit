@@ -19,6 +19,54 @@
 
 </div>
 
+<a id="quick-start"></a>
+
+## クイックスタート
+
+**プロファイルが分からなければ、既定値（`ai`）のままで大丈夫です。** 下のコマンドはすでに `ai` を使います。ほかのプロファイルは[高度なオプション](#advanced-options)にあります。
+
+**1. まずプレビュー**（v0.15.2 のソースを取得し、インストール計画だけを表示します。何もインストールしません）:
+
+macOS:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./install.sh --profile ai --dry-run
+```
+
+Linux:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./linux/install.sh --profile ai --dry-run
+```
+
+Windows (PowerShell):
+
+```powershell
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2; cd lazy-starter-kit-v0.15.2; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+```
+
+**2. インストール**（同じターミナル・同じフォルダで、自分の OS の 1 行だけを実行）:
+
+macOS:
+
+```bash
+bash ./install.sh --profile ai
+```
+
+Linux:
+
+```bash
+bash ./linux/install.sh --profile ai
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai
+```
+
+macOS で GUI を使いたい場合や、先にスクリプトを読みたい場合は[推奨セットアップ](#recommended-setup)を参照してください。
+
 ---
 
 ## これは何？
@@ -260,7 +308,12 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -P
 
 ---
 
-## よく使うオプション
+<a id="advanced-options"></a>
+<a id="common-options"></a>
+
+## 高度なオプション（ほかのプロファイル）
+
+**高度:** 既定値の `ai` のままなら、このセクションは読み飛ばしてかまいません。
 
 以下の明示的な開発者プロファイル向けオプションは、v0.15.2 でも引き続き使えます。
 ソースのルートで実行してください（Linux では `./install.sh` を
