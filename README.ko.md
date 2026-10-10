@@ -19,6 +19,54 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 
 </div>
 
+<a id="quick-start"></a>
+
+## 빠른 시작
+
+**프로필을 모르겠다면 기본값(`ai`) 그대로 두세요.** 아래 명령이 이미 `ai`를 씁니다. 다른 프로필은 [고급 옵션](#advanced-options)에 있습니다.
+
+**1. 먼저 미리보기** (v0.15.2 소스를 받고 설치 계획만 보여 줍니다. 아무것도 설치하지 않습니다):
+
+macOS:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./install.sh --profile ai --dry-run
+```
+
+Linux:
+
+```bash
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2 && cd lazy-starter-kit-v0.15.2 && bash ./linux/install.sh --profile ai --dry-run
+```
+
+Windows (PowerShell):
+
+```powershell
+git clone --branch v0.15.2 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.2; cd lazy-starter-kit-v0.15.2; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+```
+
+**2. 설치** (같은 터미널·같은 폴더에서 내 OS 줄 하나만 실행):
+
+macOS:
+
+```bash
+bash ./install.sh --profile ai
+```
+
+Linux:
+
+```bash
+bash ./linux/install.sh --profile ai
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai
+```
+
+macOS에서 GUI로 설치하거나 스크립트를 먼저 읽어 보고 싶다면 [추천 설치](#recommended-setup)를 보세요.
+
 ---
 
 ## 이게 뭔가요?
@@ -255,7 +303,12 @@ Tools와 Homebrew 준비가 필요할 수 있습니다. 안내에 따라 준비�
 
 ---
 
-## 자주 쓰는 옵션
+<a id="advanced-options"></a>
+<a id="common-options"></a>
+
+## 고급 옵션 (다른 프로필)
+
+**고급:** 기본값 `ai`를 그대로 쓴다면 이 섹션은 건너뛰어도 됩니다.
 
 아래의 명시적 개발 프로필 옵션은 v0.15.2에서도 사용할 수 있습니다.
 저장소 루트에서 실행하며, Linux에서는 `./install.sh`를 `./linux/install.sh`로 바꾸세요.
