@@ -161,6 +161,38 @@ Test-Case 'AI package/runtime steps request only Git and Node LTS' {
   Step-Packages; Step-Runtimes
   Assert-Equal $script:Packages @('Git.Git','OpenJS.NodeJS.LTS')
 }
+Test-Case 'package preview shares install detection without installing' {
+  Import-Functions (Join-Path $Repo 'windows/scripts/lib.ps1') @('Install-WingetPackage')
+  function Test-HasCommand { param($Name) return $script:HasWinget }
+  function Test-WingetPackage { param($Id) $script:PackageProbes += $Id; return $script:PackagePresent }
+  function winget { throw 'Preview or an installed package must not invoke installation' }
+  function Write-Ok { param($Message) $script:PresentCount++ }
+  function Write-Host { param($Object, $ForegroundColor) $script:PlanCount++ }
+  try {
+    foreach ($dryRun in @($false, $true)) {
+      $script:DryRun = $dryRun
+      $script:HasWinget = $true
+      $script:PackagePresent = $true
+      $script:PackageProbes = @(); $script:PresentCount = 0; $script:PlanCount = 0
+      Install-WingetPackage -Id 'Git.Git'
+      Install-WingetPackage -Id 'OpenJS.NodeJS.LTS'
+      Assert-Equal $script:PackageProbes @('Git.Git','OpenJS.NodeJS.LTS')
+      Assert-Equal $script:PresentCount 2
+      Assert-Equal $script:PlanCount 0
+    }
+    foreach ($hasWinget in @($true, $false)) {
+      $script:DryRun = $true
+      $script:HasWinget = $hasWinget
+      $script:PackagePresent = $false
+      $script:PackageProbes = @(); $script:PresentCount = 0; $script:PlanCount = 0
+      Install-WingetPackage -Id 'Git.Git'
+      Install-WingetPackage -Id 'OpenJS.NodeJS.LTS'
+      Assert-Equal $script:PackageProbes.Count $(if ($hasWinget) { 2 } else { 0 })
+      Assert-Equal $script:PresentCount 0
+      Assert-Equal $script:PlanCount 2
+    }
+  } finally { $script:DryRun = $false }
+}
 Test-Case 'missing tool cannot satisfy executable readiness' {
   Import-Functions (Join-Path $Repo 'windows/scripts/lib.ps1') @('Test-AiReadiness')
   function Test-HasCommand { param($Name) return $Name -ne 'npm' }
@@ -200,7 +232,11 @@ Test-Case 'real preview steps perform no filesystem writes or external installs'
   Copy-Item (Join-Path $Repo 'windows') $preview -Recurse
   @'
 function Test-IsWindows { return $true }
-function winget { if (($args -join ',') -ne '--version') { throw 'Preview invoked winget installation' }; $global:LASTEXITCODE = 0; 'fixture-winget' }
+function winget {
+  if ($args[0] -eq '--version') { $global:LASTEXITCODE = 0; 'fixture-winget'; return }
+  if ($args[0] -eq 'list') { $global:LASTEXITCODE = 1; return }
+  throw 'Preview invoked winget installation'
+}
 function npm { throw 'Preview invoked npm' }
 function node { throw 'Preview invoked node' }
 function claude { throw 'Preview launched Claude' }
@@ -342,10 +378,14 @@ Test-Case 'PATH persistence is minimal and idempotent without lifecycle receipts
   } finally { $env:Path = $processPath }
 }
 Test-Case 'retired uninstall exits 2 and leaves the disposable home untouched' {
-  $before = @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" })
+  # PowerShell rewrites this runtime metrics file when a child starts.
+  # Exclude only that exact path; every other file still belongs in the snapshot.
+  $startupProfileDirectory = if ($PSVersionTable.PSEdition -eq 'Core') { 'Microsoft/PowerShell' } else { 'Microsoft/Windows/PowerShell' }
+  $startupProfileData = Join-Path $env:LOCALAPPDATA "$startupProfileDirectory/StartupProfileData-NonInteractive"
+  $before = @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Where-Object { $_.FullName -ne $startupProfileData } | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" })
   $r = Invoke-TestPowerShell (Join-Path $Repo 'windows/uninstall.ps1') @('-Yes')
   Assert-Equal $r.Code 2
-  Assert-Equal @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" }) $before
+  Assert-Equal @(Get-ChildItem -LiteralPath $Sandbox -Recurse -File -Force | Where-Object { $_.FullName -ne $startupProfileData } | Sort-Object FullName | Get-FileHash | ForEach-Object { "$($_.Path):$($_.Hash)" }) $before
 }
 if ($Failures.Count) { throw "$($Failures.Count) test(s) failed:`n$($Failures -join "`n")" }
 Write-Host 'PASS Windows beginner onboarding behavior'
