@@ -7,6 +7,19 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Windows source-checkout previews use the same winget package detection as
+  installation, skipping Git and Node.js LTS when already installed.
+- Windows onboarding's no-change regression excludes only PowerShell's
+  `StartupProfileData-NonInteractive` runtime metrics file from its hash comparison.
+
+### Changed
+- The four-language README quick-start commands suppress Git's detached-HEAD
+  advice, and explain that Windows double-click installation may add winget
+  Node.js alongside mise-managed Node.js.
+- Windows launcher tests explicitly warn when PowerShell 7 module-path isolation
+  is skipped and report when it is exercised.
+
 ## [0.15.3] - 2026-10-13
 
 Patch release for v0.15.2. The public interface is unchanged.
