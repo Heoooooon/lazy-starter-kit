@@ -68,6 +68,9 @@ blockers, then rerun the same `ai` profile. Continue with [First run](#first-run
 
 - [Download the experimental v0.15.2 guided GUI installer](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.2/lazy-starter-kit-windows-gui.zip)
 
+If Smart App Control (SAC) blocks an extracted `.cmd` or `.ps1` file, right-click
+the file → **Properties** → check **Unblock** (차단 해제) → **OK**, then run it again.
+
 **Windows is experimental:** automated tests and installation package verification
 have passed. Manual verification on a real Windows PC has not covered the full
 journey from double-clicking the launcher through installer screens, permission

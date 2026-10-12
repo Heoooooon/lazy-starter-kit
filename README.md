@@ -280,6 +280,9 @@ Platform details: [Linux guide](linux/README.md).
 
 ### Windows
 
+If Smart App Control (SAC) blocks an extracted `.cmd` or `.ps1` file, right-click
+the file → **Properties** → check **Unblock** → **OK**, then run it again.
+
 In PowerShell (5.1 or newer):
 
 ```powershell

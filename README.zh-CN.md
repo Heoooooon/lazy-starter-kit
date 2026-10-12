@@ -263,6 +263,9 @@ bash ./linux/install.sh --profile ai --dry-run
 
 ### Windows
 
+如果启用了 Smart App Control（SAC），解压后的 `.cmd` 或 `.ps1` 文件被阻止，
+请右键点击文件 → **属性** → 勾选 **解除锁定（Unblock）** → **确定**，然后重新运行。
+
 在 PowerShell（5.1 或更高版本）中：
 
 ```powershell
