@@ -602,9 +602,13 @@ function Start-InstallerRun {
     $payloadQuoted = $script:InstallerPayload.Replace("'", "''")
     $logQuoted = $script:InstallerLog.Replace("'", "''")
     $switches = Get-InstallerSwitches $profileName $script:WasDryRun
+    # Run the payload in its own process: redirecting its streams in-process
+    # turns git/winget/npm stderr progress into terminating errors on
+    # Windows PowerShell 5.1 (the payload uses ErrorActionPreference=Stop).
     $command =
       "trap { `$_ | Out-File -FilePath '$logQuoted' -Encoding utf8 -Append; exit 1 }; " +
-      "& '$payloadQuoted' $switches *>&1 | Out-File -FilePath '$logQuoted' -Encoding utf8; " +
+      "& powershell.exe -NoProfile -ExecutionPolicy Bypass -File '$payloadQuoted' $switches 2>&1 | " +
+      "ForEach-Object { `"`$_`" } | Out-File -FilePath '$logQuoted' -Encoding utf8; " +
       "exit `$LASTEXITCODE"
 
     $start = New-Object System.Diagnostics.ProcessStartInfo
