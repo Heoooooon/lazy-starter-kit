@@ -336,6 +336,13 @@ if ($guiSource -notmatch '\$script:InstallerCloneDir = \$cloneDirectory' -or
 if ($guiSource -match '(?m)^\.\s+\$CleanupLibraryPath') {
   throw 'Windows GUI imports cleanup state into its UI script scope'
 }
+if ($guiSource -match '& ''\$payloadQuoted'' \$switches \*>&1') {
+  throw 'Windows GUI redirects payload streams in-process; native stderr would fail the install on PowerShell 5.1'
+}
+if ($guiSource -notmatch
+    'powershell\.exe -NoProfile -ExecutionPolicy Bypass -File ''\$payloadQuoted'' \$switches 2>&1') {
+  throw 'Windows GUI does not run its payload in a child process'
+}
 Write-Host 'ok   Windows GUI reports its contract'
 
 # Given the exact files uploaded in the Windows GUI archive, when that packaged
