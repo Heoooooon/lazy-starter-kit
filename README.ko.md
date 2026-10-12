@@ -272,6 +272,9 @@ bash ./linux/install.sh --profile ai --dry-run
 
 ### Windows
 
+Smart App Control(SAC)이 켜져 있어 압축을 푼 `.cmd`나 `.ps1` 파일이 차단되면,
+파일을 우클릭 → **속성** → **차단 해제** 체크 → **확인**을 누른 뒤 다시 실행하세요.
+
 PowerShell 5.1 이상에서:
 
 ```powershell

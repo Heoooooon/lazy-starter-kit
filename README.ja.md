@@ -277,6 +277,9 @@ bash ./linux/install.sh --profile ai --dry-run
 
 ### Windows
 
+Smart App Control（SAC）が有効で、展開した `.cmd` や `.ps1` ファイルがブロックされる場合は、
+ファイルを右クリック → **プロパティ** → **許可する（Unblock）** にチェック → **OK** を押して、もう一度実行してください。
+
 PowerShell（5.1 以降）で実行します。
 
 ```powershell
