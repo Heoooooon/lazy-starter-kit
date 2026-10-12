@@ -4,7 +4,13 @@ This project follows [Semantic Versioning](https://semver.org/). This document
 defines **what counts as the public interface**, what you can script
 against and pin, and what a version number promises about it.
 
-## Release guidance: v0.15.2
+## Release guidance: v0.15.3
+
+**v0.15.3** is a patch for v0.15.2. The Windows GUI runs its installer
+payload in a child PowerShell process so native stderr and in-process stream
+redirection no longer break installation. Windows setup guidance explains
+Smart App Control file unblocking. The public interface is unchanged; use
+v0.15.3 instead of v0.15.2.
 
 **v0.15.2** is a patch for v0.15.1. Windows double-click launchers and the
 Windows PowerShell installer work when started from a PowerShell 7 terminal,
@@ -45,7 +51,7 @@ The standard remote bootstrap selects the newest published GitHub Release by def
 Packaged GUIs pin their own release commit, so downloading an old ZIP again won't
 pick up untagged changes. A local source checkout runs its own files. Use the
 [recommended setup guide](README.md#recommended-setup) to download the GUI
-or clone `v0.15.2` and preview the local installer before applying. Record the
+or clone `v0.15.3` and preview the local installer before applying. Record the
 checkout commit when pinning source. Don't use an older
 release if avoiding retired-agent installation is required.
 

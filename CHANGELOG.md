@@ -7,6 +7,20 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.3] - 2026-10-13
+
+Patch release for v0.15.2. The public interface is unchanged.
+
+### Fixed
+- The Windows GUI runs the installer payload in a child PowerShell process,
+  preventing native stderr and in-process stream redirection from breaking
+  installation ([PR #41](https://github.com/Heoooooon/lazy-starter-kit/pull/41)).
+
+### Changed
+- Windows setup documentation explains how to unblock downloaded files when
+  Smart App Control blocks the launcher
+  ([PR #42](https://github.com/Heoooooon/lazy-starter-kit/pull/42)).
+
 ## [0.15.2] - 2026-10-09
 
 Patch release for v0.15.1. The public interface is unchanged.
@@ -573,7 +587,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.2...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.3...HEAD
+[0.15.3]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.14.1...v0.15.0
