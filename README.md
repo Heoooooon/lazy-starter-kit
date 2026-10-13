@@ -218,9 +218,10 @@ existing configuration. It doesn't provide automatic uninstall.
 | Linux | No GUI package | Use the v0.15.4 source commands below or the [Linux guide](linux/README.md) |
 
 **Windows is experimental:** automated tests and installation package verification
-have passed. Manual verification on a real Windows PC has not covered the full
-journey from double-clicking the launcher through installer screens, permission
-prompts, installation completion, and first run.
+have passed. On real Windows 11 hardware, the fixed GUI package was manually verified
+from double-click through install start, completed tool checks, and enabled first-use
+buttons ([PR #41](https://github.com/Heoooooon/lazy-starter-kit/pull/41)).
+Claude Code/Codex sign-in and a successful first real prompt remain unverified.
 
 The GUI starts with **ai**, with **Install** as the primary action and a separate
 **Preview** button. Review the plan without installing, then choose Install when
