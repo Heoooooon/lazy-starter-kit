@@ -205,9 +205,10 @@ v0.15.4 既不会安装、也不会删除 gajae-code（`gjc`）、lazycodex 或�
 | Windows（实验性） | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.4/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
 | Linux | 无 GUI 安装包 | 使用下方的 v0.15.4 源码命令或 [Linux 指南](linux/README.md) |
 
-**Windows 为实验性支持：** 自动化测试和安装包验证均已通过。但在真实 Windows 电脑上
-的手动验证，尚未覆盖从双击启动器、经过安装界面和权限提示、到安装完成和首次运行的
-完整流程。
+**Windows 为实验性支持：** 自动化测试和安装包验证均已通过。已在真实 Windows 11 电脑上
+手动验证修复后的 GUI 安装包：双击 → 开始安装 → 工具检查完成 → 首次使用按钮启用
+（[PR #41](https://github.com/Heoooooon/lazy-starter-kit/pull/41)）。
+Claude Code/Codex 登录及第一条实际提示词能否成功执行仍未验证。
 
 GUI 默认选中 **ai**，以 **Install（安装）** 为主操作，另有独立的 **Preview（预览）**
 按钮。可以先不安装、只查看计划，准备好后再点安装。不指定配置、也不自定义步骤的普通
