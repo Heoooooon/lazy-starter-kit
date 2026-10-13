@@ -25,24 +25,24 @@ The fastest way to start AI coding on your own machine.
 
 **Not sure which profile? Keep the default (`ai`).** These commands already use it; the other profiles are [advanced options](#advanced-options).
 
-**1. Preview first** (gets the v0.15.3 source and only shows the plan; installs nothing):
+**1. Preview first** (gets the v0.15.4 source and only shows the plan; installs nothing):
 
 macOS:
 
 ```bash
-git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4 && cd lazy-starter-kit-v0.15.4 && bash ./install.sh --profile ai --dry-run
 ```
 
 Linux:
 
 ```bash
-git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4 && cd lazy-starter-kit-v0.15.4 && bash ./linux/install.sh --profile ai --dry-run
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+git clone -c advice.detachedHead=false --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4; cd lazy-starter-kit-v0.15.4; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
 
 **2. Install** (same terminal and folder; run only your OS's line):
@@ -77,12 +77,12 @@ Docker, and AI coding agents one by one.
 lazy-starter-kit bootstraps that development environment in one pass and gives
 you a way to verify the result afterwards.
 
-The v0.15.3 `ai` default prepares **Git, Node.js LTS/npm, Claude Code,
+The v0.15.4 `ai` default prepares **Git, Node.js LTS/npm, Claude Code,
 Codex, safety hooks and minimal PATH setup**, plus the prerequisites needed to
 install them. It doesn't include Python, Go, Rust, Docker, Bun, uv, shell
 cosmetics, fonts, or the optional CLI bundle.
 
-**Start with v0.15.3:** use the [release downloads or pinned source commands](#recommended-setup)
+**Start with v0.15.4:** use the [release downloads or pinned source commands](#recommended-setup)
 below for the smaller AI setup and guided first run. v0.13.0 already had a
 `recommended` developer profile and first-use guidance, but not the `ai` default
 or the new GUI flow.
@@ -109,7 +109,7 @@ current state and `--dry-run` to preview changes before applying them.
 
 <a id="ai-setup"></a>
 
-## AI setup (v0.15.3)
+## AI setup (v0.15.4)
 
 Ordinary GUI and CLI installs with no profile or custom step selection now use
 `ai`. Explicit `recommended`, `full`, `minimal`, and `work` keep their existing
@@ -162,7 +162,7 @@ Installation doesn't include subscriptions, service access, or credits. Review
 provider terms, billing, and your organization's policy first. The new GUI shows
 these requirements before installation.
 
-In the v0.15.3 GUI, **Install** is the primary action. **Preview** is a
+In the v0.15.4 GUI, **Install** is the primary action. **Preview** is a
 separate action that makes no changes. Neither a completed preview nor a
 successful installer exit alone means the machine is ready. Git, Node, npm,
 Claude Code, and Codex must actually run and pass their version checks. A missing
@@ -174,7 +174,7 @@ instructions. If installation continues in Terminal, finish it there, then retur
 to the GUI's result check before starting a practice session. Use a fresh Terminal
 window to check the installed PATH, not the pre-install shell.
 
-For CLI installation, get the **v0.15.3 source** using the commands
+For CLI installation, get the **v0.15.4 source** using the commands
 [below](#recommended-setup), inspect the installer and its scripts, then use
 only your OS's row from that source root:
 
@@ -200,22 +200,22 @@ is in [First project](#first-project).
 
 <a id="recommended-setup"></a>
 
-## Recommended setup (v0.15.3)
+## Recommended setup (v0.15.4)
 
-**New to this? On macOS, use the v0.15.3 GUI below. The Windows GUI is experimental.**
+**New to this? On macOS, use the v0.15.4 GUI below. The Windows GUI is experimental.**
 The default `ai` profile sets up Claude Code and Codex without Docker or Windows
-WSL. v0.15.3 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
+WSL. v0.15.4 neither installs nor deletes gajae-code (`gjc`), lazycodex, or their
 existing configuration. It doesn't provide automatic uninstall.
 
 <a id="gui-downloads"></a>
 
 ### GUI downloads
 
-| OS | v0.15.3 GUI asset | Open after extracting |
+| OS | v0.15.4 GUI asset | Open after extracting |
 |---|---|---|
-| macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.3/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
-| Windows (experimental) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.3/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
-| Linux | No GUI package | Use the v0.15.3 source commands below or the [Linux guide](linux/README.md) |
+| macOS 14+, Apple Silicon or Intel | [lazy-starter-kit-macos-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.4/lazy-starter-kit-macos-gui.zip) | `Lazy Starter Kit Installer.app` |
+| Windows (experimental) | [lazy-starter-kit-windows-gui.zip](https://github.com/Heoooooon/lazy-starter-kit/releases/download/v0.15.4/lazy-starter-kit-windows-gui.zip) | `Lazy-Starter-Kit-Installer.cmd` |
+| Linux | No GUI package | Use the v0.15.4 source commands below or the [Linux guide](linux/README.md) |
 
 **Windows is experimental:** automated tests and installation package verification
 have passed. Manual verification on a real Windows PC has not covered the full
@@ -231,14 +231,14 @@ After installation and successful checks, continue with
 [a new terminal, version checks and your first project](#first-project).
 Account sign-in and the first prompt remain manual.
 
-See the [v0.15.3 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.3)
+See the [v0.15.4 release page](https://github.com/Heoooooon/lazy-starter-kit/releases/tag/v0.15.4)
 for changes and all assets. Packaged GUIs pin their own release commit; the
 standard remote bootstrap resolves the newest published GitHub Release by default.
 Changes to `main` don't automatically update release ZIPs.
 
 **v0.13.0** used full for no-profile CLI installs and recommended + preview in
 the GUI. Its explicit developer profiles and no-uninstall policy are preserved
-in v0.15.3; its ZIPs don't acquire the new AI flow.
+in v0.15.4; its ZIPs don't acquire the new AI flow.
 
 Older **v0.12.0** has no `recommended` profile and its GUIs start with full +
 preview. It still installs gajae-code and lazycodex and includes the old automatic
@@ -246,10 +246,10 @@ uninstall behavior. Don't use it for the setup described here.
 
 ### Install from source (Linux or terminal users)
 
-The commands below clone the **v0.15.3 tag** and run the local installer.
+The commands below clone the **v0.15.4 tag** and run the local installer.
 Install [Git](https://git-scm.com/downloads) first and open a new terminal, or
-download the [v0.15.3 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.3.zip),
-extract it, and open a terminal in `lazy-starter-kit-0.15.3`. With the ZIP, skip
+download the [v0.15.4 source ZIP](https://github.com/Heoooooon/lazy-starter-kit/archive/refs/tags/v0.15.4.zip),
+extract it, and open a terminal in `lazy-starter-kit-0.15.4`. With the ZIP, skip
 the clone and `cd` commands. Use a new folder rather than an existing checkout.
 
 ### 1. Inspect and preview
@@ -261,8 +261,8 @@ and, on Windows, `wsl` are absent from the plan.
 ### macOS
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3
-cd lazy-starter-kit-v0.15.3
+git clone --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4
+cd lazy-starter-kit-v0.15.4
 # Inspect install.sh and scripts/, then preview:
 bash ./install.sh --profile ai --dry-run
 ```
@@ -272,8 +272,8 @@ bash ./install.sh --profile ai --dry-run
 Ubuntu/Debian, Fedora/RHEL, Arch, and openSUSE families:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3
-cd lazy-starter-kit-v0.15.3
+git clone --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4
+cd lazy-starter-kit-v0.15.4
 # Inspect linux/install.sh and linux/scripts/, then preview:
 bash ./linux/install.sh --profile ai --dry-run
 ```
@@ -288,8 +288,8 @@ the file → **Properties** → check **Unblock** → **OK**, then run it again.
 In PowerShell (5.1 or newer):
 
 ```powershell
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3
-cd lazy-starter-kit-v0.15.3
+git clone --branch v0.15.4 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.4
+cd lazy-starter-kit-v0.15.4
 # Inspect windows/install.ps1 and windows/scripts/, then preview:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
@@ -323,7 +323,7 @@ Continue with [a new terminal and your first project](#first-project).
 
 **Advanced:** skip this section if you kept the default `ai`.
 
-These explicit developer-profile options remain available in v0.15.3.
+These explicit developer-profile options remain available in v0.15.4.
 Run from the source root (replace `./install.sh` with
 `./linux/install.sh` on Linux):
 
@@ -344,7 +344,7 @@ and `-Only` instead of `--dry-run` and `--only`.
 |---|---|
 | `ai` (default) | Git, Node LTS/npm, Claude Code, Codex, safety hooks, minimal PATH and required prerequisites. Ordinary no-profile install and GUI default since v0.14.0. |
 | `recommended` | Core tools, runtimes, shell, Git, Claude Code and Codex. No Docker or Windows WSL. Not an alias for `ai`. |
-| `full` | All steps, including Docker and Windows WSL. Explicit opt-in in v0.15.3; the no-profile CLI default in v0.13.0 and earlier. Windows installation prompts and prerequisites still apply. |
+| `full` | All steps, including Docker and Windows WSL. Explicit opt-in in v0.15.4; the no-profile CLI default in v0.13.0 and earlier. Windows installation prompts and prerequisites still apply. |
 | `minimal` | Core tools, runtimes, shell and Git. No agents, Docker or Windows WSL. |
 | `work` | Same steps as recommended; check your employer's policy before installing. |
 
@@ -393,7 +393,7 @@ from the source folder: `--only runtimes` or `--only agents` on macOS/Linux, or
 `-Only runtimes` / `-Only agents` on Windows. Don't add `--profile` / `-Profile`
 to an `--only` / `-Only` command.
 
-Doctor scope in v0.15.3 is platform-specific:
+Doctor scope in v0.15.4 is platform-specific:
 
 - **macOS:** bare `--doctor` infers the saved install-profile marker, falling
   back to the full inventory if no recognized marker exists. Use
@@ -423,7 +423,7 @@ mkdir "$HOME/my-first-ai" && cd "$HOME/my-first-ai" && git init && codex
 
 On Windows, create a new empty folder in File Explorer, open PowerShell there,
 and run `git init`, then `codex`. Run `claude` instead if you prefer Claude Code.
-In the v0.15.3 GUI, choose the agent and explicitly launch its new practice
+In the v0.15.4 GUI, choose the agent and explicitly launch its new practice
 folder. Use the prompt-copy action to place the starter request on the clipboard.
 
 Follow the tool's own sign-in prompts; installing the kit doesn't create an
@@ -439,7 +439,7 @@ file in your browser when it's ready. Login and prompt submission aren't automat
 
 ## Automatic uninstall is not supported
 
-**v0.15.3 doesn't provide automatic uninstall functionality.**
+**v0.15.4 doesn't provide automatic uninstall functionality.**
 
 The older v0.12.0 release still has the old removal behavior. Don't use an
 old release uninstaller to clean up an existing machine.
@@ -510,7 +510,7 @@ Get-Command python -All
 
 ## Corporate machines
 
-The v0.15.3 `work` profile excludes Docker and Windows WSL. It isn't a
+The v0.15.4 `work` profile excludes Docker and Windows WSL. It isn't a
 permission bypass. From the source root (use `./linux/install.sh` on Linux):
 
 ```bash

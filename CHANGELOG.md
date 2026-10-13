@@ -7,6 +7,10 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.15.4] - 2026-10-13
+
+Patch release for v0.15.3. The public interface is unchanged.
+
 ### Fixed
 - Windows source-checkout previews use the same winget package detection as
   installation, skipping Git and Node.js LTS when already installed.
@@ -600,7 +604,8 @@ and on every push via GitHub Actions.
 - dry-run: `brew`/`runtimes` steps degrade gracefully on a bare machine instead
   of aborting when prerequisite tools aren't installed yet.
 
-[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.3...HEAD
+[Unreleased]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.4...HEAD
+[0.15.4]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/Heoooooon/lazy-starter-kit/compare/v0.15.0...v0.15.1
