@@ -30,19 +30,19 @@ The fastest way to start AI coding on your own machine.
 macOS:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
 ```
 
 Linux:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
 
 **2. Install** (same terminal and folder; run only your OS's line):
@@ -121,6 +121,8 @@ developer bundle without Docker or Windows WSL.
 | macOS | Homebrew `node@24`, including npm |
 | Linux | mise `node@lts`, including npm |
 | Windows | winget `OpenJS.NodeJS.LTS`, including npm |
+
+On Windows, the double-click installer does not activate mise and may install a separate winget Node.js LTS alongside your mise-managed Node.js.
 
 **Why are Node.js and npm needed?** npm installs Codex, and Node.js runs the
 safety-hook installer and the AI tools' safety hooks. You do not need to choose

@@ -355,8 +355,8 @@ function Install-WingetPackage {
     [string]$Name = $null
   )
   if (-not $Name) { $Name = $Id }
-  if (-not $script:DryRun -and (Test-WingetPackage -Id $Id)) {
-    Write-Ok "$Name present"
+  if ((-not $script:DryRun -or (Test-HasCommand winget)) -and (Test-WingetPackage -Id $Id)) {
+    Write-Ok "$Name present -- skipping"
     return
   }
   Write-Info "Installing $Name (winget: $Id)..."

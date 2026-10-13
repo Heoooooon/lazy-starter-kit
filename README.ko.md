@@ -30,19 +30,19 @@ AI 코딩, 내 컴퓨터에서 시작하는 가장 빠른 길.
 macOS:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
 ```
 
 Linux:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
 
 **2. 설치** (같은 터미널·같은 폴더에서 내 OS 줄 하나만 실행):
@@ -120,6 +120,8 @@ Docker와 Windows WSL을 제외한 더 넓은 개발 도구 묶음입니다.
 | macOS | Homebrew `node@24`, npm 포함 |
 | Linux | mise `node@lts`, npm 포함 |
 | Windows | winget `OpenJS.NodeJS.LTS`, npm 포함 |
+
+Windows 더블클릭 설치기는 mise를 활성화하지 않으므로, mise로 관리하는 Node.js가 있어도 winget Node.js LTS를 별도로 설치할 수 있습니다.
 
 **Node.js와 npm은 왜 필요한가요?** npm은 Codex를 설치하고, Node.js는
 AI 도구의 안전 훅을 설치하고 실행하는 데 사용해요. 처음에는 실행 도구를 직접

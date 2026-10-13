@@ -131,7 +131,7 @@ exit 0
   if (Test-Path -LiteralPath $pwshModules) {
     $env:PSModulePath = "$pwshModules;$savedModulePath"
   } else {
-    Write-Host 'note PowerShell 7 is not installed; launcher module-path isolation not exercised'
+    Write-Warning 'SKIP: PowerShell 7 modules not found at the system install path; launcher module-path isolation was not exercised.'
   }
   try {
     $launcher = & cmd.exe /d /c $launcherPath 2>&1 | Out-String
@@ -144,6 +144,9 @@ exit 0
   }
   if ($launcher -notmatch "branch=v9\.9\.9;commit=$releaseCommit") {
     throw "Bundled Windows launcher did not pass its pinned release: $launcher"
+  }
+  if (Test-Path -LiteralPath $pwshModules) {
+    Write-Host 'ok   PowerShell 7 launcher module-path isolation exercised'
   }
 
   Remove-Item -LiteralPath (Join-Path $LauncherPackageDir 'RELEASE_COMMIT') -Force

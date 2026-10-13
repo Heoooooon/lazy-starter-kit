@@ -30,19 +30,19 @@
 macOS:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
 ```
 
 Linux:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
 ```
 
 Windows (PowerShell):
 
 ```powershell
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
 
 **2. インストール**（同じターミナル・同じフォルダで、自分の OS の 1 行だけを実行）:
@@ -121,6 +121,8 @@ Docker は含まれず、Windows の WSL も含まれません。Hermes は macO
 | macOS | Homebrew `node@24`（npm を含む） |
 | Linux | mise `node@lts`（npm を含む） |
 | Windows | winget `OpenJS.NodeJS.LTS`（npm を含む） |
+
+Windows のダブルクリックインストーラーは mise を有効化しないため、mise 管理の Node.js があっても winget の Node.js LTS を別途インストールする場合があります。
 
 **なぜ Node.js と npm が必要なの？** Codex は npm でインストールし、安全フックの
 インストーラーと AI ツールの安全フックは Node.js で動きます。始めるにあたって実行ツールを

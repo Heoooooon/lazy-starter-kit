@@ -30,19 +30,19 @@
 macOS:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./install.sh --profile ai --dry-run
 ```
 
 Linux:
 
 ```bash
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3 && cd lazy-starter-kit-v0.15.3 && bash ./linux/install.sh --profile ai --dry-run
 ```
 
 Windows（PowerShell）:
 
 ```powershell
-git clone --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
+git clone -c advice.detachedHead=false --branch v0.15.3 --single-branch https://github.com/Heoooooon/lazy-starter-kit.git lazy-starter-kit-v0.15.3; cd lazy-starter-kit-v0.15.3; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun
 ```
 
 **2. 安装**（在同一终端、同一文件夹中，只运行你的系统那一行）：
@@ -117,6 +117,8 @@ Docker 和 Windows WSL。
 | macOS | Homebrew `node@24`，含 npm |
 | Linux | mise `node@lts`，含 npm |
 | Windows | winget `OpenJS.NodeJS.LTS`，含 npm |
+
+Windows 双击安装程序不会激活 mise，因此即使已有 mise 管理的 Node.js，也可能通过 winget 另外安装 Node.js LTS。
 
 **为什么需要 Node.js 和 npm？** Codex 通过 npm 安装，而 Node.js 负责运行安全钩子
 安装程序以及 AI 工具的安全钩子。入门时你不需要自己挑选运行工具，按照下方对应系统的
