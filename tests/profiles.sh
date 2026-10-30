@@ -64,6 +64,7 @@ is_linux() { return 0; }
 cache_zsh_config_dir() { :; }
 zsh_config_file() { printf '%s/%s\n' "$HOME" "$1"; }
 load_brew() { :; }
+homebrew_preflight() { :; }
 have() { [[ "$1" == brew ]]; }
 brew() {
   case "$*" in
@@ -106,7 +107,7 @@ run_case() {
   env -i HOME="$case_dir/home" USERPROFILE="$case_dir/home" \
     TMPDIR="$case_dir/tmp" TMP="$case_dir/tmp" TEMP="$case_dir/tmp" \
     XDG_CACHE_HOME="$case_dir/cache" PATH="$WORK/bin:/usr/bin:/bin" \
-    TRACE="$case_dir/trace" FAIL_BREW="${FAIL_BREW:-0}" \
+    TRACE="$case_dir/trace" FAIL_BREW="${FAIL_BREW:-0}" STARTER_KIT_AUTO_DOCTOR=0 \
     /bin/bash "$WORK/$platform/install.sh" --yes "$@" > "$case_dir/output" 2>&1 || status=$?
   : > "$case_dir/expected"
   for id in $steps; do

@@ -184,6 +184,14 @@ only your OS's row from that source root:
 | Linux | `bash ./linux/install.sh --profile ai --dry-run` | `bash ./linux/install.sh --profile ai` | `bash ./linux/install.sh --profile ai --doctor` |
 | Windows | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -Doctor` |
 
+On macOS, every install ends with a results board: one ✅ / ❌ / ⏭ (skipped)
+row per step, an automatic `--doctor` summary, and a final line — `🎉 설치 완료`
+(installation complete) or `❌ N개 실패` with the failed step and its fix. The
+full output is saved to `~/Library/Logs/lazy-starter-kit/install-<time>.log`,
+printed at the end. If Homebrew is missing and the account is not an
+administrator, or no Terminal is available for the password prompt, the
+installer stops before changing anything and says what to do.
+
 If a required tool is missing, review its log and fix the reported blocker, then
 rerun the same `ai` profile. Custom `--only` / `-Only` or unprofiled `--skip` /
 `-Skip` selections retain the wider developer-step payloads. Don't use them as a
