@@ -174,6 +174,11 @@ Shell。
 | Linux | `bash ./linux/install.sh --profile ai --dry-run` | `bash ./linux/install.sh --profile ai` | `bash ./linux/install.sh --profile ai --doctor` |
 | Windows | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -Doctor` |
 
+macOS 安装结束时会显示结果面板：每个步骤一行 ✅ / ❌ / ⏭（跳过），自动的 `--doctor`
+摘要，以及最后一行（`🎉 설치 완료`，或列出失败步骤和解决方法的 `❌ N개 실패`）。完整输出保存到
+`~/Library/Logs/lazy-starter-kit/install-<时间>.log`，路径显示在最后。如果没有 Homebrew 且当前
+账户不是管理员，或者没有可输入密码的终端，安装程序会在做任何更改前停止并说明解决方法。
+
 如果缺少某个必需工具，请查看它的日志并解决报告的问题，然后重新运行同一个 `ai`
 配置。自定义的 `--only` / `-Only`，或不带配置的 `--skip` / `-Skip`，仍会沿用更宽的
 开发者步骤内容，不要把它们当作精简 AI 配置的修复捷径。未知的配置名和步骤 ID 会被拒绝，

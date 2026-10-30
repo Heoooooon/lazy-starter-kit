@@ -7,6 +7,20 @@ and the project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- macOS installs end with a results board: a ✅ / ❌ / ⏭ row per step, an
+  automatic read-only `--doctor` summary, and one final line (`🎉 설치 완료` or
+  `❌ N개 실패: <step> → <fix>`). Set `STARTER_KIT_AUTO_DOCTOR=0` to skip the doctor.
+- Real (non-dry-run) macOS installs save their full output to
+  `~/Library/Logs/lazy-starter-kit/install-<time>.log` and print the path at the end.
+- A Homebrew pre-flight check stops the macOS installer before any change when
+  Homebrew must be installed but the account is not an administrator, or no
+  interactive terminal is available without `--yes`, and explains the fix.
+
+### Fixed
+- `./install.sh --dry-run` on a Mac without Homebrew no longer stops silently
+  with exit code 1 right after previewing the Homebrew install.
+
 ## [0.15.4] - 2026-10-13
 
 Patch release for v0.15.3. The public interface is unchanged.

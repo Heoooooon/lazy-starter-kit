@@ -21,7 +21,8 @@ step()  { printf '\n%s==>%s %s%s%s\n' "$_C_BLUE$_C_BOLD" "$_C_RESET" "$_C_BOLD" 
 info()  { printf '%s  •%s %s\n' "$_C_DIM" "$_C_RESET" "$*"; }
 ok()    { printf '%s  ✓%s %s\n' "$_C_GREEN" "$_C_RESET" "$*"; }
 warn()  { printf '%s  !%s %s\n' "$_C_YELLOW" "$_C_RESET" "$*" >&2; }
-err()   { printf '%s  ✗%s %s\n' "$_C_RED" "$_C_RESET" "$*" >&2; }
+# err also remembers its message so an end-of-run summary can explain a failure.
+err()   { _KIT_LAST_ERROR="$*"; printf '%s  ✗%s %s\n' "$_C_RED" "$_C_RESET" "$*" >&2; }
 die()   { err "$*"; exit 1; }
 
 # ---------------------------------------------------------------------------

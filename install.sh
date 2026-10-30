@@ -520,10 +520,197 @@ JS
   doctor
 fi
 
+# ---------------------------------------------------------------------------
+# Install log + results board. Every real run tees its full output to
+# ~/Library/Logs/lazy-starter-kit/ and ends with a per-step ✅/❌/⏭ board, an
+# automatic --doctor summary and one final line, so a first-time user can tell
+# whether setup finished and what to do next. Dry-runs write no log.
+# ---------------------------------------------------------------------------
+KIT_LOG_FILE=""; KIT_TEE_PID=""; KIT_CURRENT_STEP=""
+KIT_RESULT_IDS=(); KIT_RESULT_STATES=(); KIT_RESULT_NOTES=()
+KIT_DOCTOR_LINE=""; KIT_DOCTOR_PROBLEMS=""; KIT_DOCTOR_ISSUES=0
+
+kit_start_log() {
+  [[ "$DRY_RUN" != "1" ]] || return 0
+  local dir="${STARTER_KIT_LOG_DIR:-$HOME/Library/Logs/lazy-starter-kit}" fifo
+  if ! mkdir -p "$dir" 2>/dev/null; then
+    warn "could not create $dir; continuing without an install log"
+    return 0
+  fi
+  KIT_LOG_FILE="$dir/install-$(date +%Y%m%d-%H%M%S).log"
+  # A FIFO (not >(tee)) keeps the tee process waitable on bash 3.2.
+  fifo="$(mktemp -u "${TMPDIR:-/tmp}/lazy-starter-kit-log.XXXXXX")"
+  if ! mkfifo -m 600 "$fifo" 2>/dev/null; then
+    warn "could not start the install log; continuing without it"
+    KIT_LOG_FILE=""
+    return 0
+  fi
+  exec 3>&1 4>&2
+  tee -a "$KIT_LOG_FILE" <"$fifo" >&3 2>/dev/null &
+  KIT_TEE_PID=$!
+  exec >"$fifo" 2>&1
+  rm -f "$fifo"
+}
+
+kit_finish_log() {
+  [[ -n "$KIT_TEE_PID" ]] || return 0
+  exec 1>&3 2>&4 3>&- 4>&-
+  # Bounded: a daemon started by a step may still hold the pipe open.
+  local waited=0
+  while kill -0 "$KIT_TEE_PID" 2>/dev/null && [[ "$waited" -lt 50 ]]; do
+    sleep 0.1; waited=$((waited + 1))
+  done
+  # Keep the log readable in TextEdit/Console: drop terminal color codes.
+  kill -0 "$KIT_TEE_PID" 2>/dev/null \
+    || perl -pi -e 's/\e\[[0-9;]*m//g' "$KIT_LOG_FILE" 2>/dev/null || true
+}
+
+kit_record() {
+  KIT_RESULT_IDS+=("$1"); KIT_RESULT_STATES+=("$2"); KIT_RESULT_NOTES+=("${3:-}")
+}
+
+# kit_lookup <id> — set _KIT_STATE/_KIT_NOTE from the last record for <id>.
+kit_lookup() {
+  local i found=1
+  for ((i = 0; i < ${#KIT_RESULT_IDS[@]}; i++)); do
+    if [[ "${KIT_RESULT_IDS[i]}" == "$1" ]]; then
+      _KIT_STATE="${KIT_RESULT_STATES[i]}"; _KIT_NOTE="${KIT_RESULT_NOTES[i]}"; found=0
+    fi
+  done
+  return "$found"
+}
+
+kit_step_label() {
+  case "$1" in
+    precheck) echo "pre-flight check · 사전 점검" ;;
+    prereqs)  echo "Xcode Command Line Tools + Homebrew" ;;
+    brew)     echo "Homebrew packages · 패키지" ;;
+    runtimes) echo "language runtimes · 언어 런타임" ;;
+    shell)    echo "zsh + terminal config · 셸 설정" ;;
+    docker)   echo "Docker (colima)" ;;
+    git)      echo "Git config · Git 설정" ;;
+    agents)   echo "AI agents (Claude Code, Codex)" ;;
+    check)    echo "required commands run · 필수 명령 실행 확인" ;;
+    *)        echo "setup · 설치 진행" ;;
+  esac
+}
+
+kit_fix_hint() {
+  case "$1" in
+    precheck) echo "$KIT_PREFLIGHT_FIX" ;;
+    prereqs)  echo "run ./install.sh --only prereqs from the Terminal app as an administrator · 터미널 앱에서 관리자 계정으로 다시 실행" ;;
+    check)    echo "re-run ./install.sh --profile ai · 다시 실행 (diagnose: ./install.sh --profile ai --doctor)" ;;
+    setup)    echo "re-run ./install.sh and check the log · 다시 실행하고 로그 확인" ;;
+    *)        echo "re-run ./install.sh --only $1 · 다시 실행" ;;
+  esac
+}
+
+# kit_run_doctor — run the read-only --doctor in a child process and keep a
+# one-line summary plus its problem lines for the board.
+kit_run_doctor() {
+  local output status ok_count warn_count missing_count
+  local -a args=(--doctor)
+  [[ "$DRY_RUN" != "1" && "${STARTER_KIT_AUTO_DOCTOR:-1}" != "0" ]] || return 0
+  if kit_lookup precheck; then return 0; fi
+  if [[ "$PROFILE" == ai ]]; then
+    # A partial AI selection must not probe tools the user chose not to install.
+    if [[ "$(selected | tr '\n' ',')" != 'prereqs,brew,runtimes,shell,git,agents,' ]]; then
+      KIT_DOCTOR_LINE="skipped for a partial selection (run ./install.sh --profile ai --doctor)"
+      return 0
+    fi
+    args+=(--profile ai)
+  elif [[ -n "$PROFILE" ]]; then
+    args+=(--profile "$PROFILE")
+  fi
+  info "running ./install.sh ${args[*]} (read-only)…"
+  status=0
+  # The child must never inherit the launcher's ephemeral-checkout cleanup.
+  output="$(env -u STARTER_KIT_EPHEMERAL_ROOT /bin/bash "$ROOT/install.sh" "${args[@]}" </dev/null 2>&1)" || status=$?
+  ok_count="$(printf '%s\n' "$output" | grep -c '✓' || true)"
+  warn_count="$(printf '%s\n' "$output" | grep -cE '^ +! ' || true)"
+  missing_count="$(printf '%s\n' "$output" | grep -c '✗' || true)"
+  KIT_DOCTOR_PROBLEMS="$(printf '%s\n' "$output" | grep -E '^ +(✗|!) ' | head -8 || true)"
+  if [[ "$status" == 0 && "$warn_count" == 0 ]]; then
+    KIT_DOCTOR_LINE="✅ all good · 이상 없음 (✓ $ok_count)"
+  else
+    KIT_DOCTOR_ISSUES=$((warn_count + missing_count))
+    KIT_DOCTOR_LINE="⚠️  ✓ $ok_count · ! $warn_count · ✗ $missing_count — details · 자세히: ./install.sh ${args[*]}"
+  fi
+  # A custom --only/--skip run still gets the whole-kit inventory; say so.
+  [[ -n "$PROFILE" ]] || KIT_DOCTOR_LINE="$KIT_DOCTOR_LINE (whole kit, not only selected steps · 선택한 단계가 아닌 전체 기준)"
+}
+
+kit_print_summary() {
+  local status="$1" id mark note failed=0 failures="" is_step
+  if [[ "$status" != 0 && -n "$KIT_CURRENT_STEP" ]]; then
+    kit_record "$KIT_CURRENT_STEP" fail "${_KIT_LAST_ERROR:-stopped with exit code $status}"
+    KIT_CURRENT_STEP=""
+  fi
+  if [[ "$status" != 0 && " ${KIT_RESULT_STATES[*]:-} " != *" fail "* ]]; then
+    kit_record setup fail "${_KIT_LAST_ERROR:-stopped with exit code $status}"
+  fi
+  kit_run_doctor
+
+  step "Install summary · 설치 결과"
+  for id in precheck "${STEP_IDS[@]}" check setup; do
+    is_step=0
+    [[ " ${STEP_IDS[*]} " != *" $id "* ]] || is_step=1
+    if kit_lookup "$id"; then
+      :
+    elif [[ "$is_step" == 1 ]]; then
+      if selected | grep -qx "$id"; then
+        _KIT_STATE=notrun; _KIT_NOTE="not run · 실행 안 됨"
+      else
+        _KIT_STATE=skip; _KIT_NOTE="skipped · 건너뜀"
+      fi
+    else
+      continue
+    fi
+    note="$(kit_step_label "$id")"
+    case "$_KIT_STATE" in
+      ok)   mark="✅"; [[ "$DRY_RUN" != "1" ]] || note="$note (previewed · 미리보기)" ;;
+      fail)
+        mark="❌"; note="$note — $_KIT_NOTE"; failed=$((failed + 1))
+        failures="${failures:+$failures; }$id → $(kit_fix_hint "$id")" ;;
+      *)    mark="⏭ "; note="$note — $_KIT_NOTE" ;;
+    esac
+    printf '  %s %-9s %s\n' "$mark" "$id" "$note"
+  done
+  if [[ -n "$KIT_DOCTOR_LINE" ]]; then
+    printf '  🩺 %-9s %s\n' doctor "$KIT_DOCTOR_LINE"
+    [[ -z "$KIT_DOCTOR_PROBLEMS" ]] || printf '%s\n' "$KIT_DOCTOR_PROBLEMS" | sed 's/^ */       /'
+  fi
+  printf '\n'
+  if [[ "$failed" -gt 0 ]]; then
+    printf '%s❌ %s개 실패 · %s failed: %s%s\n' "$_C_BOLD$_C_RED" "$failed" "$failed" "$failures" "$_C_RESET"
+  elif [[ "$DRY_RUN" == "1" ]]; then
+    printf '%s🎉 미리보기 완료 · Preview complete — nothing was changed · 변경 없음%s\n' "$_C_BOLD$_C_GREEN" "$_C_RESET"
+  else
+    note=""
+    [[ "$KIT_DOCTOR_ISSUES" == 0 ]] \
+      || note=" — doctor: ${KIT_DOCTOR_ISSUES}개 확인 필요 · $KIT_DOCTOR_ISSUES to check"
+    printf '%s🎉 설치 완료 · Installation complete%s%s\n' "$_C_BOLD$_C_GREEN" "$note" "$_C_RESET"
+  fi
+  [[ -z "$KIT_LOG_FILE" ]] || printf '📄 Log · 설치 로그: %s\n' "$KIT_LOG_FILE"
+}
+
+# shellcheck disable=SC2329 # invoked by the EXIT trap below
+kit_on_exit() {
+  local status=$?
+  set +eu
+  trap - EXIT
+  kit_print_summary "$status"
+  kit_finish_log
+  if declare -F cleanup_ephemeral_root >/dev/null; then cleanup_ephemeral_root; fi
+  exit "$status"
+}
+
 is_macos || die "This kit targets macOS only."
 is_arm   || warn "Not Apple Silicon (arm64) — proceeding, but only tested on M-series."
-[[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
 cache_zsh_config_dir
+kit_start_log
+trap kit_on_exit EXIT
+[[ "$DRY_RUN" == "1" ]] && warn "DRY-RUN: no changes will be made."
 
 printf '%s\n' "$_C_BOLD== lazy-starter-kit v$KIT_VERSION ==$_C_RESET"
 info "steps: $(selected | tr '\n' ' ')${PROFILE:+(profile: $PROFILE)}"
@@ -538,6 +725,12 @@ fi
 # ---------------------------------------------------------------------------
 # Execute
 # ---------------------------------------------------------------------------
+# Stop before any change when Homebrew must be installed but cannot be.
+if selected | grep -qx prereqs && ! homebrew_preflight; then
+  kit_record precheck fail "$KIT_PREFLIGHT_REASON"
+  exit 1
+fi
+
 KIT_INSTALL_FAILED=0
 for id in $(selected); do
   file="$ROOT/scripts/$(step_file "$id")"
@@ -545,12 +738,24 @@ for id in $(selected); do
   [[ -f "$file" ]] || die "missing step file: $file"
   # shellcheck disable=SC1090
   source "$file"
+  KIT_CURRENT_STEP="$id"; failed_before="$KIT_INSTALL_FAILED"
   "$fn"
+  KIT_CURRENT_STEP=""
+  if [[ "$KIT_INSTALL_FAILED" == 1 && "$failed_before" != 1 ]]; then
+    kit_record "$id" fail "some packages failed to install (see the log) · 일부 패키지 설치 실패"
+  else
+    kit_record "$id" ok
+  fi
 done
 
 if [[ "$PROFILE" == ai && "$DRY_RUN" != 1 ]]; then
   step "Checking required commands"
-  ai_check || KIT_INSTALL_FAILED=1
+  if ai_check; then
+    kit_record check ok
+  else
+    KIT_INSTALL_FAILED=1
+    kit_record check fail "a required command is missing or cannot run · 필수 명령을 실행할 수 없음"
+  fi
   if [[ "$KIT_INSTALL_FAILED" == 1 ]]; then
     printf 'LSK_AI_READINESS=action-needed\n'
     warn "Setup needs attention. Re-run ./install.sh --profile ai; diagnose with --profile ai --doctor."

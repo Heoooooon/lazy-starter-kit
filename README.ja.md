@@ -183,6 +183,12 @@ CLI でインストールする場合は、[下](#recommended-setup)のコマン
 | Linux | `bash ./linux/install.sh --profile ai --dry-run` | `bash ./linux/install.sh --profile ai` | `bash ./linux/install.sh --profile ai --doctor` |
 | Windows | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -Doctor` |
 
+macOS のインストールは最後に結果ボードを表示します。ステップごとに ✅ / ❌ / ⏭（スキップ）の
+1 行、自動の `--doctor` 要約、最後の 1 行（`🎉 설치 완료` または失敗したステップと対処法を示す
+`❌ N개 실패`）が出ます。全出力は `~/Library/Logs/lazy-starter-kit/install-<時刻>.log` に保存され、
+パスが最後に表示されます。Homebrew がなく管理者アカウントでない場合や、パスワード入力用の
+ターミナルがない場合は、何も変更する前に止まり対処法を案内します。
+
 必要なツールが足りない場合は、そのログを確認して報告された問題を解決し、同じ `ai`
 プロファイルでもう一度実行してください。`--only` / `-Only` による個別指定や、プロファイルなしの
 `--skip` / `-Skip` 指定では、幅広い開発者向けステップの内容がそのまま使われます。

@@ -243,6 +243,8 @@ jobs:
         run: tests/homebrew-installer.sh
       - name: beginner installer entrypoints
         run: tests/install-entrypoints.sh
+      - name: results board, install log and Homebrew pre-flight
+        run: tests/install-summary.sh
       - name: minimal AI setup regression
         run: python3 tests/macos-beginner-onboarding.py
       - name: beginner GUI first-run regression

@@ -179,6 +179,13 @@ CLI 사용자는 [아래 명령](#recommended-setup)으로 **v0.15.4 소스**를
 | Linux | `bash ./linux/install.sh --profile ai --dry-run` | `bash ./linux/install.sh --profile ai` | `bash ./linux/install.sh --profile ai --doctor` |
 | Windows | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -DryRun` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\windows\install.ps1 -Profile ai -Doctor` |
 
+macOS 설치는 끝에 결과판을 보여 줍니다. 단계마다 ✅(성공) / ❌(실패) / ⏭(건너뜀)
+한 줄, 자동 `--doctor` 요약, 그리고 마지막 한 줄(`🎉 설치 완료` 또는 실패한 단계와
+해결 방법이 적힌 `❌ N개 실패`)이 나옵니다. 전체 출력은
+`~/Library/Logs/lazy-starter-kit/install-<시각>.log`에 저장되고 경로가 맨 끝에
+표시됩니다. Homebrew가 없는데 관리자 계정이 아니거나 비밀번호를 입력할 터미널이
+없으면, 아무것도 바꾸기 전에 바로 멈추고 해결 방법을 알려 줍니다.
+
 필수 도구가 빠졌다면 로그에 나온 원인을 해결한 뒤 같은 `ai` 프로필로 다시
 실행하세요. 사용자 지정 `--only` / `-Only`나 프로필 없는 `--skip` / `-Skip`은
 기존의 더 넓은 개발 단계 범위를 유지합니다. AI 구성만 고치는 지름길이 아닙니다.
